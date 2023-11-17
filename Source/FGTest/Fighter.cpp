@@ -71,7 +71,7 @@ void AFighter::VectorMoveEvent(const FInputActionValue &Value)
 		// if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("Pressing vector move"));
 		const FVector2D MovementVector = Value.Get<FVector2D>();
 
-		FString Debug = FString::Printf(TEXT("Num Pad Sector: %d"), VectorToOctant(MovementVector));
+		FString Debug = FString::Printf(TEXT("Num Pad Sector: %d"), VectorToNumPadSector(MovementVector));
 		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
 	}
 }
