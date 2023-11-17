@@ -29,6 +29,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
 	bool IsLeftSide;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
+	int CurrentSector;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -92,5 +95,6 @@ private:
 	// Facing
 	void Face();
 
+	// Converts input to num pad notation
 	int VectorToNumPadSector(FVector2D Vector);
 };
