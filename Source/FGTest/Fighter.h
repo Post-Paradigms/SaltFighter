@@ -92,5 +92,5 @@ private:
 	// Facing
 	void Face();
 
-	int VectorToOctant(FVector2D Vector);
+	int VectorToNumPadSector(FVector2D Vector);
 };
