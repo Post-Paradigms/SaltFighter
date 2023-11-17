@@ -30,7 +30,7 @@ public:
 	bool IsLeftSide;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
-	int CurrentSector;
+	int PolledInput;
 
 protected:
 	// Called when the game starts or when spawned

@@ -42,10 +42,10 @@ void AFighter::Tick(float DeltaTime)
 
 	Face();
 
-	FString Debug = FString::Printf(TEXT("Num Pad Sector: %d"), CurrentSector);
+	FString Debug = FString::Printf(TEXT("Num Pad Sector: %d"), PolledInput);
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
 
-	CurrentSector = 5;
+	PolledInput = 5;
 }
 
 // Called to bind functionality to input
