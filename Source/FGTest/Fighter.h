@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Containers/RingBuffer.h"
 #include "FighterController.h"
 #include "Fighter.generated.h"
 
