@@ -11,6 +11,21 @@
 #include "FighterController.h"
 #include "Fighter.generated.h"
 
+UENUM(BlueprintType)
+enum class EFighterState : uint8 {
+	NEUTRAL UMETA(DisplayName = "Neutral"),
+	JUMPING UMETA(DisplayName = "Jumping"),
+	DEFENDING UMETA(DisplayName = "Defending"),
+	STARTUP UMETA(DisplayName = "Startup"),
+	ACTIVE UMETA(DisplayName = "Active"),
+	RECOVERY UMETA(DisplayName = "Recovery"),
+	HITSTUN UMETA(DisplayName = "Hitstun"),
+	BLOCKSTUN UMETA(DisplayName = "Blockstun")
+	//crouching
+	//crouch blocking
+	//might need a walking state for 
+};
+
 UCLASS()
 class FGTEST_API AFighter : public ACharacter
 {
@@ -43,46 +58,18 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// Input response events
-	UFUNCTION(BlueprintCallable)
-	void TestEvent(const FInputActionValue &Value);
-
 	UFUNCTION(BlueprintCallable)
 	void MoveEvent(const FInputActionValue &Value);
 
 	UFUNCTION(BlueprintCallable)
-	void VectorMoveEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
 	void JumpEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
-	void UpEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
-	void DownEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
-	void LeftEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
-	void RightEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
-	void DownRightEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
-	void LightAttackEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
-	void FireballEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
-	void CommandNormalLightEvent(const FInputActionValue &Value);
 
 	// Component getters
 	FORCEINLINE class UCameraComponent *GetCameraComponent() const { return CameraComponent; }
     FORCEINLINE class USpringArmComponent *GetCameraBoom() const { return CameraBoom; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	EFighterState State;
 
 private:
 	// Camera Components
@@ -94,7 +81,4 @@ private:
 
 	// Facing
 	void Face();
-
-	// Converts input to num pad notation
-	int VectorToNumPadSector(FVector2D Vector);
 };
