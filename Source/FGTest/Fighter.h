@@ -50,6 +50,9 @@ public:
 	UPROPERTY()
 	bool Locked;
 
+	UPROPERTY()
+	int32 FrameTimer;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -95,6 +98,9 @@ private:
 
 	UFUNCTION()
 	bool UpdateState(EFighterState NewState);
+
+	UFUNCTION()
+	void FrameAdvanceState();
 
 	UFUNCTION()
 	void OnHitOther();

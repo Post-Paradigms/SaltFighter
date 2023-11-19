@@ -33,6 +33,7 @@ void AFighter::BeginPlay()
 {
 	Super::BeginPlay();
 	State = EFighterState::NEUTRAL;
+	FrameTimer = -1;
 }
 
 // Called every frame
@@ -42,6 +43,12 @@ void AFighter::Tick(float DeltaTime)
 	Face();
 	FString Debug = FString::Printf(TEXT("State: %d"), State);
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+
+	if (FrameTimer > 0) FrameTimer--;
+
+	if (FrameTimer == 0) {
+		FrameAdvanceState();
+	}
 }
 
 // Called to bind functionality to input
@@ -90,7 +97,6 @@ void AFighter::Face()
 		// if (OurController) OurController->SetControlRotation(Rot);
 		SetActorRelativeRotation(Rot);
 	}
-
 }
 
 void AFighter::TakeInInput(int32 Num) {
@@ -126,7 +132,10 @@ void AFighter::TakeInInput(int32 Num) {
 			break;
 
 		case 10:
-			UpdateState(EFighterState::STARTUP);
+			if (UpdateState(EFighterState::STARTUP)) {
+				Locked = true;
+				FrameTimer = 60; //starts the frame timer in tick
+			}
 			break;
 	}
 }
@@ -171,6 +180,21 @@ bool AFighter::UpdateState(EFighterState NewState) {
 	}
 	return valid;
 		
+}
+
+//used for things that last a certain amount of frames!
+//ex. StartUp can last for 5 frames, which the tick function will automatically decrement,
+//once FrameTimer hits zero, then it calls this function to advance into the next state!
+void AFighter::FrameAdvanceState() {
+	FrameTimer = -1; //for safety
+
+	//oh yeah baby, more switches
+	switch (State) {
+		case EFighterState::STARTUP:
+			//done for now lol
+			UpdateState(EFighterState::NEUTRAL);
+			break;
+	}
 }
 
 //you hit the other person
