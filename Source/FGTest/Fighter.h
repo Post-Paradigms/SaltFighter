@@ -9,6 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Containers/RingBuffer.h"
+#include "Engine/DataTable.h"
 #include "FighterController.h"
 #include "Fighter.generated.h"
 
@@ -53,6 +54,10 @@ public:
 
 	UPROPERTY()
 	int32 FrameTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	UDataTable* FighterDataTable;
+
 
 protected:
 	// Called when the game starts or when spawned
