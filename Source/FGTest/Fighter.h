@@ -47,6 +47,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
 	int PolledInput;
 
+	UPROPERTY()
+	bool Locked;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -58,11 +61,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void Landed(const FHitResult& Hit) override;
+
 	UFUNCTION(BlueprintCallable)
 	void MoveEvent(const FInputActionValue &Value);
 
 	UFUNCTION(BlueprintCallable)
 	void JumpEvent(const FInputActionValue &Value);
+
+
 
 	// Component getters
 	FORCEINLINE class UCameraComponent *GetCameraComponent() const { return CameraComponent; }
@@ -70,6 +77,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFighterState State;
+
+	UFUNCTION()
+	void TakeInInput(int32 KeypadNum);
 
 private:
 	// Camera Components
@@ -81,4 +91,14 @@ private:
 
 	// Facing
 	void Face();
+
+
+	UFUNCTION()
+	bool UpdateState(EFighterState NewState);
+
+	UFUNCTION()
+	void OnHitOther();
+
+	UFUNCTION()
+	void OnOw();
 };

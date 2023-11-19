@@ -22,8 +22,11 @@ void AFighterController::BeginPlay()
 void AFighterController::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);
 
-    FString Debug = FString::Printf(TEXT("Num Pad Sector: %d"), PolledInput);
-    if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+    /*FString Debug = FString::Printf(TEXT("Num Pad Sector: %d"), PolledInput);
+    if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);*/
+
+    AFighter* player = Cast<AFighter>(this->GetCharacter());
+    if (player) player->TakeInInput(PolledInput);
 
     PolledInput = 5;
 }
@@ -65,7 +68,6 @@ void AFighterController::OnMovePressed(const FInputActionValue &Value)
 
     if (Value.IsNonZero())
     {
-         
         const FVector2D MovementVector = Value.Get<FVector2D>();
 
         PolledInput = VectorToNumPadSector(MovementVector);
@@ -80,7 +82,7 @@ void AFighterController::OnJumpPressed(const FInputActionValue &Value)
 
 void AFighterController::OnLightAttackPressed(const FInputActionValue &Value)
 {
-  /*  AFighter* player = Cast<AFighter>(this->GetCharacter());
-    if (player) player->LightAttackEvent(Value);*/
+    AFighter* player = Cast<AFighter>(this->GetCharacter());
+    if (player) player->TakeInInput(10);
 }
 

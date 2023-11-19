@@ -40,6 +40,8 @@ void AFighter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	Face();
+	FString Debug = FString::Printf(TEXT("State: %d"), State);
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
 }
 
 // Called to bind functionality to input
@@ -59,7 +61,13 @@ void AFighter::MoveEvent(const FInputActionValue &Value)
 
 void AFighter::JumpEvent(const FInputActionValue &Value)
 {
-	Jump();
+	TakeInInput(8);
+	//Jump();
+}
+
+void AFighter::Landed(const FHitResult& Hit) {
+	Super::Landed(Hit);
+	UpdateState(EFighterState::NEUTRAL);
 }
 
 // Rotate player towards direction of the opponent
@@ -83,4 +91,99 @@ void AFighter::Face()
 		SetActorRelativeRotation(Rot);
 	}
 
+}
+
+void AFighter::TakeInInput(int32 Num) {
+
+	switch (Num) {
+		case 1:
+		case 4:
+		case 7:
+			if (Locked) { return; }
+			UpdateState(EFighterState::DEFENDING);
+			break;
+		case 2:
+			//crouch
+			break;
+
+		case 5:
+			if (Locked) { return; }
+			UpdateState(EFighterState::NEUTRAL);
+			break;
+
+		case 3:
+		case 6:
+			//walk
+			if (Locked) { return; }
+			UpdateState(EFighterState::NEUTRAL);
+			break;
+		case 8:
+		case 9:
+			if (UpdateState(EFighterState::JUMPING)) {
+				Locked = true;
+				Jump();
+			}
+			break;
+
+		case 10:
+			UpdateState(EFighterState::STARTUP);
+			break;
+	}
+}
+
+bool AFighter::UpdateState(EFighterState NewState) {
+	bool valid = false;
+	switch (NewState) {
+		case EFighterState::NEUTRAL:
+			Locked = false;
+			valid = true;
+			break;
+
+		case EFighterState::DEFENDING:
+			valid = (State == EFighterState::NEUTRAL);
+			break;
+
+		case EFighterState::JUMPING:
+			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING
+				|| State == EFighterState::ACTIVE || State == EFighterState::RECOVERY);
+			break;
+
+		case EFighterState::STARTUP:
+			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || State == EFighterState::JUMPING);
+			break;
+
+		case EFighterState::ACTIVE:
+			valid = (State == EFighterState::STARTUP);
+			break;
+
+		case EFighterState::RECOVERY:
+			valid = (State == EFighterState::ACTIVE);
+			break;
+
+		case EFighterState::HITSTUN:
+		case EFighterState::BLOCKSTUN:
+			valid = true;
+			break;
+	}
+
+	if (valid) {
+		State = NewState;
+	}
+	return valid;
+		
+}
+
+//you hit the other person
+//pass in attack frame data struct thing
+void AFighter::OnHitOther() {
+}
+
+//you got hit dumbass
+//pass in attack frame data struct thing
+void AFighter::OnOw() {
+	if (State == EFighterState::DEFENDING) {
+		UpdateState(EFighterState::BLOCKSTUN);
+	} else {
+		UpdateState(EFighterState::HITSTUN);
+	}
 }
