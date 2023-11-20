@@ -145,7 +145,10 @@ private:
 	void PerformSpecial(FName SpecialName);
 
 	UFUNCTION()
-	bool UpdateState(EFighterState NewState);
+	bool ValidateState(EFighterState NewState);
+
+	UFUNCTION()
+	void UpdateState(EFighterState NewState);
 
 	UFUNCTION()
 	void FrameAdvanceState();

@@ -110,8 +110,9 @@ void AFighter::TakeInInput(int32 Num) {
 			//
 		case 7:
 			//left defend, walk right
+			GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "Holding Back");
 			if (Locked) { return; }
-			IsLeftSide ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
+			IsLeftSide && ValidateState(EFighterState::DEFENDING) ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
 			break;
 		case 2:
 			//crouch
@@ -126,56 +127,60 @@ void AFighter::TakeInInput(int32 Num) {
 		case 6:
 			//right defend, walk left
 			if (Locked) { return; }
-			!IsLeftSide ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
+			!IsLeftSide && ValidateState(EFighterState::DEFENDING) ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
 			break;
 		case 8:
 			//
 		case 9:
 			//jump
-			PreviousState = State;
-			if (UpdateState(EFighterState::JUMPING)) {
+			if (ValidateState(EFighterState::JUMPING)) {
+				PreviousState = State;
 				Locked = true;
+				UpdateState(EFighterState::JUMPING);
 				Jump();
 			}
 			break;
 
 		case 10:
-			PreviousState = State;
-			if (UpdateState(EFighterState::STARTUP)) {
-				LightNormal(PreviousState);
+			if (ValidateState(EFighterState::STARTUP)) {
+				LightNormal(State);
 			}
 			break;
 	}
 }
 
 void AFighter::PerformNormal(FName AttkName) {
+	PreviousState = State;
 	Locked = true;
+	UpdateState(EFighterState::STARTUP);
+
 	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+
 }
 
 void AFighter::PerformSpecial(FName SpecialName) {
 	//flush the input buffer here
 	PreviousState = State;
 	Locked = true;
-	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
+	UpdateState(EFighterState::STARTUP);
+
+	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
 }
 
 // Validates and changes state
-bool AFighter::UpdateState(EFighterState NewState) {
+bool AFighter::ValidateState(EFighterState NewState) {
 	bool valid = false;
 	switch (NewState) {
 		case EFighterState::NEUTRAL:
-			Locked = false;
-			CanJumpCancel = false;
-			CanSpecialCancel = false;
 			valid = true;
 			break;
 
 		case EFighterState::DEFENDING:
+			GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "Defend");
 			valid = (State != EFighterState::JUMPING);
 			break;
 
@@ -202,11 +207,23 @@ bool AFighter::UpdateState(EFighterState NewState) {
 			valid = true;
 			break;
 	}
-	if (valid) {
-		State = NewState;
-	}
+	
 	return valid;
 		
+}
+
+//what do you spaghetti
+void AFighter::UpdateState(EFighterState NewState) {
+	switch (NewState) {
+		//dab
+		case EFighterState::NEUTRAL:
+		case EFighterState::DEFENDING:
+			Locked = false;
+			CanJumpCancel = false;
+			CanSpecialCancel = false;
+			break;
+	}
+	State = NewState;
 }
 
 //used for things that last a certain amount of frames!
@@ -227,7 +244,6 @@ void AFighter::FrameAdvanceState() {
 			break;
 		case EFighterState::RECOVERY:
 			UpdateState(PreviousState);
-			Locked = false;
 			break;
 	}
 }
