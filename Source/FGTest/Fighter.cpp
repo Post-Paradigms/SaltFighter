@@ -3,6 +3,7 @@
 
 #include "Fighter.h"
 #include "FighterController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -89,9 +90,10 @@ void AFighter::Face()
 		// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
 		// GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green, Debug);
 
-		IsLeftSide = (Rot.Yaw >= 180.f);
-		// FString Debug = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
-		// GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+		IsLeftSide = (Rot.Yaw < 180.f);
+		//FString Debug = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
+		//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+
 
 		/* SetControlRotation for smooth turn, SetActorRelativeRotation for instant turn */
 		// if (OurController) OurController->SetControlRotation(Rot);
@@ -103,28 +105,34 @@ void AFighter::TakeInInput(int32 Num) {
 
 	switch (Num) {
 		case 1:
+			//
 		case 4:
+			//
 		case 7:
+			//left defend, walk right
 			if (Locked) { return; }
-			UpdateState(EFighterState::DEFENDING);
+			IsLeftSide ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
 			break;
 		case 2:
 			//crouch
 			break;
-
 		case 5:
+			//neutral/idle
 			if (Locked) { return; }
 			UpdateState(EFighterState::NEUTRAL);
 			break;
-
 		case 3:
+			//
 		case 6:
-			//walk
+			//right defend, walk left
 			if (Locked) { return; }
-			UpdateState(EFighterState::NEUTRAL);
+			!IsLeftSide ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
 			break;
 		case 8:
+			//
 		case 9:
+			//jump
+			PreviousState = State;
 			if (UpdateState(EFighterState::JUMPING)) {
 				Locked = true;
 				Jump();
@@ -132,29 +140,49 @@ void AFighter::TakeInInput(int32 Num) {
 			break;
 
 		case 10:
+			PreviousState = State;
 			if (UpdateState(EFighterState::STARTUP)) {
-				Locked = true;
-				FrameTimer = 60; //starts the frame timer in tick
+				LightNormal(PreviousState);
 			}
 			break;
 	}
 }
 
+void AFighter::PerformNormal(FName AttkName) {
+	Locked = true;
+	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
+	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+}
+
+void AFighter::PerformSpecial(FName SpecialName) {
+	//flush the input buffer here
+	PreviousState = State;
+	Locked = true;
+	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
+	CanJumpCancel = false;
+	CanSpecialCancel = false;
+	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+}
+
+// Validates and changes state
 bool AFighter::UpdateState(EFighterState NewState) {
 	bool valid = false;
 	switch (NewState) {
 		case EFighterState::NEUTRAL:
 			Locked = false;
+			CanJumpCancel = false;
+			CanSpecialCancel = false;
 			valid = true;
 			break;
 
 		case EFighterState::DEFENDING:
-			valid = (State == EFighterState::NEUTRAL);
+			valid = (State != EFighterState::JUMPING);
 			break;
 
+		// might be jank ;m;
 		case EFighterState::JUMPING:
-			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING
-				|| State == EFighterState::ACTIVE || State == EFighterState::RECOVERY);
+			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || GetCharacterMovement()->IsFalling() ||
+				(CanJumpCancel && State == EFighterState::ACTIVE) || (CanJumpCancel && State == EFighterState::RECOVERY));
 			break;
 
 		case EFighterState::STARTUP:
@@ -174,7 +202,6 @@ bool AFighter::UpdateState(EFighterState NewState) {
 			valid = true;
 			break;
 	}
-
 	if (valid) {
 		State = NewState;
 	}
@@ -187,12 +214,19 @@ bool AFighter::UpdateState(EFighterState NewState) {
 //once FrameTimer hits zero, then it calls this function to advance into the next state!
 void AFighter::FrameAdvanceState() {
 	FrameTimer = -1; //for safety
-
+	GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "frame advance state");
 	//oh yeah baby, more switches
 	switch (State) {
 		case EFighterState::STARTUP:
-			//done for now lol
-			UpdateState(EFighterState::NEUTRAL);
+			UpdateState(EFighterState::ACTIVE);
+			FrameTimer = CurrAttk.Active;
+			break;
+		case EFighterState::ACTIVE:
+			UpdateState(EFighterState::RECOVERY);
+			FrameTimer = CurrAttk.Recovery;
+			break;
+		case EFighterState::RECOVERY:
+			UpdateState(PreviousState);
 			break;
 	}
 }
@@ -200,6 +234,11 @@ void AFighter::FrameAdvanceState() {
 //you hit the other person
 //pass in attack frame data struct thing
 void AFighter::OnHitOther() {
+	//we're also going to need to know if they're blocking or if they're getting hit 
+	//to handle appropriate plus/minus frames and valid combo counting
+
+	CanJumpCancel = CurrAttk.JumpCancellable;
+	CanSpecialCancel = CurrAttk.SpecialCancellable;
 }
 
 //you got hit dumbass
@@ -210,4 +249,31 @@ void AFighter::OnOw() {
 	} else {
 		UpdateState(EFighterState::HITSTUN);
 	}
+}
+
+
+// === FIGHTER MOVE FUNCTIONS ===
+
+void AFighter::LightNormal(EFighterState CurrentState) {
+	// string var name 
+	GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Blue, "mrow");
+	FName AttkName = "";
+	if (CurrentState == EFighterState::JUMPING) {
+		AttkName = "LightJump";
+	}
+	else {
+		AttkName = "LightAttk";
+	}
+	PerformNormal(AttkName);
+}
+
+void AFighter::HeavyNormal(EFighterState CurrentState) {
+	FName AttkName = "";
+	if (CurrentState == EFighterState::JUMPING) {
+		AttkName = "HeavyJump";
+	}
+	else {
+		AttkName = "HeavyAttk";
+	}
+	PerformNormal(AttkName);
 }

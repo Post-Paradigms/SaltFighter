@@ -13,6 +13,34 @@
 #include "FighterController.h"
 #include "Fighter.generated.h"
 
+USTRUCT(BlueprintType)
+struct FAttackStruct : public FTableRowBase {
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Startup;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Active;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Recovery;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 OnBlock;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Hitstun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	bool JumpCancellable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	bool SpecialCancellable;
+};
+
 UENUM(BlueprintType)
 enum class EFighterState : uint8 {
 	NEUTRAL UMETA(DisplayName = "Neutral"),
@@ -53,11 +81,16 @@ public:
 	bool Locked;
 
 	UPROPERTY()
+	bool CanJumpCancel;
+
+	UPROPERTY()
+	bool CanSpecialCancel;
+
+	UPROPERTY()
 	int32 FrameTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	UDataTable* FighterDataTable;
-
 
 protected:
 	// Called when the game starts or when spawned
@@ -78,14 +111,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void JumpEvent(const FInputActionValue &Value);
 
-
-
 	// Component getters
 	FORCEINLINE class UCameraComponent *GetCameraComponent() const { return CameraComponent; }
     FORCEINLINE class USpringArmComponent *GetCameraBoom() const { return CameraBoom; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFighterState State;
+
+	// Used after attack/blockstun/hitstun
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	EFighterState PreviousState;
 
 	UFUNCTION()
 	void TakeInInput(int32 KeypadNum);
@@ -98,9 +133,16 @@ private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
     class USpringArmComponent *CameraBoom;
 
+	FAttackStruct CurrAttk;
+
 	// Facing
 	void Face();
 
+	UFUNCTION()
+	void PerformNormal(FName AttkName);
+
+	UFUNCTION()
+	void PerformSpecial(FName SpecialName);
 
 	UFUNCTION()
 	bool UpdateState(EFighterState NewState);
@@ -113,4 +155,8 @@ private:
 
 	UFUNCTION()
 	void OnOw();
+
+	// Fighter Move Functions owo
+	void LightNormal(EFighterState CurrentState);
+	void HeavyNormal(EFighterState CurrentState);
 };
