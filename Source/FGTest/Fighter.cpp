@@ -74,7 +74,7 @@ void AFighter::Face()
 		// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
 		// GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green, Debug);
 
-		IsLeftSide = (Rot.Yaw >= 180.f);
+		IsLeftSide = (Rot.Yaw < 180.f);
 		// FString Debug = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
 		// GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
 
