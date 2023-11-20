@@ -8,8 +8,38 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Containers/RingBuffer.h"
+#include "Engine/DataTable.h"
 #include "FighterController.h"
 #include "Fighter.generated.h"
+
+USTRUCT(BlueprintType)
+struct FAttackStruct : public FTableRowBase {
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Startup;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Active;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Recovery;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 OnBlock;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Hitstun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	bool JumpCancellable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	bool SpecialCancellable;
+};
 
 UENUM(BlueprintType)
 enum class EFighterState : uint8 {
@@ -47,6 +77,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
 	int PolledInput;
 
+	UPROPERTY()
+	bool Locked;
+
+	UPROPERTY()
+	bool CanJumpCancel;
+
+	UPROPERTY()
+	bool CanSpecialCancel;
+
+	UPROPERTY()
+	int32 FrameTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
+	UDataTable* FighterDataTable;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -57,6 +102,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 	UFUNCTION(BlueprintCallable)
 	void MoveEvent(const FInputActionValue &Value);
@@ -71,6 +118,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFighterState State;
 
+	// Used after attack/blockstun/hitstun
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	EFighterState PreviousState;
+
+	UFUNCTION()
+	void TakeInInput(int32 KeypadNum);
+
 private:
 	// Camera Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -79,6 +133,30 @@ private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
     class USpringArmComponent *CameraBoom;
 
+	FAttackStruct CurrAttk;
+
 	// Facing
 	void Face();
+
+	UFUNCTION()
+	void PerformNormal(FName AttkName);
+
+	UFUNCTION()
+	void PerformSpecial(FName SpecialName);
+
+	UFUNCTION()
+	bool UpdateState(EFighterState NewState);
+
+	UFUNCTION()
+	void FrameAdvanceState();
+
+	UFUNCTION()
+	void OnHitOther();
+
+	UFUNCTION()
+	void OnOw();
+
+	// Fighter Move Functions owo
+	void LightNormal(EFighterState CurrentState);
+	void HeavyNormal(EFighterState CurrentState);
 };

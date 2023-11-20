@@ -130,7 +130,6 @@ void AFighterController::OnMovePressed(const FInputActionValue &Value)
 
     if (Value.IsNonZero())
     {
-         
         const FVector2D MovementVector = Value.Get<FVector2D>();
 
         PolledInput = VectorToNumPadSector(MovementVector);
@@ -146,7 +145,8 @@ void AFighterController::OnJumpPressed(const FInputActionValue &Value)
 void AFighterController::OnLightAttackPressed(const FInputActionValue &Value)
 {
     AFighter* player = Cast<AFighter>(this->GetCharacter());
-    // if (player) player->LightAttackEvent(Value);
+    if (player) player->TakeInInput(10);
+
     PolledInput = 10;
 }
 
