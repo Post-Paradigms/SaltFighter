@@ -111,14 +111,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void JumpEvent(const FInputActionValue &Value);
 
-
-
 	// Component getters
 	FORCEINLINE class UCameraComponent *GetCameraComponent() const { return CameraComponent; }
     FORCEINLINE class USpringArmComponent *GetCameraBoom() const { return CameraBoom; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFighterState State;
+
+	// Used after attack/blockstun/hitstun
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	EFighterState PreviousState;
 
 	UFUNCTION()
 	void TakeInInput(int32 KeypadNum);
@@ -142,7 +144,6 @@ private:
 	UFUNCTION()
 	void PerformSpecial(FName SpecialName);
 
-
 	UFUNCTION()
 	bool UpdateState(EFighterState NewState);
 
@@ -154,4 +155,8 @@ private:
 
 	UFUNCTION()
 	void OnOw();
+
+	// Fighter Move Functions owo
+	void LightNormal(EFighterState CurrentState);
+	void HeavyNormal(EFighterState CurrentState);
 };
