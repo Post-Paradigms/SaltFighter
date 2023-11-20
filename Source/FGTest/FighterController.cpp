@@ -6,7 +6,8 @@
 
 AFighterController::AFighterController()
 {
-
+    PolledInput = 5;
+    BufferMaxCapacity = 16;
 }
 
 void AFighterController::BeginPlay()
@@ -22,11 +23,19 @@ void AFighterController::BeginPlay()
 void AFighterController::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);
 
-    /*FString Debug = FString::Printf(TEXT("Num Pad Sector: %d"), PolledInput);
-    if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);*/
+    FString Debug = FString::Printf(TEXT("Num Pad Sector: %d"), PolledInput);
+    if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
 
-    AFighter* player = Cast<AFighter>(this->GetCharacter());
-    if (player) player->TakeInInput(PolledInput);
+    PopulateInputBuffer();  
+
+    /* Uncomment to print our input buffer contents */
+    // for (int i = 0; i < InputBuffer.Num(); i++)
+    // {
+    //     Debug = FString::Printf(TEXT("InputBuffer[%d]: %d"), i, InputBuffer[i]);
+    //     if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+    // }
+
+    CheckForSequence();
 
     PolledInput = 5;
 }
@@ -44,21 +53,74 @@ void AFighterController::SetupInputComponent()
 
 int AFighterController::VectorToNumPadSector(FVector2D Vector)
 {
-    const TArray<int> NumPadSectors = { 8, 9, 6, 3, 2, 1, 4, 7 };
+    AFighter* player = Cast<AFighter>(this->GetCharacter());
+    if (player) {
+        const TArray<int> NumPadSectors = (player->IsLeftSide) ?  LeftSideNumPad : RightSideNumPad;
+        
+        float Angle = FMath::Atan2(Vector.X, Vector.Y) + (PI / 8.f);
 
-    float Angle = FMath::Atan2(Vector.X, Vector.Y) + (PI / 8.f);
+        if (Angle < 0) Angle += 2 * PI;
 
-    if (Angle < 0) Angle += 2 * PI;
+        Angle = FMath::RadiansToDegrees(Angle);
 
-    Angle = FMath::RadiansToDegrees(Angle);
+        int Octant = FMath::FloorToInt(Angle / 45);
 
-    // FString Debug = FString::Printf(TEXT("Angle Degrees: %f"), Angle);
-    // if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+        return (Vector.Length() >= 0.5) ? NumPadSectors[Octant] : 0;
+    }
 
-    int Octant = FMath::FloorToInt(Angle / 45);
+    return 0;
+}
 
-    return (Vector.Length() >= 0.5) ? NumPadSectors[Octant] : 0;
+void AFighterController::PopulateInputBuffer()
+{
+    if ((!InputBuffer.IsEmpty() && InputBuffer.Last() != PolledInput) || InputBuffer.IsEmpty()) InputBuffer.Push(PolledInput);
 
+    if (!InputBuffer.IsEmpty() && (InputBuffer.Num() > 16))
+    {
+        // if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, TEXT("Popped array"));
+        InputBuffer.RemoveAt(0);
+    } 
+}
+
+void AFighterController::CheckForSequence()
+{
+    /* TODO: Move into frame data table */
+    TArray<TArray<int>> MoveSet = {{2, 3, 6, 10}, {6, 10}};
+
+    for (int i = 0; i < MoveSet.Num(); i++)
+    {
+        if (IsSubSequence(MoveSet[i], 2))
+        {
+            /* TODO: Replace with call to TakeInput and pass in Input Type */
+            if (i == 0) OnFireballPressed();
+
+            InputBuffer.Empty();
+            break;
+        }
+    }
+}
+
+bool AFighterController::IsSubSequence(TArray<int> Sequence, int Lenience)
+{
+    int SeqIndex = 0;
+    int BufIndex = 0;
+
+    while (SeqIndex < Sequence.Num())
+    {
+        if (BufIndex == InputBuffer.Num())
+        {
+            return false;
+        }
+        else if (Sequence[SeqIndex] == InputBuffer[BufIndex])
+        {
+            SeqIndex++, BufIndex++;
+        }
+        else {
+            BufIndex++;
+        }
+    }
+
+    return true;
 }
 
 void AFighterController::OnMovePressed(const FInputActionValue &Value)
@@ -84,5 +146,14 @@ void AFighterController::OnLightAttackPressed(const FInputActionValue &Value)
 {
     AFighter* player = Cast<AFighter>(this->GetCharacter());
     if (player) player->TakeInInput(10);
+
+    PolledInput = 10;
 }
 
+void AFighterController::OnFireballPressed()
+{
+    // AFighter* player = Cast<AFighter>(this->GetCharacter());
+    // if (player) player->FireballEvent();
+
+    if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("*Fireball*"));
+}

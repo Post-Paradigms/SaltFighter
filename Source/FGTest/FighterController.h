@@ -12,6 +12,18 @@
 /**
  * 
  */
+
+UENUM(BlueprintType)
+enum class EInputType : uint8
+{
+	FQCL UMETA(DisplayName = "Quarter Circle Forward Light"),
+	BQCL UMETA(DisplayName = "Quarter Circle Backward Light"),
+	FQCH UMETA(DisplayName = "Quarter Circle Forward Heavy"),
+	BQCH UMETA(DisplayName = "Quarter Circle Backward Heavy"),
+	LB UMETA(DisplayName = "Light Button"),
+	HB UMETA(DisplayName = "Heavy Button")
+};
+
 UCLASS()
 class FGTEST_API AFighterController : public APlayerController
 {
@@ -38,6 +50,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* LightAttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	int BufferMaxCapacity;
 
 protected:
 	virtual void BeginPlay() override;
@@ -46,8 +60,16 @@ protected:
 	void OnMovePressed(const FInputActionValue &Value);
 	void OnJumpPressed(const FInputActionValue &Value);
 	void OnLightAttackPressed(const FInputActionValue &Value);
-
+	void OnFireballPressed();
 
 private:
+	const TArray<int> LeftSideNumPad = { 8, 9, 6, 3, 2, 1, 4, 7 };
+	const TArray<int> RightSideNumPad = { 8, 7, 4, 1, 2, 3, 6, 9 };
+
 	int VectorToNumPadSector(FVector2D Vector);
+	void PopulateInputBuffer();
+	void CheckForSequence();
+	bool IsSubSequence(TArray<int> Sequence, int Lenience);
+
+	TArray<int> InputBuffer;
 };
