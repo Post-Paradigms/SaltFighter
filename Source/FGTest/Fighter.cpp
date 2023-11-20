@@ -2,7 +2,6 @@
 
 
 #include "Fighter.h"
-#include "FighterMoveFunctions.h"
 #include "FighterController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
