@@ -227,6 +227,7 @@ void AFighter::FrameAdvanceState() {
 			break;
 		case EFighterState::RECOVERY:
 			UpdateState(PreviousState);
+			Locked = false;
 			break;
 	}
 }
