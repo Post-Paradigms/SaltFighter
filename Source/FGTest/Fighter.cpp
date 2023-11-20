@@ -90,8 +90,8 @@ void AFighter::Face()
 		// GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green, Debug);
 
 		IsLeftSide = (Rot.Yaw >= 180.f);
-		// FString Debug = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
-		// GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+		 FString Debug = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
+		 GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
 
 
 		/* SetControlRotation for smooth turn, SetActorRelativeRotation for instant turn */
@@ -107,7 +107,7 @@ void AFighter::TakeInInput(int32 Num) {
 		case 4:
 		case 7:
 			if (Locked) { return; }
-			UpdateState(EFighterState::DEFENDING);
+			!IsLeftSide ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
 			break;
 		case 2:
 			//crouch
@@ -122,7 +122,7 @@ void AFighter::TakeInInput(int32 Num) {
 		case 6:
 			//walk
 			if (Locked) { return; }
-			UpdateState(EFighterState::NEUTRAL);
+			IsLeftSide ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
 			break;
 		case 8:
 		case 9:
@@ -142,6 +142,7 @@ void AFighter::TakeInInput(int32 Num) {
 
 void AFighter::PerformNormal(FName AttkName) {
 	Locked = true;
+	
 	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
 }
