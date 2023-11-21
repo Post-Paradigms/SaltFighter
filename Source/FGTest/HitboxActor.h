@@ -8,9 +8,9 @@
 
 
 /* 
- Proximity Hitbox -> indication am i going to be hit by this high medium or low - gives all info before damage is dealt 
- Strike -> damage is being done and what part of the body its on 
- hurtbox -> goes around the actual player
+ Proximity Hitbox -> indication am i going to be hit by this high medium or low - gives all info before damage is dealt attack starting
+ Strike -> damage is being done and what part of the body its on - attack active
+ hurtbox -> goes around the actual player - attack connects
  damage occurs when there is a collision from a strike hitbox and a hurbox
 */
 UENUM(BlueprintType)
@@ -31,6 +31,8 @@ public:
 	// Sets default values for this actor's properties
 	AHitboxActor();
 
+	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
+
 	// hitbox enum instance
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hitbox")
 	EHitboxEnum HitboxType;
@@ -43,6 +45,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hitbox Actor")
+	class UStaticMeshComponent* MeshComponent;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -52,7 +57,7 @@ public:
 	void TriggerVisualizeHitBox();
 
 	// visualizes the hitbox 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintImplementableEvent)
 	void VisualizeHitBox();
 
 };
