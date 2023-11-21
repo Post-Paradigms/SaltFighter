@@ -54,6 +54,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	int BufferMaxCapacity;
 
+	static constexpr float NeutralThreshold = 0.5;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -66,6 +68,8 @@ protected:
 private:
 	const TArray<int> LeftSideNumPad = { 8, 9, 6, 3, 2, 1, 4, 7 };
 	const TArray<int> RightSideNumPad = { 8, 7, 4, 1, 2, 3, 6, 9 };
+	const int NeutralInput = 5;
+	
 
 	int VectorToNumPadSector(FVector2D Vector);
 	void PopulateInputBuffer();
