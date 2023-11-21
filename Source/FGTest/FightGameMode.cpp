@@ -2,6 +2,8 @@
 
 
 #include "FightGameMode.h"
+#include "FightGameState.h"
+#include "FightPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "EnhancedInputComponent.h"
@@ -11,6 +13,21 @@
 // Sets default values
 AFightGameMode::AFightGameMode()
 {
+    // Game State
+    static ConstructorHelpers::FClassFinder<AGameState> GameStateBPClass(TEXT("/Game/Blueprints/Framework/Fight/BP_FightGameState"));
+    if (GameStateBPClass.Class)
+    {
+        GameStateClass = GameStateBPClass.Class;
+    }
+
+    // Player State
+    static ConstructorHelpers::FClassFinder<APlayerState> PlayerStateBPClass(TEXT("/Game/Blueprints/Framework/Fight/BP_FightPlayerState"));
+    if (PlayerStateBPClass.Class)
+    {
+        PlayerStateClass = PlayerStateBPClass.Class;
+    }
+
+    // Player Controller
     static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerBPClass(TEXT("/Game/Blueprints/BP_FighterController"));
     if (PlayerControllerBPClass.Class)
     {
