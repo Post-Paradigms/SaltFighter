@@ -19,9 +19,6 @@ class FGTEST_API AFightGameMode : public AGameMode
 public:
 	AFightGameMode();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputMappingContext* DefaultMappingContext; // TODO: WHAT MAPPING CONTEXT IS SUPPOSED TO GO HERE???
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -30,9 +27,20 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	// HUD
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UFightingHUDUserWidget> FightingHUDClass;
+
+	UPROPERTY()
+	class UFightingHUDUserWidget* FightingHUD;
+
+	// Fighter Class and Controller
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AFighter> FighterBPClass;
+
 	AFighterController* P1FighterController;
 	AFighter* P1FighterCharacter;
 
 	AFighterController* P2FighterController;
-	AFighter* P2Fighter;
+	AFighter* P2FighterCharacter;
 };
