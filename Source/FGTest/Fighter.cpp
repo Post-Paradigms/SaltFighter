@@ -245,6 +245,10 @@ void AFighter::FrameAdvanceState() {
 		case EFighterState::RECOVERY:
 			UpdateState(PreviousState);
 			break;
+		//case AirDashing:, so no, also air dash can't hit people, so we don't gotta split into 3, it'll just be 1 state i thinks
+			//UpdateState(Jumping)
+			//does that kinda make sense? 
+
 	}
 }
 

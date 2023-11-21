@@ -45,6 +45,9 @@ UENUM(BlueprintType)
 enum class EFighterState : uint8 {
 	NEUTRAL UMETA(DisplayName = "Neutral"),
 	JUMPING UMETA(DisplayName = "Jumping"),
+	FORWARDING UMETA(DisplayName = "Walking Forward"),
+	DASHING UMETA(DisplayName = "Dashing"), 
+	AIRDASHING UMETA(DisplayName = "Airdashing"),
 	DEFENDING UMETA(DisplayName = "Defending"),
 	STARTUP UMETA(DisplayName = "Startup"),
 	ACTIVE UMETA(DisplayName = "Active"),
@@ -88,6 +91,12 @@ public:
 
 	UPROPERTY()
 	int32 FrameTimer;
+
+	UPROPERTY()
+	int32 AirDashFrames;
+
+	UPROPERTY()
+	int32 NumAirDashes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	UDataTable* FighterDataTable;
