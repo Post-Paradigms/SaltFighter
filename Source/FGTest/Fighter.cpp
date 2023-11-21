@@ -63,7 +63,7 @@ void AFighter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AFighter::MoveEvent(const FInputActionValue &Value)
 {
 	if (State == EFighterState::NEUTRAL || State == EFighterState::FORWARDING || State == EFighterState::DEFENDING || State == EFighterState::JUMPING) {
-		if (Value.IsNonZero()) {
+		if (Value.IsNonZero() && Value.GetMagnitude() > AFighterController::NeutralThreshold) {
 			AddMovementInput(FVector::ForwardVector, Value.Get<FVector>().X);
 		}
 	}

@@ -27,6 +27,9 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	// Round Timer
+	float RoundTimer;
+
 	// HUD
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UFightingHUDUserWidget> FightingHUDClass;
@@ -38,9 +41,15 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AFighter> FighterBPClass;
 
-	AFighterController* P1FighterController;
-	AFighter* P1FighterCharacter;
+	UPROPERTY()
+	class AFighterController* P1FighterController;
 
-	AFighterController* P2FighterController;
-	AFighter* P2FighterCharacter;
+	UPROPERTY()
+	class AFighter* P1FighterCharacter;
+
+	UPROPERTY()
+	class AFighterController* P2FighterController;
+
+	UPROPERTY()
+	class AFighter* P2FighterCharacter;
 };
