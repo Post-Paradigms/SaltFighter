@@ -44,6 +44,8 @@ void AFighter::Tick(float DeltaTime)
 	Face();
 	FString Debug = FString::Printf(TEXT("State: %d"), State);
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+	//FString Debug2 = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
+	//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug2);
 
 	if (FrameTimer > 0) FrameTimer--;
 
@@ -60,7 +62,7 @@ void AFighter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AFighter::MoveEvent(const FInputActionValue &Value)
 {
-	if (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || State == EFighterState::JUMPING) {
+	if (State == EFighterState::NEUTRAL || State == EFighterState::FORWARDING || State == EFighterState::DEFENDING || State == EFighterState::JUMPING) {
 		if (Value.IsNonZero()) {
 			AddMovementInput(FVector::ForwardVector, Value.Get<FVector>().X);
 		}
@@ -91,8 +93,6 @@ void AFighter::Face()
 		// GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green, Debug);
 
 		IsLeftSide = (Rot.Yaw < 180.f);
-		//FString Debug = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
-		//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
 
 
 		/* SetControlRotation for smooth turn, SetActorRelativeRotation for instant turn */
@@ -102,18 +102,18 @@ void AFighter::Face()
 }
 
 void AFighter::TakeInInput(int32 Num) {
-
 	switch (Num) {
 		case 1:
 			//
 		case 4:
-			//
-		case 7:
+			// back
 			//left defend, walk right
-			GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "Holding Back");
 			if (Locked) { return; }
-			IsLeftSide && ValidateState(EFighterState::DEFENDING) ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
+			if (ValidateState(EFighterState::DEFENDING)) {
+				UpdateState(EFighterState::DEFENDING);
+			}
 			break;
+		case 7:
 		case 2:
 			//crouch
 			break;
@@ -125,9 +125,12 @@ void AFighter::TakeInInput(int32 Num) {
 		case 3:
 			//
 		case 6:
+			// forward
 			//right defend, walk left
 			if (Locked) { return; }
-			!IsLeftSide && ValidateState(EFighterState::DEFENDING) ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
+			if (ValidateState(EFighterState::FORWARDING)) {
+				UpdateState(EFighterState::FORWARDING);
+			}
 			break;
 		case 8:
 			//
@@ -179,15 +182,26 @@ bool AFighter::ValidateState(EFighterState NewState) {
 			valid = true;
 			break;
 
+		case EFighterState::FORWARDING:
+			valid = true;
+			break;
+
+		case EFighterState::DASHING:
+			valid = (State == EFighterState::FORWARDING);
+			break;
+
 		case EFighterState::DEFENDING:
-			GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "Defend");
 			valid = (State != EFighterState::JUMPING);
 			break;
 
 		// might be jank ;m;
 		case EFighterState::JUMPING:
-			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || GetCharacterMovement()->IsFalling() ||
+			valid = (State == EFighterState::NEUTRAL || State == EFighterState::FORWARDING || State == EFighterState::DEFENDING || GetCharacterMovement()->IsFalling() ||
 				(CanJumpCancel && State == EFighterState::ACTIVE) || (CanJumpCancel && State == EFighterState::RECOVERY));
+			break;
+
+		case EFighterState::AIRDASHING:
+			valid = (State == EFighterState::JUMPING);
 			break;
 
 		case EFighterState::STARTUP:
