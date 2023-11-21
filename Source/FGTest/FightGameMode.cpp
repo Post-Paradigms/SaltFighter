@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "FightingHUDUserWidget.h"
 
+// Sets default values
 AFightGameMode::AFightGameMode()
 {
     static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerBPClass(TEXT("/Game/Blueprints/BP_FighterController"));
@@ -17,6 +18,7 @@ AFightGameMode::AFightGameMode()
     }
 }
 
+// Called when the game starts or when spawned
 void AFightGameMode::BeginPlay()
 {
     Super::BeginPlay();
@@ -69,6 +71,7 @@ void AFightGameMode::BeginPlay()
     }
 }
 
+// Called when the game ends or when removed from level
 void AFightGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     Super::EndPlay(EndPlayReason);
