@@ -10,6 +10,7 @@
 #include "FighterController.generated.h"
 
 /**
+ * @brief Construct a new UENUM object
  * 
  */
 
