@@ -6,7 +6,7 @@
 
 AFighterController::AFighterController()
 {
-    PolledInput = 5;
+    PolledInput = NeutralInput;
     BufferMaxCapacity = 16;
 }
 
@@ -37,7 +37,7 @@ void AFighterController::Tick(float DeltaTime) {
 
     CheckForSequence();
 
-    PolledInput = 5;
+    PolledInput = NeutralInput;
 }
 
 void AFighterController::SetupInputComponent()
@@ -65,17 +65,17 @@ int AFighterController::VectorToNumPadSector(FVector2D Vector)
 
         int Octant = FMath::FloorToInt(Angle / 45);
 
-        return (Vector.Length() >= 0.5) ? NumPadSectors[Octant] : 0;
+        return (Vector.Length() >= NeutralThreshold) ? NumPadSectors[Octant] : NeutralInput;
     }
 
-    return 0;
+    return NeutralInput;
 }
 
 void AFighterController::PopulateInputBuffer()
 {
     if ((!InputBuffer.IsEmpty() && InputBuffer.Last() != PolledInput) || InputBuffer.IsEmpty()) InputBuffer.Push(PolledInput);
 
-    if (!InputBuffer.IsEmpty() && (InputBuffer.Num() > 16))
+    if (!InputBuffer.IsEmpty() && (InputBuffer.Num() > BufferMaxCapacity))
     {
         // if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, TEXT("Popped array"));
         InputBuffer.RemoveAt(0);
@@ -144,10 +144,9 @@ void AFighterController::OnJumpPressed(const FInputActionValue &Value)
 
 void AFighterController::OnLightAttackPressed(const FInputActionValue &Value)
 {
-    AFighter* player = Cast<AFighter>(this->GetCharacter());
-    if (player) player->TakeInInput(10);
-
     PolledInput = 10;
+    AFighter* player = Cast<AFighter>(this->GetCharacter());
+    if (player) player->TakeInInput(PolledInput);
 }
 
 void AFighterController::OnFireballPressed()
