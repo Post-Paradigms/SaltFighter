@@ -31,4 +31,9 @@ void AFightGameState::Tick(float DeltaTime)
 		FightingHUD->UpdateRoundTimer((int) (RoundTimer + 0.5f));
 		RoundTimerDelay = 1.0f;
 	}
+
+	if (RoundTimer <= 0.0f)
+	{
+		Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())->ResetRound();
+	}
 }

@@ -100,5 +100,11 @@ void AFightGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
     }
 }
 
+// Reset the map and players for the next round
+void AFightGameMode::ResetRound()
+{
+    // TODO: RESET STUFF HERE
+}
+
 // Fighting HUD Getter
 UFightingHUDUserWidget* AFightGameMode::GetFightingHUD() { return FightingHUD; }
