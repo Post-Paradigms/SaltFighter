@@ -7,7 +7,8 @@
 AFighterController::AFighterController()
 {
     PolledInput = NeutralInput;
-    BufferMaxCapacity = 16;
+    FramesSinceLastInput = 0;
+    
 }
 
 void AFighterController::BeginPlay()
@@ -29,13 +30,15 @@ void AFighterController::Tick(float DeltaTime) {
     PopulateInputBuffer();  
 
     /* Uncomment to print our input buffer contents */
-    // for (int i = 0; i < InputBuffer.Num(); i++)
-    // {
-    //     Debug = FString::Printf(TEXT("InputBuffer[%d]: %d"), i, InputBuffer[i]);
-    //     if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
-    // }
+    for (int i = 0; i < InputBuffer.Num(); i++)
+    {
+        Debug = FString::Printf(TEXT("InputBuffer[%d]: %d"), i, InputBuffer[i]);
+        if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+    }
 
     CheckForSequence();
+
+    HandleInputTimeout();
 
     PolledInput = NeutralInput;
 }
@@ -100,27 +103,33 @@ void AFighterController::CheckForSequence()
     }
 }
 
-bool AFighterController::IsSubSequence(TArray<int> Sequence, int Lenience)
+void AFighterController::HandleInputTimeout()
 {
-    int SeqIndex = 0;
-    int BufIndex = 0;
+    if (FramesSinceLastInput >= InputBufferLifespan) InputBuffer.Empty();
+    if (PolledInput != NeutralInput) FramesSinceLastInput = 0;
+    FramesSinceLastInput++;
+}
 
-    while (SeqIndex < Sequence.Num())
+bool AFighterController::IsSubSequence(TArray<int> Sequence, int AdditionalFrameLenience)
+{
+    int TotalLenience = Sequence.Num() + AdditionalFrameLenience;
+    int SeqIndex = 0;
+
+    for (int BufIndex = 0; BufIndex < InputBuffer.Num(); BufIndex++) 
     {
-        if (BufIndex == InputBuffer.Num())
+        if (Sequence[0] == InputBuffer[BufIndex])
         {
-            return false;
-        }
-        else if (Sequence[SeqIndex] == InputBuffer[BufIndex])
-        {
-            SeqIndex++, BufIndex++;
-        }
-        else {
-            BufIndex++;
+            SeqIndex = 0;
+            for (int Frame = BufIndex; Frame < FMath::Min(TotalLenience + BufIndex, InputBuffer.Num()); Frame++)
+            {
+                if (Sequence[SeqIndex] == InputBuffer[Frame]) SeqIndex++;
+
+                if (SeqIndex == Sequence.Num()) return true;
+            }
         }
     }
 
-    return true;
+    return false;
 }
 
 void AFighterController::OnMovePressed(const FInputActionValue &Value)
