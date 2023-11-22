@@ -51,9 +51,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* LightAttackAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	int BufferMaxCapacity;
-
 	static constexpr float NeutralThreshold = 0.5;
 
 protected:
@@ -68,12 +65,16 @@ protected:
 private:
 	const TArray<int> LeftSideNumPad = { 8, 9, 6, 3, 2, 1, 4, 7 };
 	const TArray<int> RightSideNumPad = { 8, 7, 4, 1, 2, 3, 6, 9 };
+	const int BufferMaxCapacity = 16;
 	const int NeutralInput = 5;
+	const int InputBufferLifespan = 25; /* max number of frames input can remain in buffer */
 	
+	int FramesSinceLastInput;
 
 	int VectorToNumPadSector(FVector2D Vector);
 	void PopulateInputBuffer();
 	void CheckForSequence();
+	void HandleInputTimeout();
 	bool IsSubSequence(TArray<int> Sequence, int Lenience);
 
 	TArray<int> InputBuffer;

@@ -35,6 +35,9 @@ public:
 	int32 Hitstun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	bool Knockdown;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	bool JumpCancellable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
@@ -45,12 +48,17 @@ UENUM(BlueprintType)
 enum class EFighterState : uint8 {
 	NEUTRAL UMETA(DisplayName = "Neutral"),
 	JUMPING UMETA(DisplayName = "Jumping"),
+	FORWARDING UMETA(DisplayName = "Walking Forward"),
+	DASHING UMETA(DisplayName = "Dashing"), 
+	AIRDASHING UMETA(DisplayName = "Airdashing"),
 	DEFENDING UMETA(DisplayName = "Defending"),
 	STARTUP UMETA(DisplayName = "Startup"),
 	ACTIVE UMETA(DisplayName = "Active"),
 	RECOVERY UMETA(DisplayName = "Recovery"),
 	HITSTUN UMETA(DisplayName = "Hitstun"),
-	BLOCKSTUN UMETA(DisplayName = "Blockstun")
+	BLOCKSTUN UMETA(DisplayName = "Blockstun"),
+	KNOCKDOWN UMETA(DisplayName = "Knocked Down")
+
 	//crouching
 	//crouch blocking
 	//might need a walking state for 
@@ -88,6 +96,12 @@ public:
 
 	UPROPERTY()
 	int32 FrameTimer;
+
+	UPROPERTY()
+	int32 AirDashFrames;
+
+	UPROPERTY()
+	int32 MaxAirDashes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	UDataTable* FighterDataTable;
@@ -135,6 +149,8 @@ private:
 
 	FAttackStruct CurrAttk;
 
+	int32 NumAirDashes;
+
 	// Facing
 	void Face();
 
@@ -143,9 +159,15 @@ private:
 
 	UFUNCTION()
 	void PerformSpecial(FName SpecialName);
+	
+	UFUNCTION()
+	void PerformDash();
 
 	UFUNCTION()
-	bool UpdateState(EFighterState NewState);
+	bool ValidateState(EFighterState NewState);
+
+	UFUNCTION()
+	void UpdateState(EFighterState NewState);
 
 	UFUNCTION()
 	void FrameAdvanceState();
@@ -154,7 +176,7 @@ private:
 	void OnHitOther();
 
 	UFUNCTION()
-	void OnOw();
+	void OnOw(FAttackStruct OwCauser);
 
 	// Fighter Move Functions owo
 	void LightNormal(EFighterState CurrentState);
