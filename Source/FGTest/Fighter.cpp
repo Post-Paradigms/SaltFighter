@@ -35,6 +35,7 @@ void AFighter::BeginPlay()
 	Super::BeginPlay();
 	State = EFighterState::NEUTRAL;
 	FrameTimer = -1;
+	NumAirDashes = MaxAirDashes;
 }
 
 // Called every frame
@@ -44,6 +45,8 @@ void AFighter::Tick(float DeltaTime)
 	Face();
 	FString Debug = FString::Printf(TEXT("State: %d"), State);
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+	//FString Debug2 = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
+	//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug2);
 
 	if (FrameTimer > 0) FrameTimer--;
 
@@ -60,7 +63,7 @@ void AFighter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AFighter::MoveEvent(const FInputActionValue &Value)
 {
-	if (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || State == EFighterState::JUMPING) {
+	if (State == EFighterState::NEUTRAL || State == EFighterState::FORWARDING || State == EFighterState::DEFENDING || State == EFighterState::JUMPING) {
 		if (Value.IsNonZero() && Value.GetMagnitude() > AFighterController::NeutralThreshold) {
 			AddMovementInput(FVector::ForwardVector, Value.Get<FVector>().X);
 		}
@@ -75,6 +78,7 @@ void AFighter::JumpEvent(const FInputActionValue &Value)
 
 void AFighter::Landed(const FHitResult& Hit) {
 	Super::Landed(Hit);
+	NumAirDashes = MaxAirDashes;
 	UpdateState(EFighterState::NEUTRAL);
 }
 
@@ -91,8 +95,6 @@ void AFighter::Face()
 		// GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green, Debug);
 
 		IsLeftSide = (Rot.Yaw < 180.f);
-		//FString Debug = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
-		//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
 
 
 		/* SetControlRotation for smooth turn, SetActorRelativeRotation for instant turn */
@@ -102,17 +104,18 @@ void AFighter::Face()
 }
 
 void AFighter::TakeInInput(int32 Num) {
-
 	switch (Num) {
 		case 1:
 			//
 		case 4:
-			//
-		case 7:
+			// back
 			//left defend, walk right
 			if (Locked) { return; }
-			IsLeftSide ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
+			if (ValidateState(EFighterState::DEFENDING)) {
+				UpdateState(EFighterState::DEFENDING);
+			}
 			break;
+		case 7:
 		case 2:
 			//crouch
 			break;
@@ -124,55 +127,91 @@ void AFighter::TakeInInput(int32 Num) {
 		case 3:
 			//
 		case 6:
+			// forward
 			//right defend, walk left
 			if (Locked) { return; }
-			!IsLeftSide ? UpdateState(EFighterState::DEFENDING) : UpdateState(EFighterState::NEUTRAL);
+			if (ValidateState(EFighterState::FORWARDING)) {
+				UpdateState(EFighterState::FORWARDING);
+			}
 			break;
 		case 8:
 			//
 		case 9:
 			//jump
-			PreviousState = State;
-			if (UpdateState(EFighterState::JUMPING)) {
-				Locked = true;
+			if (ValidateState(EFighterState::JUMPING)) {
+				PreviousState = State;
+				UpdateState(EFighterState::JUMPING);
 				Jump();
 			}
 			break;
 
 		case 10:
-			PreviousState = State;
-			if (UpdateState(EFighterState::STARTUP)) {
-				LightNormal(PreviousState);
+			if (ValidateState(EFighterState::STARTUP)) {
+				LightNormal(State);
 			}
 			break;
+
+		case 11: //this is a test fireball state
+			//all specials will have this extra bool check to see if they can special cancel
+			//fortunately, the only specials in this game are 236, 214, and maybe 263, so only 3 switch cases! yay
+			if (ValidateState(EFighterState::STARTUP) || CanSpecialCancel) {
+				//do the special
+			}
 	}
 }
 
 void AFighter::PerformNormal(FName AttkName) {
-	Locked = true;
+	PreviousState = State;
+	UpdateState(EFighterState::STARTUP);
+
 	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+
 }
 
 void AFighter::PerformSpecial(FName SpecialName) {
 	//flush the input buffer here
 	PreviousState = State;
-	Locked = true;
-	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
+	UpdateState(EFighterState::STARTUP);
+
+	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
 }
 
+void AFighter::PerformDash() {
+	PreviousState = State;
+
+	if (State == EFighterState::JUMPING) {
+		//airdash state
+		NumAirDashes--;
+		UpdateState(EFighterState::AIRDASHING);
+		CurrAttk = *FighterDataTable->FindRow<FAttackStruct>("AirDash", "AirDash");
+		FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+	} else {
+		//dash state
+		UpdateState(EFighterState::DASHING);
+		CurrAttk = *FighterDataTable->FindRow<FAttackStruct>("Dash", "Dash");
+		FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+	}// do else if for backdash in the future
+}
+
 // Validates and changes state
-bool AFighter::UpdateState(EFighterState NewState) {
+bool AFighter::ValidateState(EFighterState NewState) {
 	bool valid = false;
 	switch (NewState) {
 		case EFighterState::NEUTRAL:
-			Locked = false;
-			CanJumpCancel = false;
-			CanSpecialCancel = false;
 			valid = true;
+			break;
+
+		case EFighterState::FORWARDING:
+			valid = true;
+			break;
+
+		case EFighterState::DASHING:
+			//i added the neutral case for when we add a dash macro
+			valid = (State == EFighterState::FORWARDING || State == EFighterState::NEUTRAL);
 			break;
 
 		case EFighterState::DEFENDING:
@@ -181,8 +220,12 @@ bool AFighter::UpdateState(EFighterState NewState) {
 
 		// might be jank ;m;
 		case EFighterState::JUMPING:
-			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || GetCharacterMovement()->IsFalling() ||
+			valid = (State == EFighterState::NEUTRAL || State == EFighterState::FORWARDING || State == EFighterState::DEFENDING || GetCharacterMovement()->IsFalling() ||
 				(CanJumpCancel && State == EFighterState::ACTIVE) || (CanJumpCancel && State == EFighterState::RECOVERY));
+			break;
+
+		case EFighterState::AIRDASHING:
+			valid = (State == EFighterState::JUMPING && NumAirDashes > 0);
 			break;
 
 		case EFighterState::STARTUP:
@@ -202,11 +245,32 @@ bool AFighter::UpdateState(EFighterState NewState) {
 			valid = true;
 			break;
 	}
-	if (valid) {
-		State = NewState;
-	}
+	
 	return valid;
 		
+}
+
+//what do you spaghetti
+void AFighter::UpdateState(EFighterState NewState) {
+	switch (NewState) {
+		//dab
+		case EFighterState::NEUTRAL:
+		case EFighterState::DEFENDING:
+		case EFighterState::FORWARDING:
+			Locked = false;
+			CanJumpCancel = false;
+			CanSpecialCancel = false;
+			break;
+
+		case EFighterState::KNOCKDOWN:
+		case EFighterState::JUMPING:
+		case EFighterState::STARTUP:
+		case EFighterState::DASHING:
+		case EFighterState::AIRDASHING:
+			Locked = true;
+			break;
+	}
+	State = NewState;
 }
 
 //used for things that last a certain amount of frames!
@@ -228,6 +292,19 @@ void AFighter::FrameAdvanceState() {
 		case EFighterState::RECOVERY:
 			UpdateState(PreviousState);
 			break;
+
+		//we're going to need to read from the input buffer the most recent input and update to that state
+		case EFighterState::KNOCKDOWN:
+			//TakeInInput(most recent input);
+			break;
+
+		case EFighterState::AIRDASHING:
+			UpdateState(EFighterState::JUMPING);
+			break;
+
+		case EFighterState::DASHING:
+			UpdateState(EFighterState::NEUTRAL);
+			break;
 	}
 }
 
@@ -243,11 +320,19 @@ void AFighter::OnHitOther() {
 
 //you got hit dumbass
 //pass in attack frame data struct thing
-void AFighter::OnOw() {
+void AFighter::OnOw(FAttackStruct OwCauser) {
 	if (State == EFighterState::DEFENDING) {
+		//blocking
 		UpdateState(EFighterState::BLOCKSTUN);
 	} else {
-		UpdateState(EFighterState::HITSTUN);
+		//i didn't pay 60 bucks to block
+		if (OwCauser.Knockdown) {
+			UpdateState(EFighterState::KNOCKDOWN);
+			FrameTimer = 60; //this has to be a consistent number across the entire cast
+		} else {
+			UpdateState(EFighterState::HITSTUN);
+			FrameTimer = OwCauser.Hitstun;
+		}
 	}
 }
 

@@ -38,6 +38,9 @@ void AFighterController::Tick(float DeltaTime) {
 
     CheckForSequence();
 
+    AFighter* player = Cast<AFighter>(this->GetCharacter());
+    if (player) player->TakeInInput(PolledInput);
+
     HandleInputTimeout();
 
     PolledInput = NeutralInput;
@@ -142,6 +145,7 @@ void AFighterController::OnMovePressed(const FInputActionValue &Value)
         const FVector2D MovementVector = Value.Get<FVector2D>();
 
         PolledInput = VectorToNumPadSector(MovementVector);
+        
     }
 }
 
