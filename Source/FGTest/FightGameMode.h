@@ -24,7 +24,7 @@ public:
 	UFUNCTION()
 	UFightingHUDUserWidget* GetFightingHUD();
 
-	UFUNCTION();
+	UFUNCTION()
 	void ResetRound();
 
 protected:
