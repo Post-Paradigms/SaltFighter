@@ -6,6 +6,7 @@
 #include "GameFramework/GameMode.h"
 #include "FighterController.h"
 #include "Fighter.h"
+#include "FightingHUDUserWidget.h"
 #include "FightGameMode.generated.h"
 
 /**
@@ -17,7 +18,11 @@ class FGTEST_API AFightGameMode : public AGameMode
 	GENERATED_BODY()
 
 public:
+	// Sets default values
 	AFightGameMode();
+	
+	UFUNCTION()
+	UFightingHUDUserWidget* GetFightingHUD();
 
 protected:
 	// Called when the game starts or when spawned
@@ -27,9 +32,6 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	// Round Timer
-	float RoundTimer;
-
 	// HUD
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UFightingHUDUserWidget> FightingHUDClass;

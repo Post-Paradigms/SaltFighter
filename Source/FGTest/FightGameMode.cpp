@@ -8,7 +8,6 @@
 #include "GameFramework/PlayerStart.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "FightingHUDUserWidget.h"
 
 // Sets default values
 AFightGameMode::AFightGameMode()
@@ -100,3 +99,6 @@ void AFightGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
         FightingHUD = nullptr;
     }
 }
+
+// Fighting HUD Getter
+UFightingHUDUserWidget* AFightGameMode::GetFightingHUD() { return FightingHUD; }
