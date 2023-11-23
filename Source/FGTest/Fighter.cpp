@@ -27,6 +27,8 @@ AFighter::AFighter()
 	// Camera
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+
+	hurtBox = nullptr;
 }
 
 // Called when the game starts or when spawned
