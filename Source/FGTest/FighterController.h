@@ -44,6 +44,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void FlushBuffer();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
 	EInputType PolledInput;
 
@@ -60,6 +62,8 @@ public:
 	class UInputAction* LightAttackAction;
 
 	static constexpr float NeutralThreshold = 0.5;
+
+	void CheckForSequence();
 
 protected:
 	virtual void BeginPlay() override;
@@ -90,7 +94,6 @@ private:
 
 	EInputType VectorToNumPadSector(FVector2D Vector);
 	void PopulateInputBuffer();
-	void CheckForSequence();
 	void HandleInputTimeout();
 	bool IsSubSequence(TArray<EInputType> Sequence, int Lenience);
 

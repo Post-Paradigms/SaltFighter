@@ -72,7 +72,7 @@ void AFighter::MoveEvent(const FInputActionValue &Value)
 
 void AFighter::JumpEvent(const FInputActionValue &Value)
 {
-	TakeInInput(8);
+	TakeInInput(EInputType::UP);
 	//Jump();
 }
 
@@ -103,11 +103,10 @@ void AFighter::Face()
 	}
 }
 
-void AFighter::TakeInInput(int32 Num) {
-	switch (Num) {
-		case 1:
-			//
-		case 4:
+void AFighter::TakeInInput(EInputType Input) {
+	switch (Input) {
+		case EInputType::DOWNLEFT:
+		case EInputType::LEFT:
 			// back
 			//left defend, walk right
 			if (Locked) { return; }
@@ -115,18 +114,17 @@ void AFighter::TakeInInput(int32 Num) {
 				UpdateState(EFighterState::DEFENDING);
 			}
 			break;
-		case 7:
-		case 2:
+		case EInputType::DOWN:
 			//crouch
 			break;
-		case 5:
+		case EInputType::NEUTRAL:
 			//neutral/idle
 			if (Locked) { return; }
 			UpdateState(EFighterState::NEUTRAL);
 			break;
-		case 3:
-			//
-		case 6:
+
+		case EInputType::DOWNRIGHT:
+		case EInputType::RIGHT:
 			// forward
 			//right defend, walk left
 			if (Locked) { return; }
@@ -134,9 +132,11 @@ void AFighter::TakeInInput(int32 Num) {
 				UpdateState(EFighterState::FORWARDING);
 			}
 			break;
-		case 8:
+
+		case EInputType::UPLEFT:
+		case EInputType::UP:
 			//
-		case 9:
+		case EInputType::UPRIGHT:
 			//jump
 			if (ValidateState(EFighterState::JUMPING)) {
 				PreviousState = State;
@@ -145,17 +145,19 @@ void AFighter::TakeInInput(int32 Num) {
 			}
 			break;
 
-		case 10:
+		case EInputType::LB:
 			if (ValidateState(EFighterState::STARTUP)) {
 				LightNormal(State);
 			}
 			break;
 
-		case 11: //this is a test fireball state
+		case EInputType::FQCL: //this is a test fireball state
 			//all specials will have this extra bool check to see if they can special cancel
 			//fortunately, the only specials in this game are 236, 214, and maybe 263, so only 3 switch cases! yay
 			if (ValidateState(EFighterState::STARTUP) || CanSpecialCancel) {
 				//do the special
+				GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "i can do firebalss on keyboard");
+				LightQuarterCircleForward(State);
 			}
 	}
 }
@@ -171,6 +173,7 @@ void AFighter::PerformNormal(FName AttkName) {
 
 void AFighter::PerformSpecial(FName SpecialName) {
 	//flush the input buffer here
+	OurController->FlushBuffer();
 	PreviousState = State;
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
@@ -229,7 +232,7 @@ bool AFighter::ValidateState(EFighterState NewState) {
 			break;
 
 		case EFighterState::STARTUP:
-			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || State == EFighterState::JUMPING);
+			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || State == EFighterState::JUMPING || State == EFighterState::FORWARDING);
 			break;
 
 		case EFighterState::ACTIVE:
@@ -278,7 +281,7 @@ void AFighter::UpdateState(EFighterState NewState) {
 //once FrameTimer hits zero, then it calls this function to advance into the next state!
 void AFighter::FrameAdvanceState() {
 	FrameTimer = -1; //for safety
-	GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "frame advance state");
+	//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "frame advance state");
 	//oh yeah baby, more switches
 	switch (State) {
 		case EFighterState::STARTUP:
@@ -295,7 +298,8 @@ void AFighter::FrameAdvanceState() {
 
 		//we're going to need to read from the input buffer the most recent input and update to that state
 		case EFighterState::KNOCKDOWN:
-			//TakeInInput(most recent input);
+			UpdateState(EFighterState::NEUTRAL);
+			OurController->CheckForSequence();
 			break;
 
 		case EFighterState::AIRDASHING:
@@ -361,4 +365,11 @@ void AFighter::HeavyNormal(EFighterState CurrentState) {
 		AttkName = "HeavyAttk";
 	}
 	PerformNormal(AttkName);
+}
+
+void AFighter::LightQuarterCircleForward(EFighterState CurrentState) {
+	//we're not gonna have any jumping specials for now
+	//so i don't need be like
+	FName SpecialName = "LightFQC";
+	PerformSpecial(SpecialName);
 }

@@ -85,34 +85,37 @@ void AFighterController::PopulateInputBuffer()
     } 
 }
 
-void AFighterController::CheckForSequence()
-{
+
+void AFighterController::CheckForSequence() {
     /* Uncomment once TakeInput accepts EInputType */
-    // AFighter* player = Cast<AFighter>(this->GetCharacter());
+     AFighter* player = Cast<AFighter>(this->GetCharacter());
 
-    for (auto& MotionInput : MotionInputs)
-    {
-        if (IsSubSequence(MotionInput.Value, 2))
-        {
+    for (auto& MotionInput : MotionInputs) {
+        if (IsSubSequence(MotionInput.Value, 2)) {
             /* TODO: Remove once TakeInput is used */
-            if (MotionInput.Key == EInputType::FQCL) OnFireballPressed();
+            //if (MotionInput.Key == EInputType::FQCL) OnFireballPressed();
 
-            // if (player) player->TakeInInput(MotionInput.Key);
+             if (player) player->TakeInInput(MotionInput.Key);
 
             /* TODO: Remove later. Only empty once move is performed */
-            InputBuffer.Empty();
+            //InputBuffer.Empty();
             break;
         }
     }
 
     /* No motion input detected, send individual input instead */
-    // if (player) player->TakeInInput(PolledInput);
+     if (player) player->TakeInInput(PolledInput);
 }
+
 
 void AFighterController::HandleInputTimeout()
 {
     if (FramesSinceLastInput >= InputBufferLifespan) InputBuffer.Empty();
     FramesSinceLastInput++;
+}
+
+void AFighterController::FlushBuffer() {
+    InputBuffer.Empty();
 }
 
 bool AFighterController::IsSubSequence(TArray<EInputType> Sequence, int AdditionalFrameLenience)

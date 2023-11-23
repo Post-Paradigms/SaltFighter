@@ -137,7 +137,7 @@ public:
 	EFighterState PreviousState;
 
 	UFUNCTION()
-	void TakeInInput(int32 KeypadNum);
+	void TakeInInput(EInputType Input);
 
 private:
 	// Camera Components
@@ -181,4 +181,7 @@ private:
 	// Fighter Move Functions owo
 	void LightNormal(EFighterState CurrentState);
 	void HeavyNormal(EFighterState CurrentState);
+
+	void LightQuarterCircleForward(EFighterState CurrentState);
+
 };
