@@ -20,6 +20,9 @@ struct FAttackStruct : public FTableRowBase {
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	UAnimMontage* Animation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int32 Startup;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
@@ -29,7 +32,7 @@ public:
 	int32 Recovery;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	int32 OnBlock;
+	int32 Blockstun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int32 Hitstun;

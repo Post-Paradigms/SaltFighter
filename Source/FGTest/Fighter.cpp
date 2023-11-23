@@ -5,6 +5,7 @@
 #include "FighterController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Animation/AnimMontage.h"
 
 // Sets default values
 AFighter::AFighter()
@@ -296,6 +297,15 @@ void AFighter::FrameAdvanceState() {
 			UpdateState(PreviousState);
 			break;
 
+		case EFighterState::HITSTUN:
+			(PreviousState == EFighterState::JUMPING) ? UpdateState(EFighterState::JUMPING) : UpdateState(EFighterState::NEUTRAL);
+			break;
+
+		case EFighterState::BLOCKSTUN:
+			UpdateState(EFighterState::NEUTRAL);
+			OurController->CheckForSequence();
+			break;
+
 		//we're going to need to read from the input buffer the most recent input and update to that state
 		case EFighterState::KNOCKDOWN:
 			UpdateState(EFighterState::NEUTRAL);
@@ -317,7 +327,6 @@ void AFighter::FrameAdvanceState() {
 void AFighter::OnHitOther() {
 	//we're also going to need to know if they're blocking or if they're getting hit 
 	//to handle appropriate plus/minus frames and valid combo counting
-
 	CanJumpCancel = CurrAttk.JumpCancellable;
 	CanSpecialCancel = CurrAttk.SpecialCancellable;
 }
@@ -325,15 +334,17 @@ void AFighter::OnHitOther() {
 //you got hit dumbass
 //pass in attack frame data struct thing
 void AFighter::OnOw(FAttackStruct OwCauser) {
-	if (State == EFighterState::DEFENDING) {
+	if (State == EFighterState::DEFENDING || OtherPlayer->State == EFighterState::BLOCKSTUN) {
 		//blocking
 		UpdateState(EFighterState::BLOCKSTUN);
+		FrameTimer = OwCauser.Blockstun;
 	} else {
 		//i didn't pay 60 bucks to block
 		if (OwCauser.Knockdown) {
 			UpdateState(EFighterState::KNOCKDOWN);
 			FrameTimer = 60; //this has to be a consistent number across the entire cast
 		} else {
+			PreviousState = State;
 			UpdateState(EFighterState::HITSTUN);
 			FrameTimer = OwCauser.Hitstun;
 		}
