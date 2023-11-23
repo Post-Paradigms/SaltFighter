@@ -16,7 +16,7 @@
 UENUM(BlueprintType)
 enum class EHitboxEnum : uint8
 {
-	HB_PROX 		UMETA(DisplayName = "Proximity"),
+	//HB_PROX 		UMETA(DisplayName = "Proximity"),
 	HB_STRIKE		UMETA(DisplayName = "Strike"),
 	HB_HURTBOX 		UMETA(DisplayName = "Hurtbox")
 	
@@ -59,5 +59,9 @@ public:
 	// visualizes the hitbox 
 	UFUNCTION(BlueprintImplementableEvent)
 	void VisualizeHitBox();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void SpawnHitbox();
+
 
 };

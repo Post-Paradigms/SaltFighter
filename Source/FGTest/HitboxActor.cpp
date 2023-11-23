@@ -11,7 +11,7 @@ AHitboxActor::AHitboxActor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// setting up all of the default components for the response actor 
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh")); // make this into a cube component
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HitboxDisplay")); // make this into a cube component
 	// desired dimentions scale: .6 .2 .2 
 	MeshComponent->SetupAttachment(RootComponent);
 
