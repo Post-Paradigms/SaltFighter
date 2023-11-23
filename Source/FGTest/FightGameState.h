@@ -29,6 +29,9 @@ private:
 	UPROPERTY()
 	class UFightingHUDUserWidget* FightingHUD;
 
+	// Current round number
+	int RoundNumber;
+
 	// Round Timer
 	float RoundTimer;
 

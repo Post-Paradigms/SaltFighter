@@ -28,8 +28,8 @@ public:
 	void UpdateRoundTimer(int time);
 
 	UFUNCTION()
-	void UpdatePlayer1Health(float health);
+	void UpdatePlayer1Health(int health);
 
 	UFUNCTION()
-	void UpdatePlayer2Health(float health);
+	void UpdatePlayer2Health(int health);
 };

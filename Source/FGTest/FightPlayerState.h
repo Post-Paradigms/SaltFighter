@@ -13,5 +13,13 @@ UCLASS()
 class FGTEST_API AFightPlayerState : public APlayerState
 {
 	GENERATED_BODY()
-	
+public:
+	// Sets default values
+	AFightPlayerState();
+
+	// Health, duh?
+	int PlayerHealth;
+
+	// Number of rounds this player has won
+	int RoundsWon;
 };

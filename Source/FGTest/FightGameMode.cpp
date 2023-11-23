@@ -106,5 +106,19 @@ void AFightGameMode::ResetRound()
     // TODO: RESET STUFF HERE
 }
 
+// Damage a player and update the hud
+void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
+{
+    Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth -= Damage;
+
+    if (FightingHUD->GetOwningPlayer<AFighterController>() == P1FighterController) // update player 1 healthbar
+    {
+        FightingHUD->UpdatePlayer1Health(Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth);
+    }
+    else { // update player 2 health bar
+        FightingHUD->UpdatePlayer2Health(Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth);
+    }
+}
+
 // Fighting HUD Getter
 UFightingHUDUserWidget* AFightGameMode::GetFightingHUD() { return FightingHUD; }

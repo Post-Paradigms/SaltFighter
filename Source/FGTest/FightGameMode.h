@@ -21,11 +21,17 @@ public:
 	// Sets default values
 	AFightGameMode();
 	
+	// Fighting HUD Getter
 	UFUNCTION()
 	UFightingHUDUserWidget* GetFightingHUD();
 
+	// Reset the map and players for the next round
 	UFUNCTION()
 	void ResetRound();
+
+	// Damage a player and update the hud
+	UFUNCTION()
+	void DamagePlayer(AFighter* Fighter, int Damage);
 
 protected:
 	// Called when the game starts or when spawned

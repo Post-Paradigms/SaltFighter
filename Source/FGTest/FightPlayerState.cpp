@@ -3,3 +3,9 @@
 
 #include "FightPlayerState.h"
 
+// Sets default values
+AFightPlayerState::AFightPlayerState()
+{
+	PlayerHealth = 100;
+	RoundsWon = 0;
+}

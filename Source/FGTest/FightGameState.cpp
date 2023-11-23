@@ -8,6 +8,7 @@
 AFightGameState::AFightGameState()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	RoundNumber = 0;
 	RoundTimer = 100.0f;
 	RoundTimerDelay = 1.0f;
 }
@@ -34,6 +35,7 @@ void AFightGameState::Tick(float DeltaTime)
 
 	if (RoundTimer <= 0.0f)
 	{
+		RoundNumber++;
 		Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())->ResetRound();
 	}
 }
