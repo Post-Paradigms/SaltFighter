@@ -110,9 +110,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HurtBox")
-	AActor * hurtBox;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -141,6 +138,10 @@ public:
 
 	UFUNCTION()
 	void TakeInInput(int32 KeypadNum);
+
+	// hurtbox component 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hurtbox")
+	class UHurtbox * HurtboxComponent;
 
 private:
 	// Camera Components
