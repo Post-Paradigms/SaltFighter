@@ -37,9 +37,13 @@ void ASharedCamera::BeginPlay()
 
 	//Sets views of all controllers to this actor's camera.
 	for (FConstPlayerControllerIterator ControllerIt = GetWorld()->GetPlayerControllerIterator(); ControllerIt; ++ControllerIt) {
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("One Iteration"));
 		APlayerController* FighterCtlr = ControllerIt->Get();
 		if (FighterCtlr) {
 			FighterCtlr->SetViewTargetWithBlend(this);
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Controller view set."));
 			ActiveFighters.Add(FighterCtlr->GetPawn());
 		}
 	}
@@ -50,6 +54,18 @@ void ASharedCamera::BeginPlay()
 void ASharedCamera::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//Sets views of all controllers to this actor's camera.
+	if (ActiveFighters.Num() < 2) {
+		for (FConstPlayerControllerIterator ControllerIt = GetWorld()->GetPlayerControllerIterator(); ControllerIt; ++ControllerIt) {
+			APlayerController* FighterCtlr = ControllerIt->Get();
+			if (FighterCtlr) {
+				FighterCtlr->SetViewTargetWithBlend(this);
+				ActiveFighters.Add(FighterCtlr->GetPawn());
+			}
+		}
+	}
+	
+
 
 	//Logic assumes two fighters.
 	if (ActiveFighters.Num() == 2) {
@@ -59,7 +75,7 @@ void ASharedCamera::Tick(float DeltaTime)
 			FinalPos.X += 40;
 			SetActorLocation(FinalPos);
 
-			CameraBoom->TargetArmLength = Distance.Size() * 1.2;
+			CameraBoom->TargetArmLength = FMath::Clamp(Distance.Size() / 3, 100, 500);
 		}
 	}
 }
