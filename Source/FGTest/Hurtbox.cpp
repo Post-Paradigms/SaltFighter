@@ -8,7 +8,7 @@ UHurtbox::UHurtbox()
 {
     // more for visual repsentation 
     MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	MeshComponent->SetupAttachment(this);
+    MeshComponent->SetupAttachment(GetOber);
 }
 
 void UHurtbox::BeginPlay()
