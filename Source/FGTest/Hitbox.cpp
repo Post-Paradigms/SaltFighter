@@ -7,7 +7,7 @@
 UHitbox::UHitbox()
 {
     // more for visual repsentation 
-    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Visual"));
+    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	MeshComponent->SetupAttachment(this);
 }
 
