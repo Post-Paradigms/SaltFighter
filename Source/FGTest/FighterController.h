@@ -44,6 +44,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void FlushBuffer();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
 	EInputType PolledInput;
 
@@ -61,6 +63,8 @@ public:
 
 	static constexpr float NeutralThreshold = 0.5;
 
+	void CheckForSequence();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -77,6 +81,12 @@ private:
 	const TArray<EInputType> RightSideNumPad = { EInputType::UP, EInputType::UPLEFT, EInputType::LEFT,
 												 EInputType::DOWNLEFT, EInputType::DOWN, EInputType::DOWNRIGHT, 
 												 EInputType::RIGHT, EInputType::UPRIGHT };
+	const TMap<EInputType, TArray<EInputType>> MotionInputs = {
+		{EInputType::FQCL, {EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::RIGHT, EInputType::LB} },
+		{EInputType::FQCH, {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::HB} },
+		{EInputType::BQCL, {EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::RIGHT, EInputType::LB} },
+		{EInputType::BQCH, {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::HB} },
+	};
 	const int BufferMaxCapacity = 16;
 	const int InputBufferLifespan = 25; /* max number of frames input can remain in buffer */
 	
@@ -84,7 +94,6 @@ private:
 
 	EInputType VectorToNumPadSector(FVector2D Vector);
 	void PopulateInputBuffer();
-	void CheckForSequence();
 	void HandleInputTimeout();
 	bool IsSubSequence(TArray<EInputType> Sequence, int Lenience);
 

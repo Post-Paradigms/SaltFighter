@@ -20,6 +20,9 @@ struct FAttackStruct : public FTableRowBase {
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	UAnimMontage* Animation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int32 Startup;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
@@ -29,7 +32,7 @@ public:
 	int32 Recovery;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	int32 OnBlock;
+	int32 Blockstun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int32 Hitstun;
@@ -137,7 +140,7 @@ public:
 	EFighterState PreviousState;
 
 	UFUNCTION()
-	void TakeInInput(int32 KeypadNum);
+	void TakeInInput(EInputType Input);
 
 private:
 	// Camera Components
@@ -181,4 +184,7 @@ private:
 	// Fighter Move Functions owo
 	void LightNormal(EFighterState CurrentState);
 	void HeavyNormal(EFighterState CurrentState);
+
+	void LightQuarterCircleForward(EFighterState CurrentState);
+
 };
