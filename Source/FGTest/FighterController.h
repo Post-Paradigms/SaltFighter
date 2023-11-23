@@ -17,12 +17,21 @@
 UENUM(BlueprintType)
 enum class EInputType : uint8
 {
+	UP UMETA(DisplayName = "Up"),
+	DOWN UMETA(DisplayName = "Down"),
+	LEFT UMETA(DisplayName = "Left"),
+	RIGHT UMETA(DisplayName = "Right"),
+	UPLEFT UMETA(DisplayName = "Up-Left"),
+	UPRIGHT UMETA(DisplayName = "Up-Right"),
+	DOWNLEFT UMETA(DisplayName = "Down-Left"),
+	DOWNRIGHT UMETA(DisplayName = "Down-Right"),
+	NEUTRAL UMETA(DisplayName = "Neutral"),
+	LB UMETA(DisplayName = "Light Button"),
+	HB UMETA(DisplayName = "Heavy Button"),
 	FQCL UMETA(DisplayName = "Quarter Circle Forward Light"),
 	BQCL UMETA(DisplayName = "Quarter Circle Backward Light"),
 	FQCH UMETA(DisplayName = "Quarter Circle Forward Heavy"),
-	BQCH UMETA(DisplayName = "Quarter Circle Backward Heavy"),
-	LB UMETA(DisplayName = "Light Button"),
-	HB UMETA(DisplayName = "Heavy Button")
+	BQCH UMETA(DisplayName = "Quarter Circle Backward Heavy")
 };
 
 UCLASS()
@@ -37,7 +46,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
-	int PolledInput;
+	EInputType PolledInput;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputMappingContext* DefaultMappingContext;
@@ -63,19 +72,22 @@ protected:
 	void OnFireballPressed();
 
 private:
-	const TArray<int> LeftSideNumPad = { 8, 9, 6, 3, 2, 1, 4, 7 };
-	const TArray<int> RightSideNumPad = { 8, 7, 4, 1, 2, 3, 6, 9 };
+	const TArray<EInputType> LeftSideNumPad = { EInputType::UP, EInputType::UPRIGHT, EInputType::RIGHT, 
+												EInputType::DOWNRIGHT, EInputType::DOWN, EInputType::DOWNLEFT, 
+												EInputType::LEFT, EInputType::UPLEFT };
+	const TArray<EInputType> RightSideNumPad = { EInputType::UP, EInputType::UPLEFT, EInputType::LEFT,
+												 EInputType::DOWNLEFT, EInputType::DOWN, EInputType::DOWNRIGHT, 
+												 EInputType::RIGHT, EInputType::UPRIGHT };
 	const int BufferMaxCapacity = 16;
-	const int NeutralInput = 5;
 	const int InputBufferLifespan = 25; /* max number of frames input can remain in buffer */
 	
 	int FramesSinceLastInput;
 
-	int VectorToNumPadSector(FVector2D Vector);
+	EInputType VectorToNumPadSector(FVector2D Vector);
 	void PopulateInputBuffer();
 	void CheckForSequence();
 	void HandleInputTimeout();
-	bool IsSubSequence(TArray<int> Sequence, int Lenience);
+	bool IsSubSequence(TArray<EInputType> Sequence, int Lenience);
 
-	TArray<int> InputBuffer;
+	TArray<EInputType> InputBuffer;
 };

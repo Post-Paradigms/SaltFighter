@@ -6,7 +6,7 @@
 
 AFighterController::AFighterController()
 {
-    PolledInput = NeutralInput;
+    PolledInput = EInputType::NEUTRAL;
     FramesSinceLastInput = 0;
     
 }
@@ -24,26 +24,19 @@ void AFighterController::BeginPlay()
 void AFighterController::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);
 
-    FString Debug = FString::Printf(TEXT("Num Pad Sector: %d"), PolledInput);
-    if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
-
     PopulateInputBuffer();  
 
     /* Uncomment to print our input buffer contents */
     for (int i = 0; i < InputBuffer.Num(); i++)
     {
-        Debug = FString::Printf(TEXT("InputBuffer[%d]: %d"), i, InputBuffer[i]);
-        if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+        if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, UEnum::GetValueAsString(InputBuffer[i]));
     }
 
     CheckForSequence();
 
-    AFighter* player = Cast<AFighter>(this->GetCharacter());
-    if (player) player->TakeInInput(PolledInput);
-
     HandleInputTimeout();
 
-    PolledInput = NeutralInput;
+    PolledInput = EInputType::NEUTRAL;
 }
 
 void AFighterController::SetupInputComponent()
@@ -57,11 +50,11 @@ void AFighterController::SetupInputComponent()
     }
 }
 
-int AFighterController::VectorToNumPadSector(FVector2D Vector)
+EInputType AFighterController::VectorToNumPadSector(FVector2D Vector)
 {
     AFighter* player = Cast<AFighter>(this->GetCharacter());
     if (player) {
-        const TArray<int> NumPadSectors = (player->IsLeftSide) ?  LeftSideNumPad : RightSideNumPad;
+        const TArray<EInputType> NumPadSectors = (player->IsLeftSide) ?  LeftSideNumPad : RightSideNumPad;
         
         float Angle = FMath::Atan2(Vector.X, Vector.Y) + (PI / 8.f);
 
@@ -71,49 +64,63 @@ int AFighterController::VectorToNumPadSector(FVector2D Vector)
 
         int Octant = FMath::FloorToInt(Angle / 45);
 
-        return (Vector.Length() >= NeutralThreshold) ? NumPadSectors[Octant] : NeutralInput;
+        return (Vector.Length() >= NeutralThreshold) ? NumPadSectors[Octant] : EInputType::NEUTRAL;
     }
 
-    return NeutralInput;
+    return EInputType::NEUTRAL;
 }
 
 void AFighterController::PopulateInputBuffer()
 {
-    if ((!InputBuffer.IsEmpty() && InputBuffer.Last() != PolledInput) || InputBuffer.IsEmpty()) InputBuffer.Push(PolledInput);
+
+    if ((!InputBuffer.IsEmpty() && InputBuffer.Last() != PolledInput) || InputBuffer.IsEmpty())
+    {
+        InputBuffer.Push(PolledInput);
+        FramesSinceLastInput = 0;
+    }
 
     if (!InputBuffer.IsEmpty() && (InputBuffer.Num() > BufferMaxCapacity))
     {
-        // if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, TEXT("Popped array"));
         InputBuffer.RemoveAt(0);
     } 
 }
 
 void AFighterController::CheckForSequence()
 {
-    /* TODO: Move into frame data table */
-    TArray<TArray<int>> MoveSet = {{2, 3, 6, 10}, {6, 10}};
+    /* TODO: Remove later, example moveset ONLY */
+    TArray<TArray<EInputType>> MoveSet = { {EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::RIGHT, EInputType::LB},   // FQCL
+                                           {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::LB} };   // BQCL
+    TArray<EInputType> Action = { EInputType::FQCL, EInputType::BQCL };
+
+    /* Uncomment once TakeInput accepts EInputType */
+    // AFighter* player = Cast<AFighter>(this->GetCharacter());
 
     for (int i = 0; i < MoveSet.Num(); i++)
     {
         if (IsSubSequence(MoveSet[i], 2))
         {
-            /* TODO: Replace with call to TakeInput and pass in Input Type */
+            /* TODO: Remove once TakeInput is used */
             if (i == 0) OnFireballPressed();
 
+            // if (player) player->TakeInInput(Action[i]);
+
+            /* TODO: Remove later. Only empty once move is performed */
             InputBuffer.Empty();
             break;
         }
     }
+
+    /* No motion input detected, send individual input instead */
+    // if (player) player->TakeInInput(PolledInput);
 }
 
 void AFighterController::HandleInputTimeout()
 {
     if (FramesSinceLastInput >= InputBufferLifespan) InputBuffer.Empty();
-    if (PolledInput != NeutralInput) FramesSinceLastInput = 0;
     FramesSinceLastInput++;
 }
 
-bool AFighterController::IsSubSequence(TArray<int> Sequence, int AdditionalFrameLenience)
+bool AFighterController::IsSubSequence(TArray<EInputType> Sequence, int AdditionalFrameLenience)
 {
     int TotalLenience = Sequence.Num() + AdditionalFrameLenience;
     int SeqIndex = 0;
@@ -137,15 +144,13 @@ bool AFighterController::IsSubSequence(TArray<int> Sequence, int AdditionalFrame
 
 void AFighterController::OnMovePressed(const FInputActionValue &Value)
 {
+    /* Remove later, handle in TakeInput*/
     AFighter* player = Cast<AFighter>(this->GetCharacter());
     if (player) player->MoveEvent(Value);
 
     if (Value.IsNonZero())
     {
-        const FVector2D MovementVector = Value.Get<FVector2D>();
-
-        PolledInput = VectorToNumPadSector(MovementVector);
-        
+        PolledInput = VectorToNumPadSector(Value.Get<FVector2D>());
     }
 }
 
@@ -157,11 +162,14 @@ void AFighterController::OnJumpPressed(const FInputActionValue &Value)
 
 void AFighterController::OnLightAttackPressed(const FInputActionValue &Value)
 {
-    PolledInput = 10;
-    AFighter* player = Cast<AFighter>(this->GetCharacter());
-    if (player) player->TakeInInput(PolledInput);
+    PolledInput = EInputType::LB;
+
+    /* Not needed since polled input is read in tick */
+    // AFighter* player = Cast<AFighter>(this->GetCharacter()); 
+    // if (player) player->TakeInInput(PolledInput);
 }
 
+/* TODO: Remove once TakeInput is used, was only used a test call*/
 void AFighterController::OnFireballPressed()
 {
     // AFighter* player = Cast<AFighter>(this->GetCharacter());
