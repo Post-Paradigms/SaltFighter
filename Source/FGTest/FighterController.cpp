@@ -87,22 +87,17 @@ void AFighterController::PopulateInputBuffer()
 
 void AFighterController::CheckForSequence()
 {
-    /* TODO: Remove later, example moveset ONLY */
-    TArray<TArray<EInputType>> MoveSet = { {EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::RIGHT, EInputType::LB},   // FQCL
-                                           {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::LB} };   // BQCL
-    TArray<EInputType> Action = { EInputType::FQCL, EInputType::BQCL };
-
     /* Uncomment once TakeInput accepts EInputType */
     // AFighter* player = Cast<AFighter>(this->GetCharacter());
 
-    for (int i = 0; i < MoveSet.Num(); i++)
+    for (auto& MotionInput : MotionInputs)
     {
-        if (IsSubSequence(MoveSet[i], 2))
+        if (IsSubSequence(MotionInput.Value, 2))
         {
             /* TODO: Remove once TakeInput is used */
-            if (i == 0) OnFireballPressed();
+            if (MotionInput.Key == EInputType::FQCL) OnFireballPressed();
 
-            // if (player) player->TakeInInput(Action[i]);
+            // if (player) player->TakeInInput(MotionInput.Key);
 
             /* TODO: Remove later. Only empty once move is performed */
             InputBuffer.Empty();
