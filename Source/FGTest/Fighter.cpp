@@ -5,6 +5,7 @@
 #include "FighterController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Hurtbox.h"
 #include "Animation/AnimMontage.h"
 
 // Sets default values
@@ -28,6 +29,11 @@ AFighter::AFighter()
 	// Camera
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+
+	// Hurtbox
+	HurtboxComponent = CreateDefaultSubobject<UHurtbox>(TEXT("HurtboxComponent"));
+	HurtboxComponent->SetupAttachment(RootComponent);
+
 }
 
 // Called when the game starts or when spawned

@@ -142,6 +142,10 @@ public:
 	UFUNCTION()
 	void TakeInInput(EInputType Input);
 
+	// hurtbox component 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hurtbox")
+	class UHurtbox * HurtboxComponent;
+
 private:
 	// Camera Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
