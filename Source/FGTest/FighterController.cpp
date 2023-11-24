@@ -87,24 +87,19 @@ void AFighterController::PopulateInputBuffer()
 
 
 void AFighterController::CheckForSequence() {
-    /* Uncomment once TakeInput accepts EInputType */
-     AFighter* player = Cast<AFighter>(this->GetCharacter());
 
-    for (auto& MotionInput : MotionInputs) {
-        if (IsSubSequence(MotionInput.Value, 2)) {
-            /* TODO: Remove once TakeInput is used */
-            //if (MotionInput.Key == EInputType::FQCL) OnFireballPressed();
+    AFighter* player = Cast<AFighter>(this->GetCharacter());
 
-             if (player) player->TakeInInput(MotionInput.Key);
-
-            /* TODO: Remove later. Only empty once move is performed */
-            //InputBuffer.Empty();
+    for (auto& MotionInput : MotionInputs) 
+    {
+        if (IsSubSequence(MotionInput.Value, 2)) 
+        {
+            if (player) player->TakeInInput(MotionInput.Key);
             break;
         }
     }
 
-    /* No motion input detected, send individual input instead */
-     if (player) player->TakeInInput(PolledInput);
+    if (player) player->TakeInInput(PolledInput);
 }
 
 
@@ -161,17 +156,4 @@ void AFighterController::OnJumpPressed(const FInputActionValue &Value)
 void AFighterController::OnLightAttackPressed(const FInputActionValue &Value)
 {
     PolledInput = EInputType::LB;
-
-    /* Not needed since polled input is read in tick */
-    // AFighter* player = Cast<AFighter>(this->GetCharacter()); 
-    // if (player) player->TakeInInput(PolledInput);
-}
-
-/* TODO: Remove once TakeInput is used, was only used a test call*/
-void AFighterController::OnFireballPressed()
-{
-    // AFighter* player = Cast<AFighter>(this->GetCharacter());
-    // if (player) player->FireballEvent();
-
-    if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("*Fireball*"));
 }

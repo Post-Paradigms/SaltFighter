@@ -10,6 +10,7 @@
 #include "FighterController.generated.h"
 
 /**
+ * @brief Construct a new UENUM object
  * 
  */
 
@@ -72,7 +73,6 @@ protected:
 	void OnMovePressed(const FInputActionValue &Value);
 	void OnJumpPressed(const FInputActionValue &Value);
 	void OnLightAttackPressed(const FInputActionValue &Value);
-	void OnFireballPressed();
 
 private:
 	const TArray<EInputType> LeftSideNumPad = { EInputType::UP, EInputType::UPRIGHT, EInputType::RIGHT, 

@@ -6,6 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/AnimMontage.h"
+#include "Hurtbox.h"
+#include "Hitbox.h"
 
 // Sets default values
 AFighter::AFighter()
@@ -28,6 +30,7 @@ AFighter::AFighter()
 	// Camera
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +40,16 @@ void AFighter::BeginPlay()
 	State = EFighterState::NEUTRAL;
 	FrameTimer = -1;
 	NumAirDashes = MaxAirDashes;
+
+	// Hurtbox
+	FVector SpawnLocation = GetMesh()->GetRelativeLocation() + FVector(0.f, 0.f, 90.f);
+	FActorSpawnParameters SpawnInfo;
+	AHurtbox* PlayerHurtbox = GetWorld()->SpawnActor<AHurtbox>(AHurtbox::StaticClass(), SpawnLocation, FRotator::ZeroRotator, SpawnInfo);
+	if (PlayerHurtbox)
+	{
+		PlayerHurtbox->HurtboxOwner = this;
+		PlayerHurtbox->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	} 
 }
 
 // Called every frame
@@ -152,12 +165,12 @@ void AFighter::TakeInInput(EInputType Input) {
 			}
 			break;
 
-		case EInputType::FQCL: //this is a test fireball state
+		case EInputType::FQCL: //this is a test fireball state			pee pee poo poo
 			//all specials will have this extra bool check to see if they can special cancel
 			//fortunately, the only specials in this game are 236, 214, and maybe 263, so only 3 switch cases! yay
 			if (ValidateState(EFighterState::STARTUP) || CanSpecialCancel) {
 				//do the special
-				GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "i can do firebalss on keyboard");
+				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "i can do firebalss on keyboard");
 				LightQuarterCircleForward(State);
 			}
 	}
@@ -172,6 +185,16 @@ void AFighter::PerformNormal(FName AttkName) {
 
 }
 
+/**
+ * fore ball:
+ * Spawn prijectile
+ * Spawn a hitbox
+ * Attach the hitbox
+ * Detect overlap in hitbox-hurtbox
+ * 
+ * 
+ * 
+*/
 void AFighter::PerformSpecial(FName SpecialName) {
 	//flush the input buffer here
 	OurController->FlushBuffer();
@@ -275,6 +298,11 @@ void AFighter::UpdateState(EFighterState NewState) {
 			break;
 	}
 	State = NewState;
+}
+
+void AFighter::SetFrameTimer(int NumFrames)
+{
+	FrameTimer = NumFrames;
 }
 
 //used for things that last a certain amount of frames!

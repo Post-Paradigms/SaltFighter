@@ -142,6 +142,15 @@ public:
 	UFUNCTION()
 	void TakeInInput(EInputType Input);
 
+	UFUNCTION()
+	bool ValidateState(EFighterState NewState);
+
+	UFUNCTION()
+	void UpdateState(EFighterState NewState);
+
+	UFUNCTION()
+	void SetFrameTimer(int NumFrames);
+
 private:
 	// Camera Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -165,12 +174,6 @@ private:
 	
 	UFUNCTION()
 	void PerformDash();
-
-	UFUNCTION()
-	bool ValidateState(EFighterState NewState);
-
-	UFUNCTION()
-	void UpdateState(EFighterState NewState);
 
 	UFUNCTION()
 	void FrameAdvanceState();
