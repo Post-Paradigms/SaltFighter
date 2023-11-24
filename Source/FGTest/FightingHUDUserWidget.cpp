@@ -14,11 +14,11 @@ void UFightingHUDUserWidget::UpdateRoundTimer(int time)
 // Called to update player 1's healthbar when their health changes.
 void UFightingHUDUserWidget::UpdatePlayer1Health(int health)
 {
-	Player1Health->Percent = health / 100.0f;
+	Player1Health->SetPercent(health / 100.0f);
 }
 
 // Called to update player 2's healthbar when their health changes.
 void UFightingHUDUserWidget::UpdatePlayer2Health(int health)
 {
-	Player2Health->Percent = health / 100.0f;
+	Player2Health->SetPercent(health / 100.0f);
 }

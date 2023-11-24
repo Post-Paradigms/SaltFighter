@@ -45,7 +45,11 @@ void AFighter::BeginPlay()
 	FVector SpawnLocation = GetMesh()->GetRelativeLocation() + FVector(0.f, 0.f, 90.f);
 	FActorSpawnParameters SpawnInfo;
 	AHurtbox* PlayerHurtbox = GetWorld()->SpawnActor<AHurtbox>(AHurtbox::StaticClass(), SpawnLocation, FRotator::ZeroRotator, SpawnInfo);
-	if (PlayerHurtbox) PlayerHurtbox->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	if (PlayerHurtbox)
+	{
+		PlayerHurtbox->HurtboxOwner = this;
+		PlayerHurtbox->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	} 
 }
 
 // Called every frame
@@ -294,6 +298,11 @@ void AFighter::UpdateState(EFighterState NewState) {
 			break;
 	}
 	State = NewState;
+}
+
+void AFighter::SetFrameTimer(int NumFrames)
+{
+	FrameTimer = NumFrames;
 }
 
 //used for things that last a certain amount of frames!

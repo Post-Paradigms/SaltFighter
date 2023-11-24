@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
+#include "Fighter.h"
 #include "Hurtbox.generated.h"
 
 /**
@@ -18,6 +19,9 @@ public:
 	AHurtbox();
 
 	FORCEINLINE class UBoxComponent* GetBoxComponent() const { return BoxComponent; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    AFighter* HurtboxOwner;
 
 protected:
 	virtual void BeginPlay() override;

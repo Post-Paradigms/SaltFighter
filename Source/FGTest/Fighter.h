@@ -148,6 +148,9 @@ public:
 	UFUNCTION()
 	void UpdateState(EFighterState NewState);
 
+	UFUNCTION()
+	void SetFrameTimer(int NumFrames);
+
 private:
 	// Camera Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
