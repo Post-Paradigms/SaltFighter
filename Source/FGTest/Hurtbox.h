@@ -3,28 +3,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/PrimitiveComponent.h"
+#include "Components/BoxComponent.h"
 #include "Hurtbox.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class FGTEST_API UHurtbox : public UPrimitiveComponent
+class FGTEST_API AHurtbox : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	UHurtbox();
+	AHurtbox();
 
-	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
-
-	// on hit - overlap 
+	FORCEINLINE class UBoxComponent* GetBoxComponent() const { return BoxComponent; }
 
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UStaticMeshComponent* MeshComponent;
+   	UBoxComponent* BoxComponent;
+	 
+    UFUNCTION()
+    void BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
 	
 };

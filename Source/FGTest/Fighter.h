@@ -142,9 +142,11 @@ public:
 	UFUNCTION()
 	void TakeInInput(EInputType Input);
 
-	// hurtbox component 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hurtbox")
-	class UHurtbox * HurtboxComponent;
+	UFUNCTION()
+	bool ValidateState(EFighterState NewState);
+
+	UFUNCTION()
+	void UpdateState(EFighterState NewState);
 
 private:
 	// Camera Components
@@ -169,12 +171,6 @@ private:
 	
 	UFUNCTION()
 	void PerformDash();
-
-	UFUNCTION()
-	bool ValidateState(EFighterState NewState);
-
-	UFUNCTION()
-	void UpdateState(EFighterState NewState);
 
 	UFUNCTION()
 	void FrameAdvanceState();

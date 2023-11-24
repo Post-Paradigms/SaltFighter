@@ -3,29 +3,36 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/PrimitiveComponent.h"
+#include "Components/BoxComponent.h"
+#include "Fighter.h"
 #include "Hitbox.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class FGTEST_API UHitbox : public UPrimitiveComponent
+class FGTEST_API AHitbox : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	UHitbox();
+	AHitbox();
 
-	FORCEINLINE class UStaticMeshComponent* GetMeshComponent() const { return MeshComponent; }
-
-	// on hit - overlap 
-
+    FAttackStruct* AttkInfo;
 
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UStaticMeshComponent* MeshComponent;
+    UBoxComponent* BoxComponent;
 
+public:
+	FORCEINLINE class UBoxComponent* GetBoxComponent() const { return BoxComponent; }
+
+	virtual void Tick(float DeltaTime) override;
+
+	void Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner, FName SocketAttachment);
+	
+private:
+	int ActiveFramesRemaining;
 };
