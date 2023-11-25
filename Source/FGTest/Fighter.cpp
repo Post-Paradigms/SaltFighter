@@ -168,7 +168,9 @@ void AFighter::TakeInInput(EInputType Input) {
 
 		case EInputType::LB:
 			if (ValidateState(EFighterState::STARTUP)) {
-				LightNormal(State);
+				LightNormal(false);
+			} else if ((CanTargetCombo && Input == NextTargetInput)) {
+				LightNormal(true);
 			}
 			break;
 
@@ -186,7 +188,13 @@ void AFighter::TakeInInput(EInputType Input) {
 void AFighter::PerformNormal(FName AttkName) {
 	PreviousState = State;
 	UpdateState(EFighterState::STARTUP);
+	CanTargetCombo = false;
+	CanJumpCancel = false;
+	CanSpecialCancel = false;
 	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
+	if (ActiveHitbox) {
+		ActiveHitbox->Destroy();
+	}
 
 	AnimInstance->Montage_Play(CurrAttk.Animation);
 
@@ -208,6 +216,7 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	//flush the input buffer here
 	OurController->FlushBuffer();
 	PreviousState = State;
+	CanTargetCombo = false;
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
 	UpdateState(EFighterState::STARTUP);
@@ -296,6 +305,7 @@ void AFighter::UpdateState(EFighterState NewState) {
 			Locked = false;
 			CanJumpCancel = false;
 			CanSpecialCancel = false;
+			CanTargetCombo = false;
 			break;
 
 		case EFighterState::KNOCKDOWN:
@@ -343,7 +353,12 @@ void AFighter::FrameAdvanceState() {
 			FrameTimer = CurrAttk.Recovery;
 			break;
 		case EFighterState::RECOVERY:
-			UpdateState(PreviousState);
+			//this conditional is purely for target combos
+			if (PreviousState != EFighterState::ACTIVE && PreviousState != EFighterState::RECOVERY && PreviousState != EFighterState::STARTUP) {
+				UpdateState(PreviousState);
+			} else {
+				UpdateState(EFighterState::NEUTRAL);
+			}
 			break;
 
 		case EFighterState::HITSTUN:
@@ -378,6 +393,8 @@ void AFighter::OnHitOther() {
 	//to handle appropriate plus/minus frames and valid combo counting
 	CanJumpCancel = CurrAttk.JumpCancellable;
 	CanSpecialCancel = CurrAttk.SpecialCancellable;
+	CanTargetCombo = CurrAttk.TargetComboable;
+	NextTargetInput = CurrAttk.NextTargetInput;
 }
 
 //you got hit dumbass
@@ -407,14 +424,15 @@ void AFighter::OnOw(FAttackStruct OwCauser) {
 
 // === FIGHTER MOVE FUNCTIONS ===
 
-void AFighter::LightNormal(EFighterState CurrentState) {
+void AFighter::LightNormal(bool Target) {
 	// string var name 
 	GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Blue, "mrow");
 	FName AttkName = "";
-	if (CurrentState == EFighterState::JUMPING) {
+	if (State == EFighterState::JUMPING) {
 		AttkName = "LightJumpAttk";
-	}
-	else {
+	} else if (Target) {
+		AttkName = CurrAttk.NextTargetName;
+	} else {
 		AttkName = "LightAttk";
 	}
 	PerformNormal(AttkName);
