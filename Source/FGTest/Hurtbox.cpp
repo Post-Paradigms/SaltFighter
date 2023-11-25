@@ -23,51 +23,55 @@ void AHurtbox::BeginPlay()
 /* Kennet pls chek thx <3 */
 void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult) 
 {
-    // if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode()))
-    // {
-    //     /* Where da dmg?? :/ - will be chips */
-    //     GameMode->DamagePlayer(HurtboxOwner, 20);
-    // } 
 
     AHitbox* IncomingHitbox = Cast<AHitbox>(OtherActor);
-    if (IncomingHitbox && HurtboxOwner && IncomingHitbox->AttkInfo)
+    if (IncomingHitbox && HurtboxOwner && IncomingHitbox->Owner && IncomingHitbox->Owner != HurtboxOwner)
     {
-        if (HurtboxOwner->State == EFighterState::DEFENDING)
-        {
-            // Apply blockstun
-            int BlockstunLength = IncomingHitbox->AttkInfo->Blockstun;
-            if (HurtboxOwner->ValidateState(EFighterState::BLOCKSTUN))
-            {
-                HurtboxOwner->UpdateState(EFighterState::BLOCKSTUN);
-                HurtboxOwner->SetFrameTimer(BlockstunLength);
-                if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode()))
-                {
-                    /* Where da dmg?? :/ - will be chips */
-                    GameMode->DamagePlayer(HurtboxOwner, 1);
-                }
-            }
+        HurtboxOwner->OnOw(IncomingHitbox->AttkInfo);
+        IncomingHitbox->Owner->OnHitOther();
+
+        if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())) {
+            /* Where da dmg?? :/ - will be chips */
+            GameMode->DamagePlayer(HurtboxOwner, 1);
         }
-        else // caught lackin, not blocking
-        {
-            // Apply hitstun
-            int HitstunLength = IncomingHitbox->AttkInfo->Hitstun;
-            bool IsKnockdown = IncomingHitbox->AttkInfo->Knockdown;
-            if (IsKnockdown && HurtboxOwner->ValidateState(EFighterState::KNOCKDOWN))
-            {
-                HurtboxOwner->UpdateState(EFighterState::KNOCKDOWN);
-                // HurtboxOwner->SetFrameTimer(BlockstunLength); idk ??? how long to set it to
-            }
-            else if (HurtboxOwner->ValidateState(EFighterState::HITSTUN))
-            {
-                HurtboxOwner->UpdateState(EFighterState::HITSTUN);
-                HurtboxOwner->SetFrameTimer(HitstunLength);
-            }
-            
-            if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode()))
-            {
-                /* Where da dmg?? :/ - -.-*/
-                // GameMode->DamagePlayer(HurtboxOwner, IncomingHitbox->AttkInfo->Damage);
-            }
-        }
+        
+
+        //if (HurtboxOwner->State == EFighterState::DEFENDING)
+        //{
+        //    // Apply blockstun
+        //    int BlockstunLength = IncomingHitbox->AttkInfo->Blockstun;
+        //    if (HurtboxOwner->ValidateState(EFighterState::BLOCKSTUN))
+        //    {
+        //        HurtboxOwner->UpdateState(EFighterState::BLOCKSTUN);
+        //        HurtboxOwner->SetFrameTimer(BlockstunLength);
+        //        if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode()))
+        //        {
+        //            /* Where da dmg?? :/ - will be chips */
+        //            GameMode->DamagePlayer(HurtboxOwner, 1);
+        //        }
+        //    }
+        //}
+        //else // caught lackin, not blocking
+        //{
+        //    // Apply hitstun
+        //    int HitstunLength = IncomingHitbox->AttkInfo->Hitstun;
+        //    bool IsKnockdown = IncomingHitbox->AttkInfo->Knockdown;
+        //    if (IsKnockdown && HurtboxOwner->ValidateState(EFighterState::KNOCKDOWN))
+        //    {
+        //        HurtboxOwner->UpdateState(EFighterState::KNOCKDOWN);
+        //        // HurtboxOwner->SetFrameTimer(BlockstunLength); idk ??? how long to set it to
+        //    }
+        //    else if (HurtboxOwner->ValidateState(EFighterState::HITSTUN))
+        //    {
+        //        HurtboxOwner->UpdateState(EFighterState::HITSTUN);
+        //        HurtboxOwner->SetFrameTimer(HitstunLength);
+        //    }
+        //    
+        //    if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode()))
+        //    {
+        //        /* Where da dmg?? :/ - -.-*/
+        //        // GameMode->DamagePlayer(HurtboxOwner, IncomingHitbox->AttkInfo->Damage);
+        //    }
+        //}
     }
 }

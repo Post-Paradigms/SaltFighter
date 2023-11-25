@@ -93,6 +93,9 @@ void AFighter::JumpEvent(const FInputActionValue &Value)
 void AFighter::Landed(const FHitResult& Hit) {
 	Super::Landed(Hit);
 	NumAirDashes = MaxAirDashes;
+	if (ActiveHitbox) {
+		ActiveHitbox->Destroy();
+	}
 	UpdateState(EFighterState::NEUTRAL);
 }
 
@@ -294,11 +297,17 @@ void AFighter::UpdateState(EFighterState NewState) {
 			break;
 
 		case EFighterState::KNOCKDOWN:
-		case EFighterState::JUMPING:
 		case EFighterState::STARTUP:
 		case EFighterState::DASHING:
 		case EFighterState::AIRDASHING:
 			Locked = true;
+			break;
+
+		case EFighterState::JUMPING:
+			Locked = true;
+			if (ActiveHitbox) {
+				ActiveHitbox->Destroy();
+			}
 			break;
 	}
 	State = NewState;
@@ -316,13 +325,17 @@ void AFighter::FrameAdvanceState() {
 	FrameTimer = -1; //for safety
 	//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "frame advance state");
 	//oh yeah baby, more switches
+	FActorSpawnParameters SpawnInfo;
 	switch (State) {
 		case EFighterState::STARTUP:
 			UpdateState(EFighterState::ACTIVE);
+			ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk.HitboxLoc, FRotator::ZeroRotator, SpawnInfo);
+			ActiveHitbox->Initialize(CurrAttk, CurrAttk.HitboxScale, CurrAttk.HitboxLoc, this);
 			FrameTimer = CurrAttk.Active;
 			break;
 		case EFighterState::ACTIVE:
 			UpdateState(EFighterState::RECOVERY);
+			ActiveHitbox->Destroy();
 			FrameTimer = CurrAttk.Recovery;
 			break;
 		case EFighterState::RECOVERY:
@@ -366,6 +379,10 @@ void AFighter::OnHitOther() {
 //you got hit dumbass
 //pass in attack frame data struct thing
 void AFighter::OnOw(FAttackStruct OwCauser) {
+	if (ActiveHitbox) {
+		ActiveHitbox->Destroy();
+	}
+
 	if (State == EFighterState::DEFENDING || OtherPlayer->State == EFighterState::BLOCKSTUN) {
 		//blocking
 		UpdateState(EFighterState::BLOCKSTUN);

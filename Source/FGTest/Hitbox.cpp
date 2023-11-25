@@ -23,16 +23,17 @@ void AHitbox::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (ActiveFramesRemaining > 0) ActiveFramesRemaining--;
+  /*  if (ActiveFramesRemaining > 0) ActiveFramesRemaining--;
 
-    if (ActiveFramesRemaining == 0) Destroy();
+    if (ActiveFramesRemaining <= 0) Destroy();*/
 }
 
-void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner, FName SocketAttachment = NAME_None)
+void AHitbox::Initialize(FAttackStruct AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
 {
-	this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform, SocketAttachment);
+    Owner = Cast<AFighter>(HitboxOwner);
+    this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform);
     BoxComponent->SetRelativeScale3D(Size);
     BoxComponent->SetRelativeLocation(SpawnLocation);
     AttkInfo = AttkData;
-    ActiveFramesRemaining = AttkInfo->Active;
+    ActiveFramesRemaining = AttkInfo.Active;
 }

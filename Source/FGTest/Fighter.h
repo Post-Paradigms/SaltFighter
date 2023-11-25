@@ -45,6 +45,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	bool SpecialCancellable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	FVector HitboxLoc;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	FVector HitboxScale;
 };
 
 UENUM(BlueprintType)
@@ -151,6 +157,12 @@ public:
 	UFUNCTION()
 	void SetFrameTimer(int NumFrames);
 
+	UFUNCTION()
+	void OnHitOther();
+
+	UFUNCTION()
+	void OnOw(FAttackStruct OwCauser);
+
 private:
 	// Camera Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -162,6 +174,8 @@ private:
 	FAttackStruct CurrAttk;
 
 	int32 NumAirDashes;
+
+	class AHitbox* ActiveHitbox;
 
 	// Facing
 	void Face();
@@ -178,11 +192,6 @@ private:
 	UFUNCTION()
 	void FrameAdvanceState();
 
-	UFUNCTION()
-	void OnHitOther();
-
-	UFUNCTION()
-	void OnOw(FAttackStruct OwCauser);
 
 	// Fighter Move Functions owo
 	void LightNormal(EFighterState CurrentState);
