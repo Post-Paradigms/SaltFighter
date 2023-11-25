@@ -18,7 +18,9 @@ class FGTEST_API AHitbox : public AActor
 public:
 	AHitbox();
 
-    FAttackStruct* AttkInfo;
+    FAttackStruct AttkInfo;
+
+	AFighter* Owner;
 
 protected:
 	virtual void BeginPlay() override;
@@ -31,7 +33,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	void Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner, FName SocketAttachment);
+	void Initialize(FAttackStruct AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner);
 
 private:
 	int ActiveFramesRemaining;

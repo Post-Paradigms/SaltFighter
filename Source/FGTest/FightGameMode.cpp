@@ -111,7 +111,7 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
 {
     Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth -= Damage;
 
-    if (FightingHUD->GetOwningPlayer<AFighterController>() == P1FighterController) // update player 1 healthbar
+    if (Fighter->GetController() == P1FighterController) // update player 1 healthbar
     {
         FightingHUD->UpdatePlayer1Health(Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth);
     }
