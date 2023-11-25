@@ -124,6 +124,15 @@ void AFighter::Face()
 	}
 }
 
+/*
+* The main bad boy of the state machine. Updates state given input from the input buffer.
+* 
+* **PARAMETERS**
+* Input represents...well the input. That input can be the analog/dpad, button presses, as well as dashes and special inputs.
+* 
+* Quick note about the *Locked* boolean. When locked is true, it will essentially lock out updating the state to defending, neutral, and forwarding.
+* Things that set locked to true are Jumping, Attacking, Dashing, Knockdown, and the Stuns.
+*/
 void AFighter::TakeInInput(EInputType Input) {
 	switch (Input) {
 		case EInputType::DOWNLEFT:
@@ -168,7 +177,9 @@ void AFighter::TakeInInput(EInputType Input) {
 
 		case EInputType::LB:
 			if (ValidateState(EFighterState::STARTUP)) {
-				LightNormal(State);
+				LightNormal(false);
+			} else if ((CanTargetCombo && Input == NextTargetInput)) {
+				LightNormal(true);
 			}
 			break;
 
@@ -183,13 +194,33 @@ void AFighter::TakeInInput(EInputType Input) {
 	}
 }
 
+/*
+	Starts a normal attack
+	**PARAMETERS**
+	AttkName is the name of the attack that will be performed.
+
+	So what's a normal? A normal is any attack that does not require a special sequence to be performed.
+	For example, just pressing Light or Heavy, is considered a normal.
+	Even if you are standing, crouching, or jumping, if it does not require a special sequence (ex. 236/Forward Scoop),
+	it is a normal.
+
+	*What about 6P (Forward Light)?*
+	That's something we call a command normal. Doesn't require a sequence, but it requires a direction. Common directions for
+	command normals are 6, and 3. 
+*/
 void AFighter::PerformNormal(FName AttkName) {
 	PreviousState = State;
 	UpdateState(EFighterState::STARTUP);
+	CanTargetCombo = false;
+	CanJumpCancel = false;
+	CanSpecialCancel = false;
 	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
+	//cancel previous attack hitbox if there is one already out
+	if (ActiveHitbox) {
+		ActiveHitbox->Destroy();
+	}
 
 	AnimInstance->Montage_Play(CurrAttk.Animation);
-
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
 
 }
@@ -208,6 +239,7 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	//flush the input buffer here
 	OurController->FlushBuffer();
 	PreviousState = State;
+	CanTargetCombo = false;
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
 	UpdateState(EFighterState::STARTUP);
@@ -289,19 +321,23 @@ bool AFighter::ValidateState(EFighterState NewState) {
 //what do you spaghetti
 void AFighter::UpdateState(EFighterState NewState) {
 	switch (NewState) {
-		//dab
+		//reset character essentially
 		case EFighterState::NEUTRAL:
 		case EFighterState::DEFENDING:
 		case EFighterState::FORWARDING:
 			Locked = false;
 			CanJumpCancel = false;
 			CanSpecialCancel = false;
+			CanTargetCombo = false;
 			break;
 
+		//lock some states out (neutral, defending, forwarding)
 		case EFighterState::KNOCKDOWN:
 		case EFighterState::STARTUP:
 		case EFighterState::DASHING:
 		case EFighterState::AIRDASHING:
+		case EFighterState::BLOCKSTUN:
+		case EFighterState::HITSTUN:
 			Locked = true;
 			break;
 
@@ -310,7 +346,6 @@ void AFighter::UpdateState(EFighterState NewState) {
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
-
 			AnimInstance->Montage_Stop(NULL);
 			break;
 	}
@@ -322,28 +357,43 @@ void AFighter::SetFrameTimer(int NumFrames)
 	FrameTimer = NumFrames;
 }
 
-//used for things that last a certain amount of frames!
-//ex. StartUp can last for 5 frames, which the tick function will automatically decrement,
-//once FrameTimer hits zero, then it calls this function to advance into the next state!
+
+/*
+* Used for things that last a certain amount of frames!
+* In tick, you will see a timer variable that is going to constantly decrement when it is greater than 0.
+* When that timer hits 0, it will call this function.
+* This function will decide what state to advance to based on the current state.
+* 
+* For example, in PerformNormal() it will update the state to *Startup* and will set the frame timer to some number of startup frames.
+* When that timer hits 0, it will enter this function essentially meaning that startup is over and we can move onto the *Active* state.
+* Which then sets the timer again! For it to eventually return here to update the state into *Recovery*.
+*/
 void AFighter::FrameAdvanceState() {
 	FrameTimer = -1; //for safety
 	//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "frame advance state");
-	//oh yeah baby, more switches
 	FActorSpawnParameters SpawnInfo;
 	switch (State) {
 		case EFighterState::STARTUP:
 			UpdateState(EFighterState::ACTIVE);
+			//spawns the hitbox according to the current attack
 			ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk.HitboxLoc, FRotator::ZeroRotator, SpawnInfo);
 			ActiveHitbox->Initialize(CurrAttk, CurrAttk.HitboxScale, CurrAttk.HitboxLoc, this);
 			FrameTimer = CurrAttk.Active;
 			break;
 		case EFighterState::ACTIVE:
 			UpdateState(EFighterState::RECOVERY);
-			ActiveHitbox->Destroy();
+			if (ActiveHitbox) {
+				ActiveHitbox->Destroy();
+			}
 			FrameTimer = CurrAttk.Recovery;
 			break;
 		case EFighterState::RECOVERY:
-			UpdateState(PreviousState);
+			//this conditional is purely for target combos
+			if (PreviousState != EFighterState::ACTIVE && PreviousState != EFighterState::RECOVERY && PreviousState != EFighterState::STARTUP) {
+				UpdateState(PreviousState);
+			} else {
+				UpdateState(EFighterState::NEUTRAL);
+			}
 			break;
 
 		case EFighterState::HITSTUN:
@@ -352,10 +402,10 @@ void AFighter::FrameAdvanceState() {
 
 		case EFighterState::BLOCKSTUN:
 			UpdateState(EFighterState::NEUTRAL);
-			OurController->CheckForSequence();
+			//what this is doing is essentially updating the state to whatever the input buffer has last detected.
+			OurController->CheckForSequence(); 
 			break;
 
-		//we're going to need to read from the input buffer the most recent input and update to that state
 		case EFighterState::KNOCKDOWN:
 			UpdateState(EFighterState::NEUTRAL);
 			OurController->CheckForSequence();
@@ -371,23 +421,36 @@ void AFighter::FrameAdvanceState() {
 	}
 }
 
-//you hit the other person
-//pass in attack frame data struct thing
+/*
+* Called whenever this fighter has hit the other fighter.
+* This will set up all onhit cancel booleans depending on if the current attack allows it and 
+* will set up the damage scaling and combo counting depending if the current attack connected or was blocked.
+*/
 void AFighter::OnHitOther() {
-	//we're also going to need to know if they're blocking or if they're getting hit 
-	//to handle appropriate plus/minus frames and valid combo counting
 	CanJumpCancel = CurrAttk.JumpCancellable;
 	CanSpecialCancel = CurrAttk.SpecialCancellable;
+	CanTargetCombo = CurrAttk.TargetComboable;
+	NextTargetInput = CurrAttk.NextTargetInput;
+
+	//check if it was blocked for comboing and scaling!
 }
 
-//you got hit dumbass
-//pass in attack frame data struct thing
+/*
+* Called whenever this fighter is hit by the other fighter.
+* This will update our next state depending on if we're blocking or not and if the
+  attack is a knockdown or not
+  
+  **PARAMETERS**
+	OwCauser is the attackstruct that represents the attack that hit us,
+	the main things we're looking from that struct are
+	Blockstun, Hitstun, and (is)Knockdown.
+*/
 void AFighter::OnOw(FAttackStruct OwCauser) {
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
 
-	if (State == EFighterState::DEFENDING || OtherPlayer->State == EFighterState::BLOCKSTUN) {
+	if (State == EFighterState::DEFENDING || State == EFighterState::BLOCKSTUN) {
 		//blocking
 		UpdateState(EFighterState::BLOCKSTUN);
 		FrameTimer = OwCauser.Blockstun;
@@ -407,14 +470,15 @@ void AFighter::OnOw(FAttackStruct OwCauser) {
 
 // === FIGHTER MOVE FUNCTIONS ===
 
-void AFighter::LightNormal(EFighterState CurrentState) {
+void AFighter::LightNormal(bool Target) {
 	// string var name 
 	GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Blue, "mrow");
 	FName AttkName = "";
-	if (CurrentState == EFighterState::JUMPING) {
+	if (State == EFighterState::JUMPING) {
 		AttkName = "LightJumpAttk";
-	}
-	else {
+	} else if (Target) {
+		AttkName = CurrAttk.NextTargetName;
+	} else {
 		AttkName = "LightAttk";
 	}
 	PerformNormal(AttkName);

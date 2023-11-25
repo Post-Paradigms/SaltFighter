@@ -47,6 +47,15 @@ public:
 	bool SpecialCancellable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	bool TargetComboable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	EInputType NextTargetInput;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	FName NextTargetName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	FVector HitboxLoc;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
@@ -102,6 +111,12 @@ public:
 
 	UPROPERTY()
 	bool CanSpecialCancel;
+
+	UPROPERTY()
+	bool CanTargetCombo;
+
+	UPROPERTY()
+	EInputType NextTargetInput;
 
 	UPROPERTY()
 	int32 FrameTimer;
@@ -197,7 +212,7 @@ private:
 	
 
 	// Fighter Move Functions owo
-	void LightNormal(EFighterState CurrentState);
+	void LightNormal(bool Target);
 	void HeavyNormal(EFighterState CurrentState);
 
 	void LightQuarterCircleForward(EFighterState CurrentState);
