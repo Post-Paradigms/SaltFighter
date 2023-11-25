@@ -177,6 +177,8 @@ private:
 
 	class AHitbox* ActiveHitbox;
 
+	class UAnimInstance* AnimInstance;
+
 	// Facing
 	void Face();
 
@@ -192,6 +194,7 @@ private:
 	UFUNCTION()
 	void FrameAdvanceState();
 
+	
 
 	// Fighter Move Functions owo
 	void LightNormal(EFighterState CurrentState);

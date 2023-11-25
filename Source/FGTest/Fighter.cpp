@@ -50,6 +50,8 @@ void AFighter::BeginPlay()
 		PlayerHurtbox->HurtboxOwner = this;
 		PlayerHurtbox->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	} 
+
+	AnimInstance = GetMesh()->GetAnimInstance();
 }
 
 // Called every frame
@@ -96,6 +98,8 @@ void AFighter::Landed(const FHitResult& Hit) {
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
+
+	AnimInstance->Montage_Stop(NULL);
 	UpdateState(EFighterState::NEUTRAL);
 }
 
@@ -184,9 +188,7 @@ void AFighter::PerformNormal(FName AttkName) {
 	UpdateState(EFighterState::STARTUP);
 	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 
-	if (UAnimInstance* AnimInst = GetMesh()->GetAnimInstance()) {
-		AnimInst->Montage_Play(CurrAttk.Animation);
-	}
+	AnimInstance->Montage_Play(CurrAttk.Animation);
 
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
 
@@ -308,6 +310,8 @@ void AFighter::UpdateState(EFighterState NewState) {
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
+
+			AnimInstance->Montage_Stop(NULL);
 			break;
 	}
 	State = NewState;
