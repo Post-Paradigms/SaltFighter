@@ -179,8 +179,12 @@ void AFighter::TakeInInput(EInputType Input) {
 void AFighter::PerformNormal(FName AttkName) {
 	PreviousState = State;
 	UpdateState(EFighterState::STARTUP);
-
 	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
+
+	if (UAnimInstance* AnimInst = GetMesh()->GetAnimInstance()) {
+		AnimInst->Montage_Play(CurrAttk.Animation);
+	}
+
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
 
 }
@@ -387,7 +391,7 @@ void AFighter::LightNormal(EFighterState CurrentState) {
 	GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Blue, "mrow");
 	FName AttkName = "";
 	if (CurrentState == EFighterState::JUMPING) {
-		AttkName = "LightJump";
+		AttkName = "LightJumpAttk";
 	}
 	else {
 		AttkName = "LightAttk";
@@ -398,7 +402,7 @@ void AFighter::LightNormal(EFighterState CurrentState) {
 void AFighter::HeavyNormal(EFighterState CurrentState) {
 	FName AttkName = "";
 	if (CurrentState == EFighterState::JUMPING) {
-		AttkName = "HeavyJump";
+		AttkName = "HeavyJumpAttk";
 	}
 	else {
 		AttkName = "HeavyAttk";
