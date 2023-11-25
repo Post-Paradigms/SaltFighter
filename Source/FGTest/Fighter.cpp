@@ -50,6 +50,8 @@ void AFighter::BeginPlay()
 		PlayerHurtbox->HurtboxOwner = this;
 		PlayerHurtbox->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	} 
+
+	AnimInstance = GetMesh()->GetAnimInstance();
 }
 
 // Called every frame
@@ -93,6 +95,11 @@ void AFighter::JumpEvent(const FInputActionValue &Value)
 void AFighter::Landed(const FHitResult& Hit) {
 	Super::Landed(Hit);
 	NumAirDashes = MaxAirDashes;
+	if (ActiveHitbox) {
+		ActiveHitbox->Destroy();
+	}
+
+	AnimInstance->Montage_Stop(NULL);
 	UpdateState(EFighterState::NEUTRAL);
 }
 
@@ -179,8 +186,10 @@ void AFighter::TakeInInput(EInputType Input) {
 void AFighter::PerformNormal(FName AttkName) {
 	PreviousState = State;
 	UpdateState(EFighterState::STARTUP);
-
 	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
+
+	AnimInstance->Montage_Play(CurrAttk.Animation);
+
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
 
 }
@@ -290,11 +299,19 @@ void AFighter::UpdateState(EFighterState NewState) {
 			break;
 
 		case EFighterState::KNOCKDOWN:
-		case EFighterState::JUMPING:
 		case EFighterState::STARTUP:
 		case EFighterState::DASHING:
 		case EFighterState::AIRDASHING:
 			Locked = true;
+			break;
+
+		case EFighterState::JUMPING:
+			Locked = true;
+			if (ActiveHitbox) {
+				ActiveHitbox->Destroy();
+			}
+
+			AnimInstance->Montage_Stop(NULL);
 			break;
 	}
 	State = NewState;
@@ -312,13 +329,17 @@ void AFighter::FrameAdvanceState() {
 	FrameTimer = -1; //for safety
 	//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "frame advance state");
 	//oh yeah baby, more switches
+	FActorSpawnParameters SpawnInfo;
 	switch (State) {
 		case EFighterState::STARTUP:
 			UpdateState(EFighterState::ACTIVE);
+			ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk.HitboxLoc, FRotator::ZeroRotator, SpawnInfo);
+			ActiveHitbox->Initialize(CurrAttk, CurrAttk.HitboxScale, CurrAttk.HitboxLoc, this);
 			FrameTimer = CurrAttk.Active;
 			break;
 		case EFighterState::ACTIVE:
 			UpdateState(EFighterState::RECOVERY);
+			ActiveHitbox->Destroy();
 			FrameTimer = CurrAttk.Recovery;
 			break;
 		case EFighterState::RECOVERY:
@@ -362,6 +383,10 @@ void AFighter::OnHitOther() {
 //you got hit dumbass
 //pass in attack frame data struct thing
 void AFighter::OnOw(FAttackStruct OwCauser) {
+	if (ActiveHitbox) {
+		ActiveHitbox->Destroy();
+	}
+
 	if (State == EFighterState::DEFENDING || OtherPlayer->State == EFighterState::BLOCKSTUN) {
 		//blocking
 		UpdateState(EFighterState::BLOCKSTUN);
@@ -387,7 +412,7 @@ void AFighter::LightNormal(EFighterState CurrentState) {
 	GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Blue, "mrow");
 	FName AttkName = "";
 	if (CurrentState == EFighterState::JUMPING) {
-		AttkName = "LightJump";
+		AttkName = "LightJumpAttk";
 	}
 	else {
 		AttkName = "LightAttk";
@@ -398,7 +423,7 @@ void AFighter::LightNormal(EFighterState CurrentState) {
 void AFighter::HeavyNormal(EFighterState CurrentState) {
 	FName AttkName = "";
 	if (CurrentState == EFighterState::JUMPING) {
-		AttkName = "HeavyJump";
+		AttkName = "HeavyJumpAttk";
 	}
 	else {
 		AttkName = "HeavyAttk";
