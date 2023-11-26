@@ -220,7 +220,8 @@ void AFighter::PerformNormal(FName AttkName) {
 		ActiveHitbox->Destroy();
 	}
 
-	AnimInstance->Montage_Play(CurrAttk.Animation);
+	if (AnimInstance) AnimInstance->Montage_Play(CurrAttk.Animation);
+	
 	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
 
 }

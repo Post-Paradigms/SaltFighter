@@ -20,6 +20,7 @@ void AFighterController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
+
 }
 
 void AFighterController::Tick(float DeltaTime) {
@@ -34,8 +35,6 @@ void AFighterController::Tick(float DeltaTime) {
     }
 
     CheckForSequence();
-
-    HandleInputTimeout();
 
     PolledInput = EInputType::NEUTRAL;
 }
@@ -73,9 +72,11 @@ EInputType AFighterController::VectorToNumPadSector(FVector2D Vector)
 
 void AFighterController::PopulateInputBuffer()
 {
+    FramesSinceLastInput++;
 
     if ((!InputBuffer.IsEmpty() && InputBuffer.Last() != PolledInput) || InputBuffer.IsEmpty())
     {
+        HandleInputTimeout();
         InputBuffer.Push(PolledInput);
         GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdatePlayer1Buffer(PolledInput);
         FramesSinceLastInput = 0;
@@ -107,8 +108,11 @@ void AFighterController::CheckForSequence() {
 
 void AFighterController::HandleInputTimeout()
 {
-    if (FramesSinceLastInput >= InputBufferLifespan) InputBuffer.Empty();
-    FramesSinceLastInput++;
+    if (FramesSinceLastInput >= InputBufferLifespan)
+    {
+        InputBuffer.Empty();
+        FramesSinceLastInput = 0;
+    } 
 }
 
 void AFighterController::FlushBuffer() {
