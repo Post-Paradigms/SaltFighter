@@ -2,6 +2,7 @@
 
 
 #include "FighterController.h"
+#include "FightGameMode.h"
 #include "Fighter.h"
 
 AFighterController::AFighterController()
@@ -76,6 +77,7 @@ void AFighterController::PopulateInputBuffer()
     if ((!InputBuffer.IsEmpty() && InputBuffer.Last() != PolledInput) || InputBuffer.IsEmpty())
     {
         InputBuffer.Push(PolledInput);
+        GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdatePlayer1Buffer(PolledInput);
         FramesSinceLastInput = 0;
     }
 
