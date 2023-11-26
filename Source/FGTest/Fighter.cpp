@@ -167,7 +167,6 @@ void AFighter::TakeInInput(EInputType Input) {
 
 		case EInputType::UPLEFT:
 		case EInputType::UP:
-			//
 		case EInputType::UPRIGHT:
 			//jump
 			if (ValidateState(EFighterState::JUMPING) && NumJumps > 0) {
@@ -178,6 +177,17 @@ void AFighter::TakeInInput(EInputType Input) {
 			}
 			break;
 
+		//dash cases
+
+		case EInputType::DASH:
+			if (ValidateState(EFighterState::DASHING)) {
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, "Begin Dash");
+				PerformDash();
+			}
+			break;
+
+		//start of all the attack cases
+
 		case EInputType::LB:
 			if (ValidateState(EFighterState::STARTUP)) {
 				LightNormal(false);
@@ -186,14 +196,58 @@ void AFighter::TakeInInput(EInputType Input) {
 			}
 			break;
 
+		case EInputType::HB:
+			if (ValidateState(EFighterState::STARTUP)) {
+				HeavyNormal(false);
+			}
+			else if ((CanTargetCombo && Input == NextTargetInput)) {
+				HeavyNormal(true);
+			}
+			break;
+
 		case EInputType::FQCL: //this is a test fireball state			pee pee poo poo
-			//all specials will have this extra bool check to see if they can special cancel
-			//fortunately, the only specials in this game are 236, 214, and maybe 263, so only 3 switch cases! yay
 			if (ValidateState(EFighterState::STARTUP) || CanSpecialCancel) {
 				//do the special
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, "i can do firebalss on keyboard");
-				LightQuarterCircleForward(State);
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "Light Fireball");
+				LightQuarterCircleForward();
 			}
+			break;
+
+		case EInputType::FQCH:
+			if (ValidateState(EFighterState::STARTUP) || CanSpecialCancel) {
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "Heavy Fireball");
+				HeavyQuarterCircleForward();
+			}
+			break;
+
+		case EInputType::BQCL:
+			if (ValidateState(EFighterState::STARTUP) || CanSpecialCancel) {
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "Light Tatsu");
+				LightQuarterCircleBack();
+			}
+			break;
+
+		case EInputType::BQCH:
+			if (ValidateState(EFighterState::STARTUP) || CanSpecialCancel) {
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "Heavy Tatsu");
+				HeavyQuarterCircleBack();
+			}
+			break;
+
+		case EInputType::DPL:
+			if (ValidateState(EFighterState::STARTUP) || CanSpecialCancel) {
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "Light DP");
+				LightDragonPunch();
+			}
+			break;
+
+		case EInputType::DPH:
+			if (ValidateState(EFighterState::STARTUP) || CanSpecialCancel) {
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "Heavy DP");
+				HeavyDragonPunch();
+			}
+			break;
+
 	}
 }
 
@@ -212,21 +266,21 @@ void AFighter::TakeInInput(EInputType Input) {
 	command normals are 6, and 3. 
 */
 void AFighter::PerformNormal(FName AttkName) {
+	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
+	if (!CurrAttk) { return; }
+
 	PreviousState = State;
 	UpdateState(EFighterState::STARTUP);
 	CanTargetCombo = false;
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
-	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	//cancel previous attack hitbox if there is one already out
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
 
-	if (CurrAttk) {
-		if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
-		FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
-	}
+	if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+	FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 
 }
 
@@ -241,6 +295,9 @@ void AFighter::PerformNormal(FName AttkName) {
  * 
 */
 void AFighter::PerformSpecial(FName SpecialName) {
+	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
+
+	if (!CurrAttk) { return; }
 	//flush the input buffer here
 	OurController->FlushBuffer();
 	PreviousState = State;
@@ -248,29 +305,30 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
 	UpdateState(EFighterState::STARTUP);
-
-	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
-	if (CurrAttk) {
-		FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
-	}
+	if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+	FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 }
 
 void AFighter::PerformDash() {
-	PreviousState = State;
-
 	if (State == EFighterState::JUMPING) {
 		//airdash state
-		NumAirDashes--;
-		UpdateState(EFighterState::AIRDASHING);
 		CurrAttk = FighterDataTable->FindRow<FAttackStruct>("AirDash", "AirDash");
 		if (CurrAttk) {
+			OurController->FlushBuffer();
+			PreviousState = State;
+			NumAirDashes--;
+			UpdateState(EFighterState::AIRDASHING);
+			if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
 			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 		}
 	} else {
 		//dash state
-		UpdateState(EFighterState::DASHING);
 		CurrAttk = FighterDataTable->FindRow<FAttackStruct>("Dash", "Dash");
 		if (CurrAttk) {
+			OurController->FlushBuffer();
+			PreviousState = State;
+			UpdateState(EFighterState::DASHING);
+			if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
 			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 		}
 	}// do else if for backdash in the future
@@ -428,6 +486,7 @@ void AFighter::FrameAdvanceState() {
 			break;
 
 		case EFighterState::DASHING:
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "End Dash");
 			UpdateState(EFighterState::NEUTRAL);
 			break;
 	}
@@ -488,7 +547,7 @@ void AFighter::LightNormal(bool Target) {
 	FName AttkName = "";
 	if (State == EFighterState::JUMPING) {
 		AttkName = "LightJumpAttk";
-	} else if (Target) {
+	} else if (Target && CurrAttk) {
 		AttkName = CurrAttk->NextTargetName;
 	} else {
 		AttkName = "LightAttk";
@@ -496,20 +555,44 @@ void AFighter::LightNormal(bool Target) {
 	PerformNormal(AttkName);
 }
 
-void AFighter::HeavyNormal(EFighterState CurrentState) {
+void AFighter::HeavyNormal(bool Target) {
 	FName AttkName = "";
-	if (CurrentState == EFighterState::JUMPING) {
+	if (State == EFighterState::JUMPING) {
 		AttkName = "HeavyJumpAttk";
-	}
-	else {
+	} else if (Target && CurrAttk) {
+		AttkName = CurrAttk->NextTargetName;
+	} else {
 		AttkName = "HeavyAttk";
 	}
 	PerformNormal(AttkName);
 }
 
-void AFighter::LightQuarterCircleForward(EFighterState CurrentState) {
+void AFighter::LightQuarterCircleForward() {
 	//we're not gonna have any jumping specials for now
 	//so i don't need be like
 	FName SpecialName = "LightFQC";
 	PerformSpecial(SpecialName);
 }
+
+void AFighter::HeavyQuarterCircleForward() {
+	FName SpecialName = "HeavyFQC";
+	PerformSpecial(SpecialName);
+}
+
+void AFighter::LightQuarterCircleBack()
+{
+}
+
+void AFighter::HeavyQuarterCircleBack()
+{
+}
+
+void AFighter::LightDragonPunch()
+{
+}
+
+void AFighter::HeavyDragonPunch()
+{
+}
+
+

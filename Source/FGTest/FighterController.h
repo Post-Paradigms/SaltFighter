@@ -68,6 +68,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* LightAttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	class UInputAction* HeavyAttackAction;
+
 	static constexpr float NeutralThreshold = 0.5;
 
 	void CheckForSequence();
@@ -79,6 +82,7 @@ protected:
 	void OnMovePressed(const FInputActionValue &Value);
 	void OnJumpPressed(const FInputActionValue &Value);
 	void OnLightAttackPressed(const FInputActionValue &Value);
+	void OnHeavyAttackPressed(const FInputActionValue &Value);
 
 private:
 	const TArray<EInputType> LeftSideNumPad = { EInputType::UP, EInputType::UPRIGHT, EInputType::RIGHT, 

@@ -47,6 +47,8 @@ void AFighterController::SetupInputComponent()
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFighterController::OnMovePressed);
         EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFighterController::OnJumpPressed);
         EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Triggered, this, &AFighterController::OnLightAttackPressed);
+        EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Triggered, this, &AFighterController::OnHeavyAttackPressed);
+
     }
 }
 
@@ -169,4 +171,8 @@ void AFighterController::OnJumpPressed(const FInputActionValue &Value)
 void AFighterController::OnLightAttackPressed(const FInputActionValue &Value)
 {
     PolledInput = EInputType::LB;
+}
+
+void AFighterController::OnHeavyAttackPressed(const FInputActionValue& Value) {
+    PolledInput = EInputType::HB;
 }

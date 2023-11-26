@@ -217,8 +217,15 @@ private:
 
 	// Fighter Move Functions owo
 	void LightNormal(bool Target);
-	void HeavyNormal(EFighterState CurrentState);
+	void HeavyNormal(bool Target);
 
-	void LightQuarterCircleForward(EFighterState CurrentState);
+	void LightQuarterCircleForward();
+	void HeavyQuarterCircleForward();
+
+	void LightQuarterCircleBack();
+	void HeavyQuarterCircleBack();
+
+	void LightDragonPunch();
+	void HeavyDragonPunch();
 
 };
