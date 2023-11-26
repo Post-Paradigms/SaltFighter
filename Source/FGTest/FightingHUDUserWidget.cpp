@@ -32,7 +32,7 @@ void UFightingHUDUserWidget::UpdatePlayer1Buffer(EInputType input)
 	Player1Buffer->ClearChildren();
 	if (input != EInputType::NEUTRAL) { // temp fix for displaying buffer without neutral input duplication
 		P1Buffer.Push(input);
-		if (P1Buffer.Num() == 17) {
+		if (P1Buffer.Num() == 18) {
 			P1Buffer.RemoveAt(0);
 		}
 	}
@@ -41,5 +41,11 @@ void UFightingHUDUserWidget::UpdatePlayer1Buffer(EInputType input)
 		UImage* image = NewObject<UImage>();
 		Player1Buffer->AddChild(image);
 		image->Brush = UWidgetBlueprintLibrary::MakeBrushFromTexture(InputTextures[(int)P1Buffer[i]], 64, 64);
+		if ((int)P1Buffer[i] < 8) {
+			image->SetBrushTintColor(FSlateColor(FColor::Green));
+		}
+		else {
+			image->SetBrushTintColor(FSlateColor(FColor::Red));
+		}
 	}
 }
