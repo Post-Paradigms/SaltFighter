@@ -17,6 +17,7 @@
 UENUM(BlueprintType)
 enum class EInputType : uint8
 {
+	/* Simple Inputs */
 	UP UMETA(DisplayName = "Up"),
 	DOWN UMETA(DisplayName = "Down"),
 	LEFT UMETA(DisplayName = "Left"),
@@ -28,10 +29,15 @@ enum class EInputType : uint8
 	NEUTRAL UMETA(DisplayName = "Neutral"),
 	LB UMETA(DisplayName = "Light Button"),
 	HB UMETA(DisplayName = "Heavy Button"),
+
+	/* Complex Inputs */
 	FQCL UMETA(DisplayName = "Quarter Circle Forward Light"),
 	BQCL UMETA(DisplayName = "Quarter Circle Backward Light"),
 	FQCH UMETA(DisplayName = "Quarter Circle Forward Heavy"),
-	BQCH UMETA(DisplayName = "Quarter Circle Backward Heavy")
+	BQCH UMETA(DisplayName = "Quarter Circle Backward Heavy"),
+	DPL UMETA(DisplayName = "Dragon Punch Light"),
+	DPH UMETA(DisplayName = "Dragon Punch Light"),
+	DASH UMETA(DisplayName = "Dash")
 };
 
 UCLASS()
@@ -86,6 +92,9 @@ private:
 		{EInputType::FQCH, {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::HB} },
 		{EInputType::BQCL, {EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::RIGHT, EInputType::LB} },
 		{EInputType::BQCH, {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::HB} },
+		{EInputType::DPL, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::LB} },
+		{EInputType::DPH, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::HB} },
+		{EInputType::DASH, {EInputType::RIGHT, EInputType::RIGHT} },
 	};
 	const int BufferMaxCapacity = 16;
 	const int InputBufferLifespan = 25; /* max number of frames input can remain in buffer */
