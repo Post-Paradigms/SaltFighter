@@ -28,12 +28,12 @@ void AHitbox::Tick(float DeltaTime)
     if (ActiveFramesRemaining <= 0) Destroy();*/
 }
 
-void AHitbox::Initialize(FAttackStruct AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
+void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
 {
+    AttkInfo = AttkData;
     Owner = Cast<AFighter>(HitboxOwner);
     this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform);
     BoxComponent->SetRelativeScale3D(Size);
     BoxComponent->SetRelativeLocation(SpawnLocation);
-    AttkInfo = AttkData;
-    ActiveFramesRemaining = AttkInfo.Active;
+    ActiveFramesRemaining = AttkInfo->Active;
 }

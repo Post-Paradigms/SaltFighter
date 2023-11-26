@@ -178,8 +178,7 @@ public:
 	UFUNCTION()
 	void OnHitOther();
 
-	UFUNCTION()
-	void OnOw(FAttackStruct OwCauser);
+	void OnOw(FAttackStruct* OwCauser);
 
 private:
 	// Camera Components
@@ -189,7 +188,7 @@ private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
     class USpringArmComponent *CameraBoom;
 
-	FAttackStruct CurrAttk;
+	FAttackStruct* CurrAttk;
 
 	int32 NumAirDashes;
 

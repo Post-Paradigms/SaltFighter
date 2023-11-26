@@ -217,15 +217,16 @@ void AFighter::PerformNormal(FName AttkName) {
 	CanTargetCombo = false;
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
-	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
+	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	//cancel previous attack hitbox if there is one already out
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
 
-	if (AnimInstance && CurrAttk.Animation) AnimInstance->Montage_Play(CurrAttk.Animation);
-	
-	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+	if (CurrAttk) {
+		if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+		FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
+	}
 
 }
 
@@ -248,8 +249,10 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	CanSpecialCancel = false;
 	UpdateState(EFighterState::STARTUP);
 
-	CurrAttk = *FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
-	FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
+	if (CurrAttk) {
+		FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
+	}
 }
 
 void AFighter::PerformDash() {
@@ -259,13 +262,17 @@ void AFighter::PerformDash() {
 		//airdash state
 		NumAirDashes--;
 		UpdateState(EFighterState::AIRDASHING);
-		CurrAttk = *FighterDataTable->FindRow<FAttackStruct>("AirDash", "AirDash");
-		FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+		CurrAttk = FighterDataTable->FindRow<FAttackStruct>("AirDash", "AirDash");
+		if (CurrAttk) {
+			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
+		}
 	} else {
 		//dash state
 		UpdateState(EFighterState::DASHING);
-		CurrAttk = *FighterDataTable->FindRow<FAttackStruct>("Dash", "Dash");
-		FrameTimer = CurrAttk.Startup; //starts the frame timer in tick
+		CurrAttk = FighterDataTable->FindRow<FAttackStruct>("Dash", "Dash");
+		if (CurrAttk) {
+			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
+		}
 	}// do else if for backdash in the future
 }
 
@@ -381,16 +388,16 @@ void AFighter::FrameAdvanceState() {
 		case EFighterState::STARTUP:
 			UpdateState(EFighterState::ACTIVE);
 			//spawns the hitbox according to the current attack
-			ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk.HitboxLoc, FRotator::ZeroRotator, SpawnInfo);
-			ActiveHitbox->Initialize(CurrAttk, CurrAttk.HitboxScale, CurrAttk.HitboxLoc, this);
-			FrameTimer = CurrAttk.Active;
+			ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk->HitboxLoc, FRotator::ZeroRotator, SpawnInfo);
+			ActiveHitbox->Initialize(CurrAttk, CurrAttk->HitboxScale, CurrAttk->HitboxLoc, this);
+			FrameTimer = CurrAttk->Active;
 			break;
 		case EFighterState::ACTIVE:
 			UpdateState(EFighterState::RECOVERY);
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
-			FrameTimer = CurrAttk.Recovery;
+			FrameTimer = CurrAttk->Recovery;
 			break;
 		case EFighterState::RECOVERY:
 			//this conditional is purely for target combos
@@ -432,10 +439,10 @@ void AFighter::FrameAdvanceState() {
 * will set up the damage scaling and combo counting depending if the current attack connected or was blocked.
 */
 void AFighter::OnHitOther() {
-	CanJumpCancel = CurrAttk.JumpCancellable;
-	CanSpecialCancel = CurrAttk.SpecialCancellable;
-	CanTargetCombo = CurrAttk.TargetComboable;
-	NextTargetInput = CurrAttk.NextTargetInput;
+	CanJumpCancel = CurrAttk->JumpCancellable;
+	CanSpecialCancel = CurrAttk->SpecialCancellable;
+	CanTargetCombo = CurrAttk->TargetComboable;
+	NextTargetInput = CurrAttk->NextTargetInput;
 
 	//check if it was blocked for comboing and scaling!
 }
@@ -450,7 +457,7 @@ void AFighter::OnHitOther() {
 	the main things we're looking from that struct are
 	Blockstun, Hitstun, and (is)Knockdown.
 */
-void AFighter::OnOw(FAttackStruct OwCauser) {
+void AFighter::OnOw(FAttackStruct* OwCauser) {
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
@@ -458,16 +465,16 @@ void AFighter::OnOw(FAttackStruct OwCauser) {
 	if (State == EFighterState::DEFENDING || State == EFighterState::BLOCKSTUN) {
 		//blocking
 		UpdateState(EFighterState::BLOCKSTUN);
-		FrameTimer = OwCauser.Blockstun;
+		FrameTimer = OwCauser->Blockstun;
 	} else {
 		//i didn't pay 60 bucks to block
-		if (OwCauser.Knockdown) {
+		if (OwCauser->Knockdown) {
 			UpdateState(EFighterState::KNOCKDOWN);
 			FrameTimer = 60; //this has to be a consistent number across the entire cast
 		} else {
 			PreviousState = State;
 			UpdateState(EFighterState::HITSTUN);
-			FrameTimer = OwCauser.Hitstun;
+			FrameTimer = OwCauser->Hitstun;
 		}
 	}
 }
@@ -482,7 +489,7 @@ void AFighter::LightNormal(bool Target) {
 	if (State == EFighterState::JUMPING) {
 		AttkName = "LightJumpAttk";
 	} else if (Target) {
-		AttkName = CurrAttk.NextTargetName;
+		AttkName = CurrAttk->NextTargetName;
 	} else {
 		AttkName = "LightAttk";
 	}

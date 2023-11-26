@@ -25,7 +25,8 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
 {
 
     AHitbox* IncomingHitbox = Cast<AHitbox>(OtherActor);
-    if (IncomingHitbox && HurtboxOwner && IncomingHitbox->Owner && IncomingHitbox->Owner != HurtboxOwner)
+    if (IncomingHitbox && HurtboxOwner && IncomingHitbox->Owner && IncomingHitbox->Owner != HurtboxOwner 
+        && IncomingHitbox->AttkInfo)
     {
         HurtboxOwner->OnOw(IncomingHitbox->AttkInfo);
         IncomingHitbox->Owner->OnHitOther();
