@@ -40,6 +40,7 @@ void AFighter::BeginPlay()
 	State = EFighterState::NEUTRAL;
 	FrameTimer = -1;
 	NumAirDashes = MaxAirDashes;
+	NumJumps = MaxJumps;
 
 	// Hurtbox
 	FVector SpawnLocation = GetMesh()->GetRelativeLocation() + FVector(0.f, 0.f, 90.f);
@@ -95,11 +96,12 @@ void AFighter::JumpEvent(const FInputActionValue &Value)
 void AFighter::Landed(const FHitResult& Hit) {
 	Super::Landed(Hit);
 	NumAirDashes = MaxAirDashes;
+	NumJumps = MaxJumps;
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
+	StopAnimMontage(nullptr);
 
-	AnimInstance->Montage_Stop(NULL);
 	UpdateState(EFighterState::NEUTRAL);
 }
 
@@ -168,8 +170,9 @@ void AFighter::TakeInInput(EInputType Input) {
 			//
 		case EInputType::UPRIGHT:
 			//jump
-			if (ValidateState(EFighterState::JUMPING)) {
+			if (ValidateState(EFighterState::JUMPING) && NumJumps > 0) {
 				PreviousState = State;
+				NumJumps--;
 				UpdateState(EFighterState::JUMPING);
 				Jump();
 			}
@@ -347,7 +350,8 @@ void AFighter::UpdateState(EFighterState NewState) {
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
-			AnimInstance->Montage_Stop(NULL);
+			StopAnimMontage(nullptr);
+			/*if (AnimInstance) AnimInstance->Montage_Stop(NULL);*/
 			break;
 	}
 	State = NewState;

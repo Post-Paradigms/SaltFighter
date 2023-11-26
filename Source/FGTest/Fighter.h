@@ -124,7 +124,10 @@ public:
 	UPROPERTY()
 	int32 AirDashFrames;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
+	int32 MaxJumps;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
 	int32 MaxAirDashes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
@@ -189,6 +192,8 @@ private:
 	FAttackStruct CurrAttk;
 
 	int32 NumAirDashes;
+
+	int32 NumJumps;
 
 	class AHitbox* ActiveHitbox;
 
