@@ -30,11 +30,9 @@ void UFightingHUDUserWidget::UpdatePlayer2Health(int health)
 void UFightingHUDUserWidget::UpdatePlayer1Buffer(EInputType input)
 {
 	Player1Buffer->ClearChildren();
-	if (input != EInputType::NEUTRAL) { // temp fix for displaying buffer without neutral input duplication
-		P1Buffer.Push(input);
-		if (P1Buffer.Num() == 18) {
-			P1Buffer.RemoveAt(0);
-		}
+	P1Buffer.Push(input);
+	if (P1Buffer.Num() == 18) {
+		P1Buffer.RemoveAt(0);
 	}
 	for (int i = P1Buffer.Num() - 1; i >= 0; --i)
 	{
