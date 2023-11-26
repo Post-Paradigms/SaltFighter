@@ -33,6 +33,12 @@ public:
 	UFUNCTION()
 	void DamagePlayer(AFighter* Fighter, int Damage);
 
+	UFUNCTION()
+	AFighterController* GetPlayer1Controller();
+
+	UFUNCTION()
+	AFighterController* GetPlayer2Controller();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

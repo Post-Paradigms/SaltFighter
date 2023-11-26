@@ -122,3 +122,7 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
 
 // Fighting HUD Getter
 UFightingHUDUserWidget* AFightGameMode::GetFightingHUD() { return FightingHUD; }
+
+AFighterController* AFightGameMode::GetPlayer1Controller() { return P1FighterController; }
+
+AFighterController* AFightGameMode::GetPlayer2Controller() { return P2FighterController; }

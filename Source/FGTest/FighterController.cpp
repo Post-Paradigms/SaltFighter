@@ -78,7 +78,14 @@ void AFighterController::PopulateInputBuffer()
     {
         HandleInputTimeout();
         InputBuffer.Push(PolledInput);
-        GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdatePlayer1Buffer(PolledInput);
+        if (PolledInput != EInputType::NEUTRAL) { // ignore displaying neutral
+            if (this == GetWorld()->GetAuthGameMode<AFightGameMode>()->GetPlayer1Controller()) {
+                GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdatePlayer1Buffer(PolledInput);
+            }
+            else {
+                GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdatePlayer2Buffer(PolledInput);
+            }
+        }
         FramesSinceLastInput = 0;
     }
 

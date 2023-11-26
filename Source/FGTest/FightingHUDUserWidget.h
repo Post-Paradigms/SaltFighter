@@ -31,6 +31,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UVerticalBox* Player1Buffer;
 
+	//UPROPERTY(EditAnywhere, meta = (BindWidget))
+	//class UVerticalBox* Player1Buffer;
+
 	UFUNCTION()
 	void UpdateRoundTimer(int time);
 
@@ -43,7 +46,12 @@ public:
 	UFUNCTION()
 	void UpdatePlayer1Buffer(EInputType input);
 
+	UFUNCTION()
+	void UpdatePlayer2Buffer(EInputType input);
+
 private:
 	TArray<EInputType> P1Buffer;
+
+	TArray<EInputType> P2Buffer;
 
 };
