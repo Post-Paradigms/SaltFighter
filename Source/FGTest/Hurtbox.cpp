@@ -13,7 +13,6 @@ AHurtbox::AHurtbox()
     BoxComponent->SetRelativeScale3D(FVector(1.5, 1.5, 2.5));
     BoxComponent->bHiddenInGame = false;
 
-    seq = 0;
 }
 
 void AHurtbox::BeginPlay()
@@ -38,8 +37,7 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
             GameMode->DamagePlayer(HurtboxOwner, 1);
         }
         
-        /* Uncomment when knockback angle and force field added to data table */
-        // ApplyKnockback(IncomingHitbox->AttkInfo.Angle, IncomingHitbox->AttkInfo.Force);
+         ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
 
         //if (HurtboxOwner->State == EFighterState::DEFENDING)
         //{

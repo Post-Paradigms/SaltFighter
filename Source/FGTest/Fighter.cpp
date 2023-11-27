@@ -140,28 +140,39 @@ void AFighter::Face()
 */
 void AFighter::TakeInInput(EInputType Input) {
 	switch (Input) {
-		case EInputType::DOWNLEFT:
 		case EInputType::LEFT:
-			// back
-			//left defend, walk right
+			// defending
 			if (Locked) { return; }
 			if (ValidateState(EFighterState::DEFENDING)) {
 				UpdateState(EFighterState::DEFENDING);
 			}
 			break;
+
+		case EInputType::DOWNLEFT:
+			//crouch block
+			if (Locked) { return; }
+			if (ValidateState(EFighterState::CROUCHBLOCKING)) {
+				UpdateState(EFighterState::CROUCHBLOCKING);
+			}
+			break;
+
+		case EInputType::DOWNRIGHT:
 		case EInputType::DOWN:
 			//crouch
+			if (Locked) { return; }
+			if (ValidateState(EFighterState::CROUCHING)) {
+				UpdateState(EFighterState::CROUCHING);
+			}
 			break;
+
 		case EInputType::NEUTRAL:
 			//neutral/idle
 			if (Locked) { return; }
 			UpdateState(EFighterState::NEUTRAL);
 			break;
 
-		case EInputType::DOWNRIGHT:
 		case EInputType::RIGHT:
 			// forward
-			//right defend, walk left
 			if (Locked) { return; }
 			if (ValidateState(EFighterState::FORWARDING)) {
 				UpdateState(EFighterState::FORWARDING);
@@ -183,7 +194,7 @@ void AFighter::TakeInInput(EInputType Input) {
 		//dash cases
 
 		case EInputType::DASH:
-			if (ValidateState(EFighterState::DASHING)) {
+			if (ValidateState(EFighterState::DASHING) || ValidateState(EFighterState::AIRDASHING)) {
 				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, "Begin Dash");
 				PerformDash();
 			}
@@ -349,10 +360,6 @@ bool AFighter::ValidateState(EFighterState NewState) {
 			valid = true;
 			break;
 
-		case EFighterState::DASHING:
-			//i added the neutral case for when we add a dash macro
-			valid = (State == EFighterState::FORWARDING || State == EFighterState::NEUTRAL);
-			break;
 
 		case EFighterState::DEFENDING:
 			valid = (State != EFighterState::JUMPING);
@@ -364,12 +371,26 @@ bool AFighter::ValidateState(EFighterState NewState) {
 				(CanJumpCancel && State == EFighterState::ACTIVE) || (CanJumpCancel && State == EFighterState::RECOVERY));
 			break;
 
+		case EFighterState::CROUCHING:
+			valid = (State != EFighterState::JUMPING);
+			break;
+
+		case EFighterState::CROUCHBLOCKING:
+			valid = (State != EFighterState::JUMPING);
+			break;
+
+		case EFighterState::DASHING:
+			//i added the neutral case for when we add a dash macro
+			valid = (State == EFighterState::FORWARDING || State == EFighterState::NEUTRAL);
+			break;
+
 		case EFighterState::AIRDASHING:
 			valid = (State == EFighterState::JUMPING && NumAirDashes > 0);
 			break;
 
 		case EFighterState::STARTUP:
-			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || State == EFighterState::JUMPING || State == EFighterState::FORWARDING);
+			valid = (State == EFighterState::NEUTRAL || State == EFighterState::DEFENDING || State == EFighterState::JUMPING 
+				|| State == EFighterState::FORWARDING || State == EFighterState::CROUCHING || State == EFighterState::CROUCHBLOCKING);
 			break;
 
 		case EFighterState::ACTIVE:
@@ -397,6 +418,8 @@ void AFighter::UpdateState(EFighterState NewState) {
 		case EFighterState::NEUTRAL:
 		case EFighterState::DEFENDING:
 		case EFighterState::FORWARDING:
+		case EFighterState::CROUCHING:
+		case EFighterState::CROUCHBLOCKING:
 			Locked = false;
 			CanJumpCancel = false;
 			CanSpecialCancel = false;
@@ -418,6 +441,7 @@ void AFighter::UpdateState(EFighterState NewState) {
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
+
 			if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 				StopAnimMontage(nullptr);
 			}
@@ -526,7 +550,9 @@ void AFighter::OnOw(FAttackStruct* OwCauser) {
 		ActiveHitbox->Destroy();
 	}
 
-	if (State == EFighterState::DEFENDING || State == EFighterState::BLOCKSTUN) {
+	if (State == EFighterState::BLOCKSTUN ||
+		(State == EFighterState::DEFENDING && OwCauser->AttackType != EAttackType::LOW) ||
+		(State == EFighterState::CROUCHBLOCKING && OwCauser->AttackType != EAttackType::HIGH)) {
 		//blocking
 		UpdateState(EFighterState::BLOCKSTUN);
 		FrameTimer = OwCauser->Blockstun;
@@ -545,15 +571,15 @@ void AFighter::OnOw(FAttackStruct* OwCauser) {
 
 
 // === FIGHTER MOVE FUNCTIONS ===
-
 void AFighter::LightNormal(bool Target) {
 	// string var name 
-	GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Blue, "mrow");
 	FName AttkName = "";
-	if (State == EFighterState::JUMPING) {
-		AttkName = "LightJumpAttk";
-	} else if (Target && CurrAttk) {
+	if (Target && CurrAttk) {
 		AttkName = CurrAttk->NextTargetName;
+	} else if (State == EFighterState::JUMPING) {
+		AttkName = "LightJumpAttk";
+	} else if (State == EFighterState::CROUCHING || State == EFighterState::CROUCHBLOCKING) {
+		AttkName = "LightCrouchAttk";
 	} else {
 		AttkName = "LightAttk";
 	}
@@ -562,10 +588,12 @@ void AFighter::LightNormal(bool Target) {
 
 void AFighter::HeavyNormal(bool Target) {
 	FName AttkName = "";
-	if (State == EFighterState::JUMPING) {
-		AttkName = "HeavyJumpAttk";
-	} else if (Target && CurrAttk) {
+	if (Target && CurrAttk) {
 		AttkName = CurrAttk->NextTargetName;
+	} else if (State == EFighterState::JUMPING) {
+		AttkName = "HeavyJumpAttk";
+	} else if (State == EFighterState::CROUCHING || State == EFighterState::CROUCHBLOCKING) {
+		AttkName = "HeavyCrouchAttk";
 	} else {
 		AttkName = "HeavyAttk";
 	}

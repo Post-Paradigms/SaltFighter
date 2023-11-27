@@ -40,6 +40,13 @@ enum class EInputType : uint8
 	DASH UMETA(DisplayName = "Dash")
 };
 
+UENUM(BlueprintType)
+enum class EAttackType : uint8 {
+	MID UMETA(DisplayName = "Mid Attack"),
+	HIGH UMETA(DisplayName = "High Attack"),
+	LOW UMETA(DisplayName = "Low Attack")
+};
+
 UCLASS()
 class FGTEST_API AFighterController : public APlayerController
 {

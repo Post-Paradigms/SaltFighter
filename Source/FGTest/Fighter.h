@@ -38,6 +38,9 @@ public:
 	int32 Hitstun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	EAttackType AttackType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	bool Knockdown;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
@@ -60,6 +63,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	FVector HitboxScale;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float KnockbackAngle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float KnockbackForce;
 };
 
 UENUM(BlueprintType)
@@ -75,12 +84,12 @@ enum class EFighterState : uint8 {
 	RECOVERY UMETA(DisplayName = "Recovery"),
 	HITSTUN UMETA(DisplayName = "Hitstun"),
 	BLOCKSTUN UMETA(DisplayName = "Blockstun"),
-	KNOCKDOWN UMETA(DisplayName = "Knocked Down")
-
-	//crouching
-	//crouch blocking
-	//might need a walking state for 
+	KNOCKDOWN UMETA(DisplayName = "Knocked Down"),
+	CROUCHING UMETA(DisplayName = "Crouching"),
+	CROUCHBLOCKING UMETA(DisplayName = "Crouch Blocking")
 };
+
+
 
 UCLASS()
 class FGTEST_API AFighter : public ACharacter
