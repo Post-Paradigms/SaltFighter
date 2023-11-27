@@ -33,6 +33,4 @@ protected:
     void BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
 
 	void ApplyKnockback(float Angle, float Force);
-	
-	int seq;
 };

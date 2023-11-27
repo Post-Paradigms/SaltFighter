@@ -41,16 +41,6 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
         /* Uncomment when knockback angle and force field added to data table */
         // ApplyKnockback(IncomingHitbox->AttkInfo.Angle, IncomingHitbox->AttkInfo.Force);
 
-        /* Fuck around and find out, spam light */
-        // if (seq < 2)
-        // {
-        //     ApplyKnockback(85, 250);
-        //     seq++;
-        // } else {
-        //     ApplyKnockback(25, 800);
-        //     seq = 0;
-        // }
-
         //if (HurtboxOwner->State == EFighterState::DEFENDING)
         //{
         //    // Apply blockstun
