@@ -12,6 +12,8 @@ AHurtbox::AHurtbox()
     BoxComponent->SetupAttachment(RootComponent);   
     BoxComponent->SetRelativeScale3D(FVector(1.5, 1.5, 2.5));
     BoxComponent->bHiddenInGame = false;
+
+    seq = 0;
 }
 
 void AHurtbox::BeginPlay()
@@ -36,6 +38,18 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
             GameMode->DamagePlayer(HurtboxOwner, 1);
         }
         
+        /* Uncomment when knockback angle and force field added to data table */
+        // ApplyKnockback(IncomingHitbox->AttkInfo.Angle, IncomingHitbox->AttkInfo.Force);
+
+        /* Fuck around and find out, spam light */
+        // if (seq < 2)
+        // {
+        //     ApplyKnockback(85, 250);
+        //     seq++;
+        // } else {
+        //     ApplyKnockback(25, 800);
+        //     seq = 0;
+        // }
 
         //if (HurtboxOwner->State == EFighterState::DEFENDING)
         //{
@@ -75,4 +89,12 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
         //    }
         //}
     }
+}
+
+void AHurtbox::ApplyKnockback(float Angle, float Force)
+{
+    float AngleRad = Angle * (PI / 180);
+    FVector AngleVector = FVector(std::cos(AngleRad), 0, std::sin(AngleRad));
+    FVector LaunchDirection = FVector((HurtboxOwner->IsLeftSide) ? -1 : 1, 1, 1);
+    HurtboxOwner->LaunchCharacter(AngleVector.GetSafeNormal() * Force * LaunchDirection, true, true);
 }
