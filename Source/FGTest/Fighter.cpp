@@ -100,7 +100,8 @@ void AFighter::Landed(const FHitResult& Hit) {
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
-	if (AnimInstance->Montage_IsPlaying(NULL)) {
+
+	if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 		StopAnimMontage(nullptr);
 	}
 
@@ -417,7 +418,7 @@ void AFighter::UpdateState(EFighterState NewState) {
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
-			if (AnimInstance->Montage_IsPlaying(NULL)) {
+			if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 				StopAnimMontage(nullptr);
 			}
 			/*if (AnimInstance) AnimInstance->Montage_Stop(NULL);*/
