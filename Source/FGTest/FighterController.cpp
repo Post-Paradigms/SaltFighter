@@ -76,9 +76,10 @@ void AFighterController::PopulateInputBuffer()
 {
     FramesSinceLastInput++;
 
+    HandleInputTimeout();
+
     if ((!InputBuffer.IsEmpty() && InputBuffer.Last() != PolledInput) || InputBuffer.IsEmpty())
     {
-        HandleInputTimeout();
         InputBuffer.Push(PolledInput);
         if (PolledInput != EInputType::NEUTRAL) { // ignore displaying neutral
             if (this == GetWorld()->GetAuthGameMode<AFightGameMode>()->GetPlayer1Controller()) {
@@ -119,7 +120,9 @@ void AFighterController::HandleInputTimeout()
 {
     if (FramesSinceLastInput >= InputBufferLifespan)
     {
+        EInputType LastInput = InputBuffer.Last();
         InputBuffer.Empty();
+        InputBuffer.Push(LastInput);
         FramesSinceLastInput = 0;
     } 
 }
