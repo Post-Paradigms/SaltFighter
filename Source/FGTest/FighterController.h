@@ -36,8 +36,9 @@ enum class EInputType : uint8
 	FQCH UMETA(DisplayName = "Quarter Circle Forward Heavy"),
 	BQCH UMETA(DisplayName = "Quarter Circle Backward Heavy"),
 	DPL UMETA(DisplayName = "Dragon Punch Light"),
-	DPH UMETA(DisplayName = "Dragon Punch Light"),
-	DASH UMETA(DisplayName = "Dash")
+	DPH UMETA(DisplayName = "Dragon Punch Heavy"),
+	DASH UMETA(DisplayName = "Dash"),
+	BACKDASH UMETA(DisplayName = "Back Dash")
 };
 
 UENUM(BlueprintType)
@@ -106,6 +107,7 @@ private:
 		{EInputType::DPL, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::LB} },
 		{EInputType::DPH, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::HB} },
 		{EInputType::DASH, {EInputType::RIGHT, EInputType::RIGHT} },
+		{EInputType::BACKDASH, {EInputType::LEFT, EInputType::LEFT} },
 	};
 	const int BufferMaxCapacity = 16;
 	const int InputBufferLifespan = 25; /* max number of frames input can remain in buffer */
