@@ -101,9 +101,10 @@ void AFighter::Landed(const FHitResult& Hit) {
 		ActiveHitbox->Destroy();
 	}
 
-	if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
-		StopAnimMontage(nullptr);
-	}
+	//if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
+	//	StopAnimMontage(nullptr);
+	//}
+	StopMontage();
 
 	UpdateState(EFighterState::NEUTRAL);
 }
@@ -293,7 +294,8 @@ void AFighter::PerformNormal(FName AttkName) {
 		ActiveHitbox->Destroy();
 	}
 
-	if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+	//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+	PlayMontage(CurrAttk->Animation);
 	FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 
 }
@@ -319,7 +321,9 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
 	UpdateState(EFighterState::STARTUP);
-	if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+	//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+
+	PlayMontage(CurrAttk->Animation);
 	FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 }
 
@@ -332,7 +336,9 @@ void AFighter::PerformDash() {
 			PreviousState = State;
 			NumAirDashes--;
 			UpdateState(EFighterState::AIRDASHING);
-			if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+			//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+
+			PlayMontage(CurrAttk->Animation);
 			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 		}
 	} else {
@@ -342,7 +348,9 @@ void AFighter::PerformDash() {
 			OurController->FlushBuffer();
 			PreviousState = State;
 			UpdateState(EFighterState::DASHING);
-			if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+			//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+
+			PlayMontage(CurrAttk->Animation);
 			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 		}
 	}// do else if for backdash in the future
@@ -442,9 +450,10 @@ void AFighter::UpdateState(EFighterState NewState) {
 				ActiveHitbox->Destroy();
 			}
 
-			if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
+			/*if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 				StopAnimMontage(nullptr);
-			}
+			}*/
+			StopMontage();
 			/*if (AnimInstance) AnimInstance->Montage_Stop(NULL);*/
 			break;
 	}

@@ -161,6 +161,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void JumpEvent(const FInputActionValue &Value);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayMontage(UAnimMontage* Montage);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StopMontage();
+
 	// Component getters
 	FORCEINLINE class UCameraComponent *GetCameraComponent() const { return CameraComponent; }
     FORCEINLINE class USpringArmComponent *GetCameraBoom() const { return CameraBoom; }
