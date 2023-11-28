@@ -71,9 +71,6 @@ public:
 	class UInputAction* MoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* JumpAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* LightAttackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
@@ -88,7 +85,6 @@ protected:
 	virtual void SetupInputComponent() override;
 
 	void OnMovePressed(const FInputActionValue &Value);
-	void OnJumpPressed(const FInputActionValue &Value);
 	void OnLightAttackPressed(const FInputActionValue &Value);
 	void OnHeavyAttackPressed(const FInputActionValue &Value);
 

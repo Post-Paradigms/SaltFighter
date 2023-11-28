@@ -45,10 +45,8 @@ void AFighterController::SetupInputComponent()
 
     if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent)) {
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFighterController::OnMovePressed);
-        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFighterController::OnJumpPressed);
         EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Triggered, this, &AFighterController::OnLightAttackPressed);
         EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Triggered, this, &AFighterController::OnHeavyAttackPressed);
-
     }
 }
 
@@ -159,16 +157,7 @@ void AFighterController::OnMovePressed(const FInputActionValue &Value)
     AFighter* player = Cast<AFighter>(this->GetCharacter());
     if (player) player->MoveEvent(Value);
 
-    if (Value.IsNonZero())
-    {
-        PolledInput = VectorToNumPadSector(Value.Get<FVector2D>());
-    }
-}
-
-void AFighterController::OnJumpPressed(const FInputActionValue &Value)
-{
-    AFighter* player = Cast<AFighter>(this->GetCharacter());
-    if (player) player->JumpEvent(Value);
+    if (Value.IsNonZero()) PolledInput = VectorToNumPadSector(Value.Get<FVector2D>());
 }
 
 void AFighterController::OnLightAttackPressed(const FInputActionValue &Value)

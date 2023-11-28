@@ -16,6 +16,8 @@ AFighter::AFighter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	IsLeftSide = true;
+	GetCharacterMovement()->AirControl = 0.f;
+	GetCharacterMovement()->GravityScale = 2.5f;
 
 	// Camera Boom
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -30,7 +32,6 @@ AFighter::AFighter()
 	// Camera
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-
 }
 
 // Called when the game starts or when spawned
@@ -78,6 +79,16 @@ void AFighter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void AFighter::Jump(EInputType Input)
+{
+	if (JumpDirections.Contains(Input))
+	{
+		FVector FacingSide = FVector((IsLeftSide) ? 1 : -1, 1, 1);
+		FVector Direction = FVector(JumpDirections[Input], 1, 1);
+		LaunchCharacter(JumpVector * Direction * FacingSide, true, true);
+	}
+}
+
 void AFighter::MoveEvent(const FInputActionValue &Value)
 {
 	if (State == EFighterState::NEUTRAL || State == EFighterState::FORWARDING || State == EFighterState::DEFENDING || State == EFighterState::JUMPING) {
@@ -85,12 +96,6 @@ void AFighter::MoveEvent(const FInputActionValue &Value)
 			AddMovementInput(FVector::ForwardVector, Value.Get<FVector>().X);
 		}
 	}
-}
-
-void AFighter::JumpEvent(const FInputActionValue &Value)
-{
-	TakeInInput(EInputType::UP);
-	//Jump();
 }
 
 void AFighter::Landed(const FHitResult& Hit) {
@@ -121,7 +126,7 @@ void AFighter::Face()
 		// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
 		// GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green, Debug);
 
-		IsLeftSide = (Rot.Yaw < 180.f);
+		IsLeftSide = (Rot.Yaw < 90.f);
 
 
 		/* SetControlRotation for smooth turn, SetActorRelativeRotation for instant turn */
@@ -188,7 +193,7 @@ void AFighter::TakeInInput(EInputType Input) {
 				PreviousState = State;
 				NumJumps--;
 				UpdateState(EFighterState::JUMPING);
-				Jump();
+				Jump(Input);
 			}
 			break;
 

@@ -156,13 +156,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void Jump(EInputType Input);
+
 	virtual void Landed(const FHitResult& Hit) override;
 
 	UFUNCTION(BlueprintCallable)
 	void MoveEvent(const FInputActionValue &Value);
-
-	UFUNCTION(BlueprintCallable)
-	void JumpEvent(const FInputActionValue &Value);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayMontage(UAnimMontage* Montage);
@@ -199,6 +198,14 @@ public:
 	void OnOw(FAttackStruct* OwCauser);
 
 private:
+	const TMap<EInputType, int> JumpDirections = {
+		{EInputType::UPLEFT, -1},
+		{EInputType::UP,      0},
+		{EInputType::UPRIGHT, 1},
+	};
+
+	const FVector JumpVector = FVector(400.f, 0.f, 1100.f);
+
 	// Camera Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
     class UCameraComponent *CameraComponent;
