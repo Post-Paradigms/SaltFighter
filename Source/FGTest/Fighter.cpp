@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/AnimMontage.h"
+#include "Components/CapsuleComponent.h"
 #include "Hurtbox.h"
 #include "Hitbox.h"
 
@@ -83,6 +84,10 @@ void AFighter::Jump(EInputType Input)
 {
 	if (JumpDirections.Contains(Input))
 	{
+		PreviousState = State;
+		NumJumps--;
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+		UpdateState(EFighterState::JUMPING);
 		FVector FacingSide = FVector((IsLeftSide) ? 1 : -1, 1, 1);
 		FVector Direction = FVector(JumpDirections[Input], 1, 1);
 		LaunchCharacter(JumpVector * Direction * FacingSide, true, true);
@@ -105,6 +110,8 @@ void AFighter::Landed(const FHitResult& Hit) {
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 
 	//if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 	//	StopAnimMontage(nullptr);
@@ -190,9 +197,6 @@ void AFighter::TakeInInput(EInputType Input) {
 		case EInputType::UPRIGHT:
 			//jump
 			if (ValidateState(EFighterState::JUMPING) && NumJumps > 0) {
-				PreviousState = State;
-				NumJumps--;
-				UpdateState(EFighterState::JUMPING);
 				Jump(Input);
 			}
 			break;
