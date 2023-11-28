@@ -548,8 +548,9 @@ void AFighter::OnHitOther() {
 	CanSpecialCancel = CurrAttk->SpecialCancellable;
 	CanTargetCombo = CurrAttk->TargetComboable;
 	NextTargetInput = CurrAttk->NextTargetInput;
-
+	
 	//check if it was blocked for comboing and scaling!
+	StartHitStop(0.04f);
 }
 
 /*
@@ -584,6 +585,22 @@ void AFighter::OnOw(FAttackStruct* OwCauser) {
 			FrameTimer = OwCauser->Hitstun;
 		}
 	}
+}
+
+void AFighter::StartHitStop(float Duration) {
+	OurController->SetActorTickEnabled(false);
+	OtherPlayer->OurController->SetActorTickEnabled(false);
+	OurController->GetCharacter()->CustomTimeDilation = 0.0f;
+	OtherPlayer->OurController->GetCharacter()->CustomTimeDilation = 0.0f;
+	GetWorldTimerManager().SetTimer(HitStopTimerHandler, this, &AFighter::StopHitStop, Duration, false);
+}
+
+void AFighter::StopHitStop() {
+	OurController->SetActorTickEnabled(true);
+	OtherPlayer->OurController->SetActorTickEnabled(true);
+	OurController->GetCharacter()->CustomTimeDilation = 1.0f;
+	OtherPlayer->OurController->GetCharacter()->CustomTimeDilation = 1.0f;
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "RACIST");
 }
 
 

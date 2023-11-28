@@ -228,6 +228,14 @@ private:
 	UFUNCTION()
 	void FrameAdvanceState();
 
+	UFUNCTION()
+	void StartHitStop(float Duration);
+
+	UFUNCTION()
+	void StopHitStop();
+
+	FTimerHandle HitStopTimerHandler;
+
 	
 
 	// Fighter Move Functions owo
