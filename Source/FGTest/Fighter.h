@@ -113,6 +113,9 @@ public:
 	int PolledInput;
 
 	UPROPERTY()
+	uint32 ComboCounter;
+
+	UPROPERTY()
 	bool Locked;
 
 	UPROPERTY()

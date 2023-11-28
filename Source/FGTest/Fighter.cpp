@@ -196,7 +196,6 @@ void AFighter::TakeInInput(EInputType Input) {
 
 		case EInputType::DASH:
 			if (ValidateState(EFighterState::DASHING) || ValidateState(EFighterState::AIRDASHING)) {
-				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, "Begin Dash");
 				PerformDash(false);
 			}
 			break;
@@ -514,6 +513,7 @@ void AFighter::FrameAdvanceState() {
 
 		case EFighterState::HITSTUN:
 			(PreviousState == EFighterState::JUMPING) ? UpdateState(EFighterState::JUMPING) : UpdateState(EFighterState::NEUTRAL);
+			OtherPlayer->ComboCounter = 0;
 			break;
 
 		case EFighterState::BLOCKSTUN:
@@ -525,6 +525,7 @@ void AFighter::FrameAdvanceState() {
 		case EFighterState::KNOCKDOWN:
 			UpdateState(EFighterState::NEUTRAL);
 			OurController->CheckForSequence();
+			OtherPlayer->ComboCounter = 0;
 			break;
 
 		case EFighterState::AIRDASHING:
@@ -532,7 +533,6 @@ void AFighter::FrameAdvanceState() {
 			break;
 
 		case EFighterState::DASHING:
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "End Dash");
 			UpdateState(EFighterState::NEUTRAL);
 			break;
 	}
@@ -549,6 +549,12 @@ void AFighter::OnHitOther() {
 	CanTargetCombo = CurrAttk->TargetComboable;
 	NextTargetInput = CurrAttk->NextTargetInput;
 	
+	if (OtherPlayer->State == EFighterState::HITSTUN || OtherPlayer->State == EFighterState::KNOCKDOWN) {
+		ComboCounter++;
+	}
+	// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
+
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Combo counter meow: %d"), ComboCounter));
 	//check if it was blocked for comboing and scaling!
 	StartHitStop(0.04f);
 }
