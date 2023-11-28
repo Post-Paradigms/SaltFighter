@@ -118,9 +118,11 @@ void AFighterController::HandleInputTimeout()
 {
     if (FramesSinceLastInput >= InputBufferLifespan)
     {
-        EInputType LastInput = InputBuffer.Last();
-        InputBuffer.Empty();
-        InputBuffer.Push(LastInput);
+        if (!InputBuffer.IsEmpty()) {
+            EInputType LastInput = InputBuffer.Last();
+            InputBuffer.Empty();
+            InputBuffer.Push(LastInput);
+        }
         FramesSinceLastInput = 0;
     } 
 }
