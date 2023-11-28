@@ -223,7 +223,7 @@ private:
 	void PerformSpecial(FName SpecialName);
 	
 	UFUNCTION()
-	void PerformDash();
+	void PerformDash(bool Back);
 
 	UFUNCTION()
 	void FrameAdvanceState();

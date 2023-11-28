@@ -197,10 +197,15 @@ void AFighter::TakeInInput(EInputType Input) {
 		case EInputType::DASH:
 			if (ValidateState(EFighterState::DASHING) || ValidateState(EFighterState::AIRDASHING)) {
 				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, "Begin Dash");
-				PerformDash();
+				PerformDash(false);
 			}
 			break;
 
+		case EInputType::BACKDASH:
+			if (ValidateState(EFighterState::DASHING) || ValidateState(EFighterState::AIRDASHING)) {
+				PerformDash(true);
+			}
+			break;
 		//start of all the attack cases
 
 		case EInputType::LB:
@@ -327,10 +332,12 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 }
 
-void AFighter::PerformDash() {
+void AFighter::PerformDash(bool Back) {
+	FName DashName = "";
 	if (State == EFighterState::JUMPING) {
 		//airdash state
-		CurrAttk = FighterDataTable->FindRow<FAttackStruct>("AirDash", "AirDash");
+		DashName = Back ? "BackAirDash" : "AirDash";
+		CurrAttk = FighterDataTable->FindRow<FAttackStruct>(DashName, "AirDash");
 		if (CurrAttk) {
 			OurController->FlushBuffer();
 			PreviousState = State;
@@ -343,7 +350,8 @@ void AFighter::PerformDash() {
 		}
 	} else {
 		//dash state
-		CurrAttk = FighterDataTable->FindRow<FAttackStruct>("Dash", "Dash");
+		DashName = Back ? "BackDash" : "Dash";
+		CurrAttk = FighterDataTable->FindRow<FAttackStruct>(DashName, "Dash");
 		if (CurrAttk) {
 			OurController->FlushBuffer();
 			PreviousState = State;
