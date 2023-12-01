@@ -21,12 +21,13 @@ void AFighterController::BeginPlay()
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 
+
 }
 
 void AFighterController::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);
 
-    PopulateInputBuffer();  
+    PopulateInputBuffer();
 
     /* Uncomment to print our input buffer contents */
     for (int i = 0; i < InputBuffer.Num(); i++)
@@ -48,6 +49,7 @@ void AFighterController::SetupInputComponent()
         EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Triggered, this, &AFighterController::OnLightAttackPressed);
         EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Triggered, this, &AFighterController::OnHeavyAttackPressed);
     }
+
 }
 
 EInputType AFighterController::VectorToNumPadSector(FVector2D Vector)

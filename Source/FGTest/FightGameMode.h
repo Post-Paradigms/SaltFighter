@@ -39,12 +39,18 @@ public:
 	UFUNCTION()
 	AFighterController* GetPlayer2Controller();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enhanced Input")
+	class UInputMappingContext* InputMapping;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	// Called when the game ends or when removed from level
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	//void SpawnPlayers();
+
 
 private:
 	// HUD
@@ -69,4 +75,5 @@ private:
 
 	UPROPERTY()
 	class AFighter* P2FighterCharacter;
+
 };

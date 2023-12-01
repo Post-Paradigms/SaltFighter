@@ -583,8 +583,13 @@ void AFighter::OnOw(FAttackStruct* OwCauser) {
 		ActiveHitbox->Destroy();
 	}
 
+	if (!OwCauser) {
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "OWCAUSER SHOULD NOT BE NULL");
+		return;
+	}
+
 	if (State == EFighterState::BLOCKSTUN ||
-		(State == EFighterState::DEFENDING && OwCauser->AttackType != EAttackType::LOW) ||
+		(State == EFighterState::DEFENDING &&OwCauser->AttackType != EAttackType::LOW) ||
 		(State == EFighterState::CROUCHBLOCKING && OwCauser->AttackType != EAttackType::HIGH)) {
 		//blocking
 		UpdateState(EFighterState::BLOCKSTUN);

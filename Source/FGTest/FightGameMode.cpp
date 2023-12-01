@@ -40,7 +40,7 @@ void AFightGameMode::BeginPlay()
     Super::BeginPlay();
 
     // Create a player for each PlayerStart object
-    TArray<AActor*> PlayerStarts;
+     TArray<AActor*> PlayerStarts;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStarts);
 
     for (int i = 0; i < PlayerStarts.Num(); ++i)
@@ -55,6 +55,7 @@ void AFightGameMode::BeginPlay()
 
             if (P1FighterController && P1FighterCharacter)
                 P1FighterController->Possess(P1FighterCharacter);
+            
         }
         else if (i == 1) { // Setup player 2
             if (FighterBPClass)
@@ -64,8 +65,17 @@ void AFightGameMode::BeginPlay()
                 UGameplayStatics::CreatePlayer(GetWorld(), 1);
             P2FighterController = Cast<AFighterController>(UGameplayStatics::GetPlayerControllerFromID(GetWorld(), 1));
 
-            if (P2FighterController && P2FighterCharacter)
+            //only need to add mapping context to player 2 for some reason
+            if (P2FighterController) {
+                if (UEnhancedInputLocalPlayerSubsystem* InputSystem = P2FighterController->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()) {
+                    InputSystem->AddMappingContext(InputMapping, 0);
+                }
+            }
+
+            if (P2FighterController && P2FighterCharacter) {
                 P2FighterController->Possess(P2FighterCharacter);
+            }
+
         }
     }
 
@@ -86,6 +96,7 @@ void AFightGameMode::BeginPlay()
         FightingHUD->AddToPlayerScreen();
     }
 }
+
 
 // Called when the game ends or when removed from level
 void AFightGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
