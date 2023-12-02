@@ -11,6 +11,7 @@
 #include "Containers/RingBuffer.h"
 #include "Engine/DataTable.h"
 #include "FighterController.h"
+#include "ProjectileBase.h"
 #include "Fighter.generated.h"
 
 USTRUCT(BlueprintType)
@@ -144,6 +145,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	UDataTable* FighterDataTable;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<class AProjectileBase>> ProjectileClasses;
 
 protected:
 	// Called when the game starts or when spawned
