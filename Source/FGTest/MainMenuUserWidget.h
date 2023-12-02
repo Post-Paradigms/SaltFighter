@@ -27,15 +27,17 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* QuitButton;
 
+	void Select();
+
 	void UpdateButtonState();
+
+	int NavigationIndex;
 
 protected:
 	virtual void NativeConstruct() override;
 
 private:
 	TArray<UButton*> NavigationItems;
-
-	int NavigationIndex;
 
 	UFUNCTION()
 	void OnPlayClicked();

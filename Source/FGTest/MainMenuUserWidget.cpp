@@ -4,6 +4,7 @@
 #include "MainMenuUserWidget.h"
 #include "Components/Button.h"
 #include "Components/VerticalBox.h"
+#include "Kismet/GameplayStatics.h"
 
 void UMainMenuUserWidget::NativeConstruct()
 {
@@ -25,6 +26,21 @@ void UMainMenuUserWidget::NativeConstruct()
 	UpdateButtonState();
 }
 
+void UMainMenuUserWidget::Select()
+{
+	switch (NavigationIndex) {
+	case 0:
+		OnPlayClicked();
+		break;
+	case 1:
+		OnCreditClicked();
+		break;
+	case 2:
+		OnQuitClicked();
+		break;
+	}
+}
+
 void UMainMenuUserWidget::UpdateButtonState()
 {
 	int index = 0;
@@ -42,8 +58,7 @@ void UMainMenuUserWidget::UpdateButtonState()
 
 void UMainMenuUserWidget::OnPlayClicked()
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("PLAY!"));
+	UGameplayStatics::OpenLevel(this, "TestMap");
 }
 
 void UMainMenuUserWidget::OnCreditClicked()
