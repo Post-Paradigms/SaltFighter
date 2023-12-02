@@ -22,7 +22,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	//virtual void PerformLight() = 0;
-	//virtual void PerformHeavy() = 0;
+	virtual void PerformLight() PURE_VIRTUAL(AProjectileBase::PerformLight, );
+	virtual void PerformHeavy() PURE_VIRTUAL(AProjectileBase::PerformHeavy, );
 
 };

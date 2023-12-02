@@ -298,6 +298,11 @@ void AFighter::PerformNormal(FName AttkName) {
 	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	if (!CurrAttk) { return; }
 
+	if(AProjectileBase* CurrProjectile = GetWorld()->SpawnActor<AProjectileBase>(CurrAttk->ProjectileClass)) {
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Squeak")));
+		CurrProjectile->PerformLight();
+	};
+
 	PreviousState = State;
 	UpdateState(EFighterState::STARTUP);
 	CanTargetCombo = false;

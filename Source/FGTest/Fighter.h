@@ -70,6 +70,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	float KnockbackForce;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	TSubclassOf<class AProjectileBase> ProjectileClass;
 };
 
 UENUM(BlueprintType)
@@ -145,9 +148,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	UDataTable* FighterDataTable;
-
-	UPROPERTY(EditAnywhere)
-	TArray<TSubclassOf<class AProjectileBase>> ProjectileClasses;
 
 protected:
 	// Called when the game starts or when spawned
