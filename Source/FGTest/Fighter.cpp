@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Hurtbox.h"
 #include "Hitbox.h"
+#include "FightGameMode.h"
 
 // Sets default values
 AFighter::AFighter()
@@ -523,6 +524,7 @@ void AFighter::FrameAdvanceState() {
 		case EFighterState::HITSTUN:
 			(PreviousState == EFighterState::JUMPING) ? UpdateState(EFighterState::JUMPING) : UpdateState(EFighterState::NEUTRAL);
 			OtherPlayer->ComboCounter = 0;
+			GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, OtherPlayer);
 			break;
 
 		case EFighterState::BLOCKSTUN:
@@ -535,6 +537,7 @@ void AFighter::FrameAdvanceState() {
 			UpdateState(EFighterState::NEUTRAL);
 			OurController->CheckForSequence();
 			OtherPlayer->ComboCounter = 0;
+			GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, OtherPlayer);
 			break;
 
 		case EFighterState::AIRDASHING:
@@ -560,10 +563,11 @@ void AFighter::OnHitOther() {
 	
 	if (OtherPlayer->State == EFighterState::HITSTUN || OtherPlayer->State == EFighterState::KNOCKDOWN) {
 		ComboCounter++;
+		GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, this);
 	}
 	// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
 
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Combo counter meow: %d"), ComboCounter));
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Combo counter meow: %d"), ComboCounter));
 	//check if it was blocked for comboing and scaling!
 	StartHitStop(0.04f);
 }

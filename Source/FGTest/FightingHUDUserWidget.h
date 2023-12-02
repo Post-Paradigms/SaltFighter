@@ -34,6 +34,12 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UVerticalBox* Player2Buffer;
 
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* Player1Combo;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* Player2Combo;
+
 	UFUNCTION()
 	void UpdateRoundTimer(int time);
 
@@ -48,6 +54,9 @@ public:
 
 	UFUNCTION()
 	void UpdatePlayer2Buffer(EInputType input);
+
+	UFUNCTION()
+	void UpdateCombo(int combo, AFighter* comboer);
 
 private:
 	TArray<EInputType> P1Buffer;
