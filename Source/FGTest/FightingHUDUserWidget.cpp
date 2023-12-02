@@ -51,7 +51,7 @@ void UFightingHUDUserWidget::UpdatePlayer1Buffer(EInputType input)
 // Called to update player 2's input buffer
 void UFightingHUDUserWidget::UpdatePlayer2Buffer(EInputType input)
 {
-	Player1Buffer->ClearChildren();
+	Player2Buffer->ClearChildren();
 	P2Buffer.Push(input);
 	if (P2Buffer.Num() == 18) {
 		P2Buffer.RemoveAt(0);
@@ -59,7 +59,7 @@ void UFightingHUDUserWidget::UpdatePlayer2Buffer(EInputType input)
 	for (int i = P2Buffer.Num() - 1; i >= 0; --i)
 	{
 		UImage* image = NewObject<UImage>();
-		Player1Buffer->AddChild(image);
+		Player2Buffer->AddChild(image);
 		image->Brush = UWidgetBlueprintLibrary::MakeBrushFromTexture(InputTextures[(int)P2Buffer[i]], 64, 64);
 		if ((int)P2Buffer[i] < 8) {
 			image->SetBrushTintColor(FSlateColor(FColor::Green));
