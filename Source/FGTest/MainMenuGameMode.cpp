@@ -6,12 +6,14 @@
 
 AMainMenuGameMode::AMainMenuGameMode()
 {
-	// TODO: Set menu player controller
+	// TODO: Set default player controller
 }
 
 void AMainMenuGameMode::BeginPlay()
 {
     Super::BeginPlay();
+
+    GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 
     // Create User Widget
     if (MainMenuUWClass)
