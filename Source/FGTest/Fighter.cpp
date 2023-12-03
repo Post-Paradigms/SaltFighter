@@ -139,8 +139,8 @@ void AFighter::Face()
 
 
 		/* SetControlRotation for smooth turn, SetActorRelativeRotation for instant turn */
-	/*	 if (OurController) OurController->SetControlRotation(Rot);
-		SetActorRelativeRotation(Rot);*/
+		 if (OurController) OurController->SetControlRotation(Rot);
+		SetActorRelativeRotation(Rot);
 	}
 }
 
