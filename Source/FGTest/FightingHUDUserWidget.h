@@ -19,6 +19,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<UTexture2D*> InputTextures;
 
+	UPROPERTY(EditAnywhere)
+	UTexture2D* WinTexture;
+
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UTextBlock* RoundTimer;
 
@@ -43,6 +46,12 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UTextBlock* Countdown;
 
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UHorizontalBox* Player1Wins;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UHorizontalBox* Player2Wins;
+
 	UFUNCTION()
 	void UpdateRoundTimer(int time);
 
@@ -63,6 +72,12 @@ public:
 
 	UFUNCTION()
 	void UpdateCountdown(FText text);
+
+	UFUNCTION()
+	void AddPlayer1Win();
+
+	UFUNCTION()
+	void AddPlayer2Win();
 
 private:
 	TArray<EInputType> P1Buffer;

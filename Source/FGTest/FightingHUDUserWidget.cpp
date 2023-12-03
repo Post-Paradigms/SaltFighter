@@ -9,6 +9,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Fighter.h"
 #include "FightGameMode.h"
+#include "Components/HorizontalBox.h"
 
 // Called to update the round timer display. Should be called once every second?
 void UFightingHUDUserWidget::UpdateRoundTimer(int time)
@@ -85,4 +86,20 @@ void UFightingHUDUserWidget::UpdateCombo(int combo, AFighter* comboer)
 
 void UFightingHUDUserWidget::UpdateCountdown(FText text) {
 	Countdown->SetText(text);
+}
+
+void UFightingHUDUserWidget::AddPlayer1Win()
+{
+	UImage* image = NewObject<UImage>();
+	Player1Wins->AddChild(image);
+	image->Brush = UWidgetBlueprintLibrary::MakeBrushFromTexture(WinTexture, 64, 64);
+	image->SetBrushTintColor(FSlateColor(FColor::Red));
+}
+
+void UFightingHUDUserWidget::AddPlayer2Win()
+{
+	UImage* image = NewObject<UImage>();
+	Player2Wins->AddChild(image);
+	image->Brush = UWidgetBlueprintLibrary::MakeBrushFromTexture(WinTexture, 64, 64);
+	image->SetBrushTintColor(FSlateColor(FColor::Red));
 }

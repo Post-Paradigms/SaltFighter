@@ -156,7 +156,7 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
         if (Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth <= 0)
         {
             ResetRound();
-            // TODO: handle additional reset logic
+            FightingHUD->AddPlayer2Win();
         }
     }
     else { // update player 2 health bar
@@ -164,7 +164,7 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
         if (Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth <= 0)
         {
             ResetRound();
-            // TODO: handle additional reset logic
+            FightingHUD->AddPlayer1Win();
         }
     }
 }
