@@ -157,6 +157,9 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
         {
             ResetRound();
             FightingHUD->AddPlayer2Win();
+            if (GetGameState<AFightGameState>()->Player2Wins++ == 2) {
+                UGameplayStatics::OpenLevel(this, "MainMenuTestMap");
+            }
         }
     }
     else { // update player 2 health bar
@@ -165,6 +168,9 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
         {
             ResetRound();
             FightingHUD->AddPlayer1Win();
+            if (GetGameState<AFightGameState>()->Player1Wins++ == 2) {
+                UGameplayStatics::OpenLevel(this, "MainMenuTestMap");
+            }
         }
     }
 }
@@ -182,7 +188,7 @@ void AFightGameMode::StartRoundCountdown()
             FightingHUD->UpdateCountdown(FText::FromString("1"));
             break;
         case 3:
-            FightingHUD->UpdateCountdown(FText::FromString("FIGHT"));
+            FightingHUD->UpdateCountdown(FText::FromString("COOK"));
             break;
         case 4:
             FightingHUD->UpdateCountdown(FText::FromString(""));
