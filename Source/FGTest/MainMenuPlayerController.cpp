@@ -35,6 +35,7 @@ void AMainMenuPlayerController::OnNavigatePressed(const FInputActionValue& Value
 {
 	UMainMenuUserWidget* MainMenuWidget = GetWorld()->GetAuthGameMode<AMainMenuGameMode>()->GetMainMenuWidget();
 	float navigationdir = Value.Get<float>();
+	if (FMath::Abs(navigationdir) < 0.5) return;
 	if (navigationdir > 0 && MainMenuWidget->NavigationIndex > 0)
 	{
 		MainMenuWidget->NavigationIndex--;
