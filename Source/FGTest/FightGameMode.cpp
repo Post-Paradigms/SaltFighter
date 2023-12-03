@@ -114,7 +114,24 @@ void AFightGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 // Reset the map and players for the next round
 void AFightGameMode::ResetRound()
 {
-    // TODO: RESET STUFF HERE
+    
+    // Create a player for each PlayerStart object
+    TArray<AActor*> PlayerStarts;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStarts);
+
+    for (int i = 0; i < PlayerStarts.Num(); ++i)
+    {
+        if (i == 0)
+            P1FighterCharacter->SetActorLocation(PlayerStarts[i]->GetActorLocation());
+        if (i == 1)
+            P2FighterCharacter->SetActorLocation(PlayerStarts[i]->GetActorLocation());
+    }
+
+    FightingHUD->UpdatePlayer1Health(P1FighterCharacter->GetPlayerState<AFightPlayerState>()->PlayerHealth = 100);
+    FightingHUD->UpdatePlayer2Health(P2FighterCharacter->GetPlayerState<AFightPlayerState>()->PlayerHealth = 100);
+
+    GetGameState<AFightGameState>()->RoundNumber++;
+    GetGameState<AFightGameState>()->RoundTimer = 100.0f;
 }
 
 // Damage a player and update the hud
@@ -125,9 +142,19 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
     if (Fighter->GetController() == P1FighterController) // update player 1 healthbar
     {
         FightingHUD->UpdatePlayer1Health(Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth);
+        if (Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth <= 0)
+        {
+            ResetRound();
+            // TODO: handle additional reset logic
+        }
     }
     else { // update player 2 health bar
         FightingHUD->UpdatePlayer2Health(Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth);
+        if (Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth <= 0)
+        {
+            ResetRound();
+            // TODO: handle additional reset logic
+        }
     }
 }
 
