@@ -40,6 +40,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UTextBlock* Player2Combo;
 
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* Countdown;
+
 	UFUNCTION()
 	void UpdateRoundTimer(int time);
 
@@ -57,6 +60,9 @@ public:
 
 	UFUNCTION()
 	void UpdateCombo(int combo, AFighter* comboer);
+
+	UFUNCTION()
+	void UpdateCountdown(FText text);
 
 private:
 	TArray<EInputType> P1Buffer;

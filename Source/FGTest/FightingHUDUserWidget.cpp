@@ -82,3 +82,7 @@ void UFightingHUDUserWidget::UpdateCombo(int combo, AFighter* comboer)
 		Player2Combo->SetText(FText::FromString(FString::FormatAsNumber(combo) + " HITS"));
 	}
 }
+
+void UFightingHUDUserWidget::UpdateCountdown(FText text) {
+	Countdown->SetText(text);
+}

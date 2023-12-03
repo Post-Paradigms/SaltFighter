@@ -76,4 +76,10 @@ private:
 	UPROPERTY()
 	class AFighter* P2FighterCharacter;
 
+	FTimerHandle StartRoundCountdownTimer;
+
+	int StartRoundCountdownTimerCount; // jesus christ
+
+	void StartRoundCountdown();
+
 };
