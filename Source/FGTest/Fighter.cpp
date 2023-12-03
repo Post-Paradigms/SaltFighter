@@ -125,7 +125,8 @@ void AFighter::Landed(const FHitResult& Hit) {
 // Rotate player towards direction of the opponent
 void AFighter::Face()
 {
-	if (OtherPlayer)
+	if (OtherPlayer && 
+		State != EFighterState::STARTUP && State != EFighterState::ACTIVE && State != EFighterState::RECOVERY)
 	{
 		FVector Direction = OtherPlayer->GetActorLocation() - this->GetActorLocation();
 		Direction = FVector(Direction.X, Direction.Y, 0.f);
@@ -138,8 +139,8 @@ void AFighter::Face()
 
 
 		/* SetControlRotation for smooth turn, SetActorRelativeRotation for instant turn */
-		// if (OurController) OurController->SetControlRotation(Rot);
-		SetActorRelativeRotation(Rot);
+	/*	 if (OurController) OurController->SetControlRotation(Rot);
+		SetActorRelativeRotation(Rot);*/
 	}
 }
 
