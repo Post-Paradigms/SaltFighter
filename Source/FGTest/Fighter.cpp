@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Hurtbox.h"
 #include "Hitbox.h"
+#include "ProjectileBase.h"
 #include "FightGameMode.h"
 
 // Sets default values
@@ -297,9 +298,14 @@ void AFighter::TakeInInput(EInputType Input) {
 void AFighter::PerformNormal(FName AttkName) {
 	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	if (!CurrAttk) { return; }
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Squeak")));
 
-	if(AProjectileBase* CurrProjectile = GetWorld()->SpawnActor<AProjectileBase>(CurrAttk->ProjectileClass)) {
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Squeak")));
+	AProjectileBase* CurrProjectile = GetWorld()->SpawnActor<AProjectileBase>(CurrAttk->ProjectileClass);
+
+	if (CurrProjectile) {
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Squeak")));
+
+		CurrProjectile->SetOwner(this);
 		CurrProjectile->PerformLight();
 	};
 

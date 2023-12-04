@@ -30,10 +30,23 @@ void AHitbox::Tick(float DeltaTime)
 
 void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
 {
+    GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
     AttkInfo = AttkData;
-    Owner = Cast<AFighter>(HitboxOwner);
+    Owner = HitboxOwner;
     this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform);
     BoxComponent->SetRelativeScale3D(Size);
     BoxComponent->SetRelativeLocation(SpawnLocation);
     ActiveFramesRemaining = AttkInfo->Active;
+}
+
+
+void AHitbox::InitializeProjectile(FProjectileStruct* ProjectileData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
+{
+    GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
+    ProjectileInfo = ProjectileData;
+    Owner = HitboxOwner;
+    this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform);
+    BoxComponent->SetRelativeScale3D(Size);
+    BoxComponent->SetRelativeLocation(SpawnLocation);
+    ActiveFramesRemaining = ProjectileInfo->Lifespan;
 }

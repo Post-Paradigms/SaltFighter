@@ -11,7 +11,6 @@
 #include "Containers/RingBuffer.h"
 #include "Engine/DataTable.h"
 #include "FighterController.h"
-#include "ProjectileBase.h"
 #include "Fighter.generated.h"
 
 USTRUCT(BlueprintType)

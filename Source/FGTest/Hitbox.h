@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
 #include "Fighter.h"
+#include "ProjectileBase.h"
 #include "Hitbox.generated.h"
 
 /**
@@ -20,7 +21,9 @@ public:
 
     FAttackStruct* AttkInfo;
 
-	AFighter* Owner;
+	FProjectileStruct* ProjectileInfo;
+
+	AActor* Owner;
 
 protected:
 	virtual void BeginPlay() override;
@@ -34,6 +37,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner);
+
+	void InitializeProjectile(FProjectileStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner);
 
 private:
 	int ActiveFramesRemaining;

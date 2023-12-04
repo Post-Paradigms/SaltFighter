@@ -22,22 +22,38 @@ void AHurtbox::BeginPlay()
 }
 
 /* Kennet pls chek thx <3 */
+// currently heavily reworking dont look at this ok
 void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult) 
 {
-
+    //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "eee eewwee weeee");
     AHitbox* IncomingHitbox = Cast<AHitbox>(OtherActor);
-    if (IncomingHitbox && HurtboxOwner && IncomingHitbox->Owner && IncomingHitbox->Owner != HurtboxOwner 
-        && IncomingHitbox->AttkInfo)
+    if ((IncomingHitbox && HurtboxOwner && IncomingHitbox->Owner) && (IncomingHitbox->Owner != HurtboxOwner))
     {
-        HurtboxOwner->OnOw(IncomingHitbox->AttkInfo);
-        IncomingHitbox->Owner->OnHitOther();
+        // Hitbox is owned by fighter
+        AFighter* FightOwner = Cast<AFighter>(IncomingHitbox->Owner);
+        if (FightOwner) {
+            if (IncomingHitbox->AttkInfo) {
+                HurtboxOwner->OnOw(IncomingHitbox->AttkInfo);
+                FightOwner->OnHitOther();
+            }
+        }
+        // Hitbox is owned by projectile
+        AProjectileBase* ProjectileOwner = Cast<AProjectileBase>(IncomingHitbox->Owner);
+        if (ProjectileOwner) {
+            GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "eee eewwee weeee");
+            if (ProjectileOwner->Owner == HurtboxOwner) {
+                return; // early return scary fix this
+            }
+        }
 
         if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())) {
             /* Where da dmg?? :/ - will be chips */
             GameMode->DamagePlayer(HurtboxOwner, 1);
         }
         
-         ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
+        if (FightOwner) {
+            ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
+        }
 
         //if (HurtboxOwner->State == EFighterState::DEFENDING)
         //{
