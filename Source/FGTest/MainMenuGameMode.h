@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "MainMenuUserWidget.h"
 #include "MainMenuGameMode.generated.h"
 
 /**
@@ -17,6 +18,7 @@ class FGTEST_API AMainMenuGameMode : public AGameMode
 public:
 	AMainMenuGameMode();
 
+	UMainMenuUserWidget* GetMainMenuWidget();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

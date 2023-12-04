@@ -95,6 +95,12 @@ void AFightGameMode::BeginPlay()
         FightingHUD = CreateWidget<UFightingHUDUserWidget>(P1FighterController, FightingHUDClass);
         FightingHUD->AddToPlayerScreen();
     }
+
+    P1FighterController->DisableInput(P1FighterController);
+    P2FighterController->DisableInput(P2FighterController);
+
+    StartRoundCountdownTimerCount = 0;
+    GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 1.0f, true);
 }
 
 
@@ -114,7 +120,29 @@ void AFightGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 // Reset the map and players for the next round
 void AFightGameMode::ResetRound()
 {
-    // TODO: RESET STUFF HERE
+    
+    P1FighterController->DisableInput(P1FighterController);
+    P2FighterController->DisableInput(P2FighterController);
+
+    // Create a player for each PlayerStart object
+    TArray<AActor*> PlayerStarts;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStarts);
+
+    for (int i = 0; i < PlayerStarts.Num(); ++i)
+    {
+        if (i == 0)
+            P1FighterCharacter->SetActorLocation(PlayerStarts[i]->GetActorLocation());
+        if (i == 1)
+            P2FighterCharacter->SetActorLocation(PlayerStarts[i]->GetActorLocation());
+    }
+
+    FightingHUD->UpdatePlayer1Health(P1FighterCharacter->GetPlayerState<AFightPlayerState>()->PlayerHealth = 100);
+    FightingHUD->UpdatePlayer2Health(P2FighterCharacter->GetPlayerState<AFightPlayerState>()->PlayerHealth = 100);
+
+    GetGameState<AFightGameState>()->RoundNumber++;
+    GetGameState<AFightGameState>()->RoundTimer = 100.0f;
+
+    GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 1.0f, true);
 }
 
 // Damage a player and update the hud
@@ -125,10 +153,56 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
     if (Fighter->GetController() == P1FighterController) // update player 1 healthbar
     {
         FightingHUD->UpdatePlayer1Health(Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth);
+        if (Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth <= 0)
+        {
+            ResetRound();
+            FightingHUD->AddPlayer2Win();
+            if (GetGameState<AFightGameState>()->Player2Wins++ == 2) {
+                UGameplayStatics::OpenLevel(this, "MainMenuTestMap");
+            }
+        }
     }
     else { // update player 2 health bar
         FightingHUD->UpdatePlayer2Health(Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth);
+        if (Fighter->GetPlayerState<AFightPlayerState>()->PlayerHealth <= 0)
+        {
+            ResetRound();
+            FightingHUD->AddPlayer1Win();
+            if (GetGameState<AFightGameState>()->Player1Wins++ == 2) {
+                UGameplayStatics::OpenLevel(this, "MainMenuTestMap");
+            }
+        }
     }
+}
+
+void AFightGameMode::StartRoundCountdown()
+{
+    switch (StartRoundCountdownTimerCount) {
+        case 0:
+            FightingHUD->UpdateCountdown(FText::FromString("3"));
+            break;
+        case 1:
+            FightingHUD->UpdateCountdown(FText::FromString("2"));
+            break;
+        case 2:
+            FightingHUD->UpdateCountdown(FText::FromString("1"));
+            break;
+        case 3:
+            FightingHUD->UpdateCountdown(FText::FromString("COOK"));
+            break;
+        case 4:
+            FightingHUD->UpdateCountdown(FText::FromString(""));
+
+            P1FighterController->EnableInput(P1FighterController);
+            P2FighterController->EnableInput(P2FighterController);
+
+            GetWorld()->GetTimerManager().ClearTimer(StartRoundCountdownTimer);
+            StartRoundCountdownTimerCount = 0;
+            return;
+            break;
+
+    }
+    StartRoundCountdownTimerCount++;
 }
 
 // Fighting HUD Getter

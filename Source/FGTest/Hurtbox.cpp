@@ -13,6 +13,12 @@ AHurtbox::AHurtbox()
     BoxComponent->SetRelativeScale3D(FVector(1.5, 1.5, 2.5));
     BoxComponent->bHiddenInGame = false;
 
+    // Hit Effect
+    static ConstructorHelpers::FClassFinder<ANiagaraActor> HurtEffectClass(TEXT("/Game/Blueprints/BP_HitEffect"));
+    if (HurtEffectClass.Class)
+    {
+        HurtEffectComponent = Cast<ANiagaraActor>(HurtEffectClass.Class->GetDefaultObject());
+    }
 }
 
 void AHurtbox::BeginPlay()
@@ -59,6 +65,8 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
         if (FightOwner && IncomingHitbox->AttkInfo) {
             ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
         }
+        //ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
+        SpawnHurtEffect();
     }
 }
 
@@ -68,4 +76,16 @@ void AHurtbox::ApplyKnockback(float Angle, float Force)
     FVector AngleVector = FVector(std::cos(AngleRad), 0, std::sin(AngleRad));
     FVector LaunchDirection = FVector((HurtboxOwner->IsLeftSide) ? -1 : 1, 1, 1);
     HurtboxOwner->LaunchCharacter(AngleVector.GetSafeNormal() * Force * LaunchDirection, true, true);
+}
+
+void AHurtbox::SpawnHurtEffect()
+{
+    if (HurtEffectComponent)
+    {
+        FVector SpawnLocation = HurtboxOwner->GetActorLocation() + FVector(-50.f, 0.f, 0.f) * ((HurtboxOwner->IsLeftSide) ? -1.f : 1.f);
+        FRotator SpawnRotation = FRotator(90.f, 0.f, 0.f) * ((HurtboxOwner->IsLeftSide) ? -1.f : 1.f);
+        FActorSpawnParameters SpawnInfo;
+        ANiagaraActor* EffectInstance = GetWorld()->SpawnActor<ANiagaraActor>(HurtEffectComponent->GetClass(), SpawnLocation, SpawnRotation, SpawnInfo);
+        EffectInstance->SetLifeSpan(0.5f);
+    }
 }

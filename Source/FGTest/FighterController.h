@@ -61,6 +61,8 @@ public:
 
 	void FlushBuffer();
 
+	EInputType GetMostRecentInput();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
 	EInputType PolledInput;
 
@@ -84,6 +86,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
+	void SendInputToUI(EInputType Input);
+
 	void OnMovePressed(const FInputActionValue &Value);
 	void OnLightAttackPressed(const FInputActionValue &Value);
 	void OnHeavyAttackPressed(const FInputActionValue &Value);
@@ -96,17 +100,18 @@ private:
 												 EInputType::DOWNLEFT, EInputType::DOWN, EInputType::DOWNRIGHT, 
 												 EInputType::RIGHT, EInputType::UPRIGHT };
 	const TMap<EInputType, TArray<EInputType>> MotionInputs = {
+		{EInputType::DPL, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::LB} },
+		{EInputType::DPH, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::HB} },
 		{EInputType::FQCL, {EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::RIGHT, EInputType::LB} },
 		{EInputType::FQCH, {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::HB} },
 		{EInputType::BQCL, {EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::RIGHT, EInputType::LB} },
 		{EInputType::BQCH, {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::HB} },
-		{EInputType::DPL, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::LB} },
-		{EInputType::DPH, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::HB} },
-		{EInputType::DASH, {EInputType::RIGHT, EInputType::RIGHT} },
-		{EInputType::BACKDASH, {EInputType::LEFT, EInputType::LEFT} },
+		{EInputType::DASH, {EInputType::RIGHT, EInputType::NEUTRAL, EInputType::RIGHT} },
+		{EInputType::BACKDASH, {EInputType::LEFT, EInputType::NEUTRAL, EInputType::LEFT} },
 	};
 	const int BufferMaxCapacity = 16;
 	const int InputBufferLifespan = 25; /* max number of frames input can remain in buffer */
+	const int DefaultInputLenience = 2;
 	
 	int FramesSinceLastInput;
 

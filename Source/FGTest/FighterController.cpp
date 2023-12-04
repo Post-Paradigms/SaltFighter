@@ -52,6 +52,18 @@ void AFighterController::SetupInputComponent()
 
 }
 
+void AFighterController::SendInputToUI(EInputType Input)
+{
+    if (Input != EInputType::NEUTRAL) {
+        if (this == GetWorld()->GetAuthGameMode<AFightGameMode>()->GetPlayer1Controller()) {
+            GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdatePlayer1Buffer(Input);
+        }
+        else {
+            GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdatePlayer2Buffer(Input);
+        }
+    }
+}
+
 EInputType AFighterController::VectorToNumPadSector(FVector2D Vector)
 {
     AFighter* player = Cast<AFighter>(this->GetCharacter());
@@ -81,14 +93,9 @@ void AFighterController::PopulateInputBuffer()
     if ((!InputBuffer.IsEmpty() && InputBuffer.Last() != PolledInput) || InputBuffer.IsEmpty())
     {
         InputBuffer.Push(PolledInput);
-        if (PolledInput != EInputType::NEUTRAL) { // ignore displaying neutral
-            if (this == GetWorld()->GetAuthGameMode<AFightGameMode>()->GetPlayer1Controller()) {
-                GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdatePlayer1Buffer(PolledInput);
-            }
-            else {
-                GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdatePlayer2Buffer(PolledInput);
-            }
-        }
+        
+        SendInputToUI(PolledInput);
+
         FramesSinceLastInput = 0;
     }
 
@@ -105,7 +112,8 @@ void AFighterController::CheckForSequence() {
 
     for (auto& MotionInput : MotionInputs) 
     {
-        if (IsSubSequence(MotionInput.Value, 2)) 
+        int Lenience = (MotionInput.Key == EInputType::DASH || MotionInput.Key == EInputType::BACKDASH) ? 0 : DefaultInputLenience;
+        if (IsSubSequence(MotionInput.Value, Lenience)) 
         {
             if (player) player->TakeInInput(MotionInput.Key);
             break;
@@ -131,6 +139,10 @@ void AFighterController::HandleInputTimeout()
 
 void AFighterController::FlushBuffer() {
     InputBuffer.Empty();
+}
+
+EInputType AFighterController::GetMostRecentInput() {
+    return PolledInput;
 }
 
 bool AFighterController::IsSubSequence(TArray<EInputType> Sequence, int AdditionalFrameLenience)

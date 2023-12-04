@@ -21,6 +21,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// Current round number
+	int RoundNumber;
+
+	// Round Timer
+	float RoundTimer;
+
+	int Player1Wins;
+
+	int Player2Wins;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -28,12 +38,6 @@ protected:
 private:
 	UPROPERTY()
 	class UFightingHUDUserWidget* FightingHUD;
-
-	// Current round number
-	int RoundNumber;
-
-	// Round Timer
-	float RoundTimer;
 
 	// Round Timer Update Delay
 	float RoundTimerDelay;

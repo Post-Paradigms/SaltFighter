@@ -441,6 +441,10 @@ bool AFighter::ValidateState(EFighterState NewState) {
 		case EFighterState::BLOCKSTUN:
 			valid = true;
 			break;
+
+		case EFighterState::CROUCHBLOCKSTUN:
+			valid = (State == EFighterState::BLOCKSTUN || State == EFighterState::CROUCHBLOCKSTUN || State == EFighterState::CROUCHING);
+			break;
 	}
 	
 	return valid;
@@ -468,6 +472,7 @@ void AFighter::UpdateState(EFighterState NewState) {
 		case EFighterState::DASHING:
 		case EFighterState::AIRDASHING:
 		case EFighterState::BLOCKSTUN:
+		case EFighterState::CROUCHBLOCKSTUN:
 		case EFighterState::HITSTUN:
 			Locked = true;
 			break;
@@ -539,6 +544,7 @@ void AFighter::FrameAdvanceState() {
 			break;
 
 		case EFighterState::BLOCKSTUN:
+		case EFighterState::CROUCHBLOCKSTUN:
 			UpdateState(EFighterState::NEUTRAL);
 			//what this is doing is essentially updating the state to whatever the input buffer has last detected.
 			OurController->CheckForSequence(); 

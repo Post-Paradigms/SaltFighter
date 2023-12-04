@@ -6,12 +6,19 @@
 
 AMainMenuGameMode::AMainMenuGameMode()
 {
-	// TODO: Set menu player controller
+    // Player Controller
+    static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerBPClass(TEXT("/Game/Blueprints/BP_MainMenuPlayerController"));
+    if (PlayerControllerBPClass.Class)
+    {
+        PlayerControllerClass = PlayerControllerBPClass.Class;
+    }
 }
 
 void AMainMenuGameMode::BeginPlay()
 {
     Super::BeginPlay();
+
+    GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 
     // Create User Widget
     if (MainMenuUWClass)
@@ -32,3 +39,5 @@ void AMainMenuGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
         MainMenuUW = nullptr;
     }
 }
+
+UMainMenuUserWidget* AMainMenuGameMode::GetMainMenuWidget() { return MainMenuUW; }
