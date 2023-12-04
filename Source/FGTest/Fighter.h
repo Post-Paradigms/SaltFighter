@@ -84,6 +84,7 @@ enum class EFighterState : uint8 {
 	RECOVERY UMETA(DisplayName = "Recovery"),
 	HITSTUN UMETA(DisplayName = "Hitstun"),
 	BLOCKSTUN UMETA(DisplayName = "Blockstun"),
+	CROUCHBLOCKSTUN UMETA(DisplayName = "CrouchingBlockstun"),
 	KNOCKDOWN UMETA(DisplayName = "Knocked Down"),
 	CROUCHING UMETA(DisplayName = "Crouching"),
 	CROUCHBLOCKING UMETA(DisplayName = "Crouch Blocking")
