@@ -11,6 +11,8 @@
 #include "Containers/RingBuffer.h"
 #include "Engine/DataTable.h"
 #include "FighterController.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundCue.h"
 #include "Fighter.generated.h"
 
 USTRUCT(BlueprintType)
@@ -149,6 +151,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	UDataTable* FighterDataTable;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	USoundCue* JumpSoundCue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	USoundCue* LandedSoundCue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	USoundCue* LightAttackCue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	USoundCue* HeavyAttackCue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	USoundCue* LightHitCue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	USoundCue* HeavyHitCue;
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -267,4 +288,10 @@ private:
 	void LightDragonPunch();
 	void HeavyDragonPunch();
 
+	//Sound functions
+	void LightAttackSound();
+	void HeavyAttackSound();
+
+	void LightHitSound();
+	void HeavyHitSound();
 };

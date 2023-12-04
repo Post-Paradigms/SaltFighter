@@ -11,6 +11,7 @@
 #include "Hitbox.h"
 #include "ProjectileBase.h"
 #include "FightGameMode.h"
+#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 AFighter::AFighter()
@@ -35,6 +36,17 @@ AFighter::AFighter()
 	// Camera
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+
+	//// Audio Setup
+	//static ConstructorHelpers::FObjectFinder<USoundCue> JumpCueObject(TEXT("/Script/Engine.SoundCue'/Game/Sound/JumpStartCue.JumpStartCue''"));
+	//if (JumpCueObject.Succeeded()) {
+	//	JumpSoundCue = JumpCueObject.Object;		
+	//}
+
+	//static ConstructorHelpers::FObjectFinder<USoundCue> LandCueObject(TEXT("/Script/Engine.SoundCue'/Game/Sound/JumpEndCue.JumpEndCue''"));
+	//if (LandCueObject.Succeeded()) {
+	//	LandedSoundCue = LandCueObject.Object;
+	//}
 }
 
 // Called when the game starts or when spawned
@@ -56,7 +68,7 @@ void AFighter::BeginPlay()
 		PlayerHurtbox->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	} 
 
-	AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance = GetMesh()->GetAnimInstance();	
 }
 
 // Called every frame
@@ -86,6 +98,7 @@ void AFighter::Jump(EInputType Input)
 {
 	if (JumpDirections.Contains(Input))
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), JumpSoundCue, GetActorLocation());
 		PreviousState = State;
 		NumJumps--;
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
@@ -93,6 +106,10 @@ void AFighter::Jump(EInputType Input)
 		FVector FacingSide = FVector((IsLeftSide) ? 1 : -1, 1, 1);
 		FVector Direction = FVector(JumpDirections[Input], 1, 1);
 		LaunchCharacter(JumpVector * Direction * FacingSide, true, true);
+
+		/*JumpAudioComponent->Stop();
+		JumpAudioComponent->Play(0.0f);*/
+		
 	}
 }
 
@@ -107,6 +124,7 @@ void AFighter::MoveEvent(const FInputActionValue &Value)
 
 void AFighter::Landed(const FHitResult& Hit) {
 	Super::Landed(Hit);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), LandedSoundCue, GetActorLocation());
 	NumAirDashes = MaxAirDashes;
 	NumJumps = MaxJumps;
 	if (ActiveHitbox) {
@@ -118,6 +136,7 @@ void AFighter::Landed(const FHitResult& Hit) {
 	//if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 	//	StopAnimMontage(nullptr);
 	//}
+	
 	StopMontage();
 
 	UpdateState(EFighterState::NEUTRAL);
@@ -724,6 +743,28 @@ void AFighter::LightDragonPunch()
 
 void AFighter::HeavyDragonPunch()
 {
+}
+
+
+//Sound functions
+void AFighter::LightAttackSound()
+{
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), LightAttackCue, GetActorLocation());
+}
+
+void AFighter::HeavyAttackSound()
+{
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HeavyAttackCue, GetActorLocation());
+}
+
+void AFighter::LightHitSound()
+{
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), LightHitCue, GetActorLocation());
+}
+
+void AFighter::HeavyHitSound()
+{
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HeavyHitCue, GetActorLocation());
 }
 
 
