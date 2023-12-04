@@ -61,6 +61,8 @@ public:
 
 	void FlushBuffer();
 
+	EInputType GetMostRecentInput();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
 	EInputType PolledInput;
 

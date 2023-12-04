@@ -141,6 +141,10 @@ void AFighterController::FlushBuffer() {
     InputBuffer.Empty();
 }
 
+EInputType AFighterController::GetMostRecentInput() {
+    return PolledInput;
+}
+
 bool AFighterController::IsSubSequence(TArray<EInputType> Sequence, int AdditionalFrameLenience)
 {
     int TotalLenience = Sequence.Num() + AdditionalFrameLenience;

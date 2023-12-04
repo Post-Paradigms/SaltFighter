@@ -431,6 +431,10 @@ bool AFighter::ValidateState(EFighterState NewState) {
 		case EFighterState::BLOCKSTUN:
 			valid = true;
 			break;
+
+		case EFighterState::CROUCHBLOCKSTUN:
+			valid = (State == EFighterState::BLOCKSTUN || State == EFighterState::CROUCHBLOCKSTUN || State == EFighterState::CROUCHING);
+			break;
 	}
 	
 	return valid;
@@ -458,6 +462,7 @@ void AFighter::UpdateState(EFighterState NewState) {
 		case EFighterState::DASHING:
 		case EFighterState::AIRDASHING:
 		case EFighterState::BLOCKSTUN:
+		case EFighterState::CROUCHBLOCKSTUN:
 		case EFighterState::HITSTUN:
 			Locked = true;
 			break;
@@ -529,6 +534,7 @@ void AFighter::FrameAdvanceState() {
 			break;
 
 		case EFighterState::BLOCKSTUN:
+		case EFighterState::CROUCHBLOCKSTUN:
 			UpdateState(EFighterState::NEUTRAL);
 			//what this is doing is essentially updating the state to whatever the input buffer has last detected.
 			OurController->CheckForSequence(); 
@@ -593,18 +599,25 @@ void AFighter::OnOw(FAttackStruct* OwCauser) {
 		return;
 	}
 
-	if (State == EFighterState::BLOCKSTUN ||
-		(State == EFighterState::DEFENDING &&OwCauser->AttackType != EAttackType::LOW) ||
-		(State == EFighterState::CROUCHBLOCKING && OwCauser->AttackType != EAttackType::HIGH)) {
-		//blocking
+	if ((State == EFighterState::DEFENDING && OwCauser->AttackType != EAttackType::LOW) ||
+		((State == EFighterState::BLOCKSTUN || State == EFighterState::CROUCHBLOCKSTUN) && OurController->GetMostRecentInput() == EInputType::LEFT)) {
+		//standing block
 		UpdateState(EFighterState::BLOCKSTUN);
 		FrameTimer = OwCauser->Blockstun;
-	} else {
-		//i didn't pay 60 bucks to block
+	} 
+	else if ((State == EFighterState::CROUCHBLOCKING && OwCauser->AttackType != EAttackType::HIGH) ||
+		((State == EFighterState::BLOCKSTUN || State == EFighterState::CROUCHBLOCKSTUN) && OurController->GetMostRecentInput() == EInputType::DOWNLEFT)) {
+		//crouching block
+		UpdateState(EFighterState::CROUCHBLOCKSTUN);
+		FrameTimer = OwCauser->Blockstun;
+	}
+	else {
+		//we got hit
 		if (OwCauser->Knockdown) {
 			UpdateState(EFighterState::KNOCKDOWN);
 			FrameTimer = 60; //this has to be a consistent number across the entire cast
-		} else {
+		}
+		else {
 			PreviousState = State;
 			UpdateState(EFighterState::HITSTUN);
 			FrameTimer = OwCauser->Hitstun;
