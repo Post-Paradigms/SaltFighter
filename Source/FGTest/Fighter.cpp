@@ -662,7 +662,7 @@ void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool 
 		//i didn't pay 60 bucks to block
 		if (Knockdown) {
 			UpdateState(EFighterState::KNOCKDOWN);
-			FrameTimer = 60; //this has to be a consistent number across the entire cast
+			FrameTimer = 51; //this has to be a consistent number across the entire cast
 		}
 		else {
 			PreviousState = State;
