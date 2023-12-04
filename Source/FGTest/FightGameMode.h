@@ -64,6 +64,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AFighter> FighterBPClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AFighter> PepperBPClass;
+
 	UPROPERTY()
 	class AFighterController* P1FighterController;
 
