@@ -24,6 +24,8 @@ public:
 	FProjectileStruct* ProjectileInfo;
 
 	AActor* Owner;
+	
+	bool IsProjectile;
 
 protected:
 	virtual void BeginPlay() override;

@@ -33,6 +33,7 @@ void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLoc
     //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
     AttkInfo = AttkData;
     Owner = HitboxOwner;
+    IsProjectile = false;
     this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform);
     BoxComponent->SetRelativeScale3D(Size);
     BoxComponent->SetRelativeLocation(SpawnLocation);
@@ -45,6 +46,7 @@ void AHitbox::InitializeProjectile(FProjectileStruct* ProjectileData, FVector Si
    //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
     ProjectileInfo = ProjectileData;
     Owner = HitboxOwner;
+    IsProjectile = true;
     this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform);
     BoxComponent->SetRelativeScale3D(Size);
     BoxComponent->SetRelativeLocation(SpawnLocation);
