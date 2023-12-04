@@ -98,12 +98,12 @@ private:
 												 EInputType::DOWNLEFT, EInputType::DOWN, EInputType::DOWNRIGHT, 
 												 EInputType::RIGHT, EInputType::UPRIGHT };
 	const TMap<EInputType, TArray<EInputType>> MotionInputs = {
+		{EInputType::DPL, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::LB} },
+		{EInputType::DPH, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::HB} },
 		{EInputType::FQCL, {EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::RIGHT, EInputType::LB} },
 		{EInputType::FQCH, {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::HB} },
 		{EInputType::BQCL, {EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::RIGHT, EInputType::LB} },
 		{EInputType::BQCH, {EInputType::DOWN, EInputType::DOWNLEFT, EInputType::LEFT, EInputType::HB} },
-		{EInputType::DPL, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::LB} },
-		{EInputType::DPH, {EInputType::RIGHT, EInputType::DOWN, EInputType::DOWNRIGHT, EInputType::HB} },
 		{EInputType::DASH, {EInputType::RIGHT, EInputType::NEUTRAL, EInputType::RIGHT} },
 		{EInputType::BACKDASH, {EInputType::LEFT, EInputType::NEUTRAL, EInputType::LEFT} },
 	};

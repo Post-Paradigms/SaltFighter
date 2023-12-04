@@ -13,6 +13,12 @@ AHurtbox::AHurtbox()
     BoxComponent->SetRelativeScale3D(FVector(1.5, 1.5, 2.5));
     BoxComponent->bHiddenInGame = false;
 
+    // Hit Effect
+    static ConstructorHelpers::FClassFinder<ANiagaraActor> HurtEffectClass(TEXT("/Game/Blueprints/BP_HitEffect"));
+    if (HurtEffectClass.Class)
+    {
+        HurtEffectComponent = Cast<ANiagaraActor>(HurtEffectClass.Class->GetDefaultObject());
+    }
 }
 
 void AHurtbox::BeginPlay()
@@ -37,45 +43,9 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
             GameMode->DamagePlayer(HurtboxOwner, 1);
         }
         
-         ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
+        ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
 
-        //if (HurtboxOwner->State == EFighterState::DEFENDING)
-        //{
-        //    // Apply blockstun
-        //    int BlockstunLength = IncomingHitbox->AttkInfo->Blockstun;
-        //    if (HurtboxOwner->ValidateState(EFighterState::BLOCKSTUN))
-        //    {
-        //        HurtboxOwner->UpdateState(EFighterState::BLOCKSTUN);
-        //        HurtboxOwner->SetFrameTimer(BlockstunLength);
-        //        if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode()))
-        //        {
-        //            /* Where da dmg?? :/ - will be chips */
-        //            GameMode->DamagePlayer(HurtboxOwner, 1);
-        //        }
-        //    }
-        //}
-        //else // caught lackin, not blocking
-        //{
-        //    // Apply hitstun
-        //    int HitstunLength = IncomingHitbox->AttkInfo->Hitstun;
-        //    bool IsKnockdown = IncomingHitbox->AttkInfo->Knockdown;
-        //    if (IsKnockdown && HurtboxOwner->ValidateState(EFighterState::KNOCKDOWN))
-        //    {
-        //        HurtboxOwner->UpdateState(EFighterState::KNOCKDOWN);
-        //        // HurtboxOwner->SetFrameTimer(BlockstunLength); idk ??? how long to set it to
-        //    }
-        //    else if (HurtboxOwner->ValidateState(EFighterState::HITSTUN))
-        //    {
-        //        HurtboxOwner->UpdateState(EFighterState::HITSTUN);
-        //        HurtboxOwner->SetFrameTimer(HitstunLength);
-        //    }
-        //    
-        //    if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode()))
-        //    {
-        //        /* Where da dmg?? :/ - -.-*/
-        //        // GameMode->DamagePlayer(HurtboxOwner, IncomingHitbox->AttkInfo->Damage);
-        //    }
-        //}
+        SpawnHurtEffect();
     }
 }
 
@@ -85,4 +55,16 @@ void AHurtbox::ApplyKnockback(float Angle, float Force)
     FVector AngleVector = FVector(std::cos(AngleRad), 0, std::sin(AngleRad));
     FVector LaunchDirection = FVector((HurtboxOwner->IsLeftSide) ? -1 : 1, 1, 1);
     HurtboxOwner->LaunchCharacter(AngleVector.GetSafeNormal() * Force * LaunchDirection, true, true);
+}
+
+void AHurtbox::SpawnHurtEffect()
+{
+    if (HurtEffectComponent)
+    {
+        FVector SpawnLocation = HurtboxOwner->GetActorLocation() + FVector(-50.f, 0.f, 0.f) * ((HurtboxOwner->IsLeftSide) ? -1.f : 1.f);
+        FRotator SpawnRotation = FRotator(90.f, 0.f, 0.f) * ((HurtboxOwner->IsLeftSide) ? -1.f : 1.f);
+        FActorSpawnParameters SpawnInfo;
+        ANiagaraActor* EffectInstance = GetWorld()->SpawnActor<ANiagaraActor>(HurtEffectComponent->GetClass(), SpawnLocation, SpawnRotation, SpawnInfo);
+        EffectInstance->SetLifeSpan(0.5f);
+    }
 }
