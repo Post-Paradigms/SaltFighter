@@ -58,8 +58,8 @@ void AFightGameMode::BeginPlay()
             
         }
         else if (i == 1) { // Setup player 2
-            if (FighterBPClass)
-                P2FighterCharacter = GetWorld()->SpawnActor<AFighter>(FighterBPClass, PlayerStarts[i]->GetActorTransform());
+            if (PepperBPClass)
+                P2FighterCharacter = GetWorld()->SpawnActor<AFighter>(PepperBPClass, PlayerStarts[i]->GetActorTransform());
 
             if (GetWorld()->GetNumPlayerControllers() == 1)
                 UGameplayStatics::CreatePlayer(GetWorld(), 1);
