@@ -27,6 +27,10 @@ public:
 	// Round Timer
 	float RoundTimer;
 
+	int Player1Wins;
+
+	int Player2Wins;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
