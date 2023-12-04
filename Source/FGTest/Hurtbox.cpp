@@ -57,10 +57,7 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
             FightOwner->OnHitOther();
         }
 
-        if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())) {
-            /* Where da dmg?? :/ - will be chips */
-            GameMode->DamagePlayer(HurtboxOwner, 1);
-        }
+        
         
         if (FightOwner && IncomingHitbox->AttkInfo) {
             ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);

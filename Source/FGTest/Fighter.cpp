@@ -318,16 +318,9 @@ void AFighter::TakeInInput(EInputType Input) {
 void AFighter::PerformNormal(FName AttkName) {
 	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	if (!CurrAttk) { return; }
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Squeak")));
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Squeak")));
 
-	AProjectileBase* CurrProjectile = GetWorld()->SpawnActor<AProjectileBase>(CurrAttk->ProjectileClass);
-
-	if (CurrProjectile) {
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Squeak")));
-
-		CurrProjectile->SetOwner(this);
-		CurrProjectile->PerformLight();
-	};
+	
 
 	PreviousState = State;
 	UpdateState(EFighterState::STARTUP);
@@ -537,8 +530,13 @@ void AFighter::FrameAdvanceState() {
 		case EFighterState::STARTUP:
 			UpdateState(EFighterState::ACTIVE);
 			//spawns the hitbox according to the current attack
-			ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk->HitboxLoc, FRotator::ZeroRotator, SpawnInfo);
-			ActiveHitbox->Initialize(CurrAttk, CurrAttk->HitboxScale, CurrAttk->HitboxLoc, this);
+			if (AProjectileBase* CurrProjectile = GetWorld()->SpawnActor<AProjectileBase>(CurrAttk->ProjectileClass)) {
+				CurrProjectile->SetOwner(this);
+				CurrProjectile->PerformLight();
+			} else {
+				ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk->HitboxLoc, FRotator::ZeroRotator, SpawnInfo);
+				ActiveHitbox->Initialize(CurrAttk, CurrAttk->HitboxScale, CurrAttk->HitboxLoc, this);
+			}
 			FrameTimer = CurrAttk->Active;
 			break;
 		case EFighterState::ACTIVE:
@@ -657,6 +655,10 @@ void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool 
 		FrameTimer = Blockstun;
 	}
 	else {
+		if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())) {
+			/* Where da dmg?? :/ - will be chips */
+			GameMode->DamagePlayer(this, 1);
+		}
 		//i didn't pay 60 bucks to block
 		if (Knockdown) {
 			UpdateState(EFighterState::KNOCKDOWN);
@@ -731,10 +733,14 @@ void AFighter::HeavyQuarterCircleForward() {
 
 void AFighter::LightQuarterCircleBack()
 {
+	FName SpecialName = "LightBQC";
+	PerformSpecial(SpecialName);
 }
 
 void AFighter::HeavyQuarterCircleBack()
 {
+	FName SpecialName = "HeavyBQC";
+	PerformSpecial(SpecialName);
 }
 
 void AFighter::LightDragonPunch()
