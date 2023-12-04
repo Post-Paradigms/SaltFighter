@@ -3,7 +3,7 @@
 
 #include "Hitbox.h"
 #include "Components/StaticMeshComponent.h"
-#include "Fighter.h"
+
 
 AHitbox::AHitbox()
 {
@@ -30,7 +30,7 @@ void AHitbox::Tick(float DeltaTime)
 
 void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
+    //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
     AttkInfo = AttkData;
     Owner = HitboxOwner;
     this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform);
@@ -42,7 +42,7 @@ void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLoc
 
 void AHitbox::InitializeProjectile(FProjectileStruct* ProjectileData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
+   //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
     ProjectileInfo = ProjectileData;
     Owner = HitboxOwner;
     this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform);

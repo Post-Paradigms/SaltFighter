@@ -33,22 +33,24 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
         AFighter* FightOwner = Cast<AFighter>(IncomingHitbox->Owner);
         if (FightOwner) {
             if (IncomingHitbox->AttkInfo) {
-                HurtboxOwner->OnOw(IncomingHitbox->AttkInfo);
+                HurtboxOwner->OnOw(IncomingHitbox);
                 FightOwner->OnHitOther();
             }
         }
         // Hitbox is owned by projectile
         AProjectileBase* ProjectileOwner = Cast<AProjectileBase>(IncomingHitbox->Owner);
         if (ProjectileOwner) {
-            GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "eee eewwee weeee");
-            if (ProjectileOwner->Owner == HurtboxOwner) {
-                return; // early return scary fix this
+            if (ProjectileOwner->Owner != HurtboxOwner) {
+                //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "eee eewwee weeee");
+                HurtboxOwner->OnOw(IncomingHitbox);
             }
         }
 
         if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())) {
             /* Where da dmg?? :/ - will be chips */
-            GameMode->DamagePlayer(HurtboxOwner, 1);
+            if (!ProjectileOwner || (ProjectileOwner && ProjectileOwner->Owner != HurtboxOwner)) {
+                GameMode->DamagePlayer(HurtboxOwner, 1);
+            }
         }
         
         if (FightOwner) {

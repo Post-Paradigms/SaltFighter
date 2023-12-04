@@ -198,7 +198,7 @@ public:
 	UFUNCTION()
 	void OnHitOther();
 
-	void OnOw(FAttackStruct* OwCauser);
+	void OnOw(AActor* OwCauser);
 
 private:
 	const TMap<EInputType, int> JumpDirections = {

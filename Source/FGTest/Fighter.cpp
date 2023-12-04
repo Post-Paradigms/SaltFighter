@@ -593,31 +593,41 @@ void AFighter::OnHitOther() {
 	the main things we're looking from that struct are
 	Blockstun, Hitstun, and (is)Knockdown.
 */
-void AFighter::OnOw(FAttackStruct* OwCauser) {
-	if (ActiveHitbox) {
-		ActiveHitbox->Destroy();
-	}
+void AFighter::OnOw(AActor* OwCauser) {
+	AHitbox* CastedOwCauser = Cast<AHitbox>(OwCauser);
+	if (CastedOwCauser) {
+		AFighter* FightOwner = Cast<AFighter>(OwCauser->Owner);
+		AProjectileBase* ProjectileOwner = Cast<AProjectileBase>(OwCauser->Owner);
 
-	if (!OwCauser) {
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "OWCAUSER SHOULD NOT BE NULL");
-		return;
-	}
+		if (ActiveHitbox) {
+			ActiveHitbox->Destroy();
+		}
 
-	if (State == EFighterState::BLOCKSTUN ||
-		(State == EFighterState::DEFENDING &&OwCauser->AttackType != EAttackType::LOW) ||
-		(State == EFighterState::CROUCHBLOCKING && OwCauser->AttackType != EAttackType::HIGH)) {
-		//blocking
-		UpdateState(EFighterState::BLOCKSTUN);
-		FrameTimer = OwCauser->Blockstun;
-	} else {
-		//i didn't pay 60 bucks to block
-		if (OwCauser->Knockdown) {
-			UpdateState(EFighterState::KNOCKDOWN);
-			FrameTimer = 60; //this has to be a consistent number across the entire cast
-		} else {
-			PreviousState = State;
-			UpdateState(EFighterState::HITSTUN);
-			FrameTimer = OwCauser->Hitstun;
+		if (!FightOwner && !ProjectileOwner) {
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "OWCAUSER SHOULD NOT BE NULL");
+			return;
+		}
+		if (FightOwner) {
+			FAttackStruct* AttkInfo = CastedOwCauser->AttkInfo;
+			if (State == EFighterState::BLOCKSTUN ||
+				(State == EFighterState::DEFENDING && AttkInfo->AttackType != EAttackType::LOW) ||
+				(State == EFighterState::CROUCHBLOCKING && AttkInfo->AttackType != EAttackType::HIGH)) {
+				//blocking
+				UpdateState(EFighterState::BLOCKSTUN);
+				FrameTimer = AttkInfo->Blockstun;
+			}
+			else {
+				//i didn't pay 60 bucks to block
+				if (AttkInfo->Knockdown) {
+					UpdateState(EFighterState::KNOCKDOWN);
+					FrameTimer = 60; //this has to be a consistent number across the entire cast
+				}
+				else {
+					PreviousState = State;
+					UpdateState(EFighterState::HITSTUN);
+					FrameTimer = AttkInfo->Hitstun;
+				}
+			}
 		}
 	}
 }

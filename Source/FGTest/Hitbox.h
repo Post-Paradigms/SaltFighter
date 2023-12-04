@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/BoxComponent.h"
-#include "Fighter.h"
 #include "ProjectileBase.h"
+#include "Fighter.h"
 #include "Hitbox.generated.h"
 
 /**
