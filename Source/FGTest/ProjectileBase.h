@@ -24,6 +24,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int Speed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	EAttackType AttackType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int Blockstun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int Hitstun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	bool Knockdown;
 };
 
 UCLASS()

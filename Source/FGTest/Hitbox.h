@@ -40,7 +40,7 @@ public:
 
 	void Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner);
 
-	void InitializeProjectile(FProjectileStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner);
+	void Initialize(FProjectileStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner);
 
 private:
 	int ActiveFramesRemaining;

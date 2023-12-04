@@ -40,20 +40,16 @@ void AFireball::Tick(float DeltaTime)
 
 void AFireball::PerformLight() {
 	// load data to use
-	if (ACharacter* CastOwner = Cast<ACharacter>(Owner)) {
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("putting")));
-		SetActorLocation(CastOwner->GetActorLocation());
-	}
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("putting")));
+	SetActorLocation(Owner->GetActorLocation());
 	if (Owner) {
 		Direction = Owner->IsLeftSide ? 1 : -1;
-		FString Debug2 = FString::Printf(TEXT("IsLeft: (%d)"), Direction);
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, Debug2);
 	}
  // GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("neigh")));
  	//Hitbox stuff, need info to set
 
 	ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + ProjectileData->HitboxLoc, FRotator::ZeroRotator);
-	ActiveHitbox->InitializeProjectile(ProjectileData, ProjectileData->HitboxScale, ProjectileData->HitboxLoc, this);
+	ActiveHitbox->Initialize(ProjectileData, ProjectileData->HitboxScale, ProjectileData->HitboxLoc, this);
 	if (ActiveHitbox) {
 		if (ActiveHitbox->Owner) {
 			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "booooooooom");

@@ -41,7 +41,7 @@ void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLoc
 }
 
 
-void AHitbox::InitializeProjectile(FProjectileStruct* ProjectileData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
+void AHitbox::Initialize(FProjectileStruct* ProjectileData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
 {
    //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
     ProjectileInfo = ProjectileData;

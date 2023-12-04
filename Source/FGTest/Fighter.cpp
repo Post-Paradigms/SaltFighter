@@ -593,41 +593,53 @@ void AFighter::OnHitOther() {
 	the main things we're looking from that struct are
 	Blockstun, Hitstun, and (is)Knockdown.
 */
-void AFighter::OnOw(AActor* OwCauser) {
-	AHitbox* CastedOwCauser = Cast<AHitbox>(OwCauser);
-	if (CastedOwCauser) {
-		AFighter* FightOwner = Cast<AFighter>(OwCauser->Owner);
-		AProjectileBase* ProjectileOwner = Cast<AProjectileBase>(OwCauser->Owner);
+void AFighter::OnOw(AHitbox* OwCauser) {
+	if (!OwCauser) {
+		return;
+	}
+	AFighter* FightOwner = Cast<AFighter>(OwCauser->Owner);
+	AProjectileBase* Projectile = Cast<AProjectileBase>(OwCauser->Owner);
 
-		if (ActiveHitbox) {
-			ActiveHitbox->Destroy();
-		}
+	if (ActiveHitbox) {
+		ActiveHitbox->Destroy();
+	}
+	if (!FightOwner && !Projectile) {
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "OWCAUSER SHOULD NOT BE NULL");
+		return;
+	}
+	if (FightOwner) {
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "boop");
+		FAttackStruct* AttkInfo = OwCauser->AttkInfo;
+		CauseOw(AttkInfo->AttackType, AttkInfo->Blockstun, AttkInfo->Hitstun, AttkInfo->Knockdown);
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "beep");
+		FProjectileStruct* ProjectileInfo = OwCauser->ProjectileInfo;
+		CauseOw(ProjectileInfo->AttackType, ProjectileInfo->Blockstun, ProjectileInfo->Hitstun, ProjectileInfo->Knockdown);
+		Projectile->Destroy();
+	}
+	OwCauser->Destroy();
+}
 
-		if (!FightOwner && !ProjectileOwner) {
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "OWCAUSER SHOULD NOT BE NULL");
-			return;
+void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool Knockdown) {
+
+	if (State == EFighterState::BLOCKSTUN ||
+		(State == EFighterState::DEFENDING && AttackType != EAttackType::LOW) ||
+		(State == EFighterState::CROUCHBLOCKING && AttackType != EAttackType::HIGH)) {
+		//blocking
+		UpdateState(EFighterState::BLOCKSTUN);
+		FrameTimer = Blockstun;
+	}
+	else {
+		//i didn't pay 60 bucks to block
+		if (Knockdown) {
+			UpdateState(EFighterState::KNOCKDOWN);
+			FrameTimer = 60; //this has to be a consistent number across the entire cast
 		}
-		if (FightOwner) {
-			FAttackStruct* AttkInfo = CastedOwCauser->AttkInfo;
-			if (State == EFighterState::BLOCKSTUN ||
-				(State == EFighterState::DEFENDING && AttkInfo->AttackType != EAttackType::LOW) ||
-				(State == EFighterState::CROUCHBLOCKING && AttkInfo->AttackType != EAttackType::HIGH)) {
-				//blocking
-				UpdateState(EFighterState::BLOCKSTUN);
-				FrameTimer = AttkInfo->Blockstun;
-			}
-			else {
-				//i didn't pay 60 bucks to block
-				if (AttkInfo->Knockdown) {
-					UpdateState(EFighterState::KNOCKDOWN);
-					FrameTimer = 60; //this has to be a consistent number across the entire cast
-				}
-				else {
-					PreviousState = State;
-					UpdateState(EFighterState::HITSTUN);
-					FrameTimer = AttkInfo->Hitstun;
-				}
-			}
+		else {
+			PreviousState = State;
+			UpdateState(EFighterState::HITSTUN);
+			FrameTimer = Hitstun;
 		}
 	}
 }

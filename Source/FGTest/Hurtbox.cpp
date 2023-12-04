@@ -47,8 +47,8 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
         }
 
         if (FightOwner) {
-                HurtboxOwner->OnOw(IncomingHitbox);
-                FightOwner->OnHitOther();
+            HurtboxOwner->OnOw(IncomingHitbox);
+            FightOwner->OnHitOther();
         }
 
         if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())) {

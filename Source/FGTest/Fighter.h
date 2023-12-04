@@ -198,7 +198,9 @@ public:
 	UFUNCTION()
 	void OnHitOther();
 
-	void OnOw(AActor* OwCauser);
+	void OnOw(class AHitbox* OwCauser);
+
+	void CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool Knockdown);
 
 private:
 	const TMap<EInputType, int> JumpDirections = {
