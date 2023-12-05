@@ -376,19 +376,22 @@ void AFighter::PerformDash(bool Back) {
 			OurController->FlushBuffer();
 			PreviousState = State;
 			NumAirDashes--;
-			UpdateState(EFighterState::AIRDASHING);
-			//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
 
-			if (DashName == "AirDash") 
-			{
+			if (DashName == "AirDash")  {
 				SpawnDashVisual();
 				GetCharacterMovement()->GravityScale = 0.f;
 				GetCharacterMovement()->FallingLateralFriction = 1.5f;
-				LaunchCharacter(FVector(1100.f * ((IsLeftSide) ? 1 : -1), 0.f, 0.f), true, true);
+				GetCharacterMovement()->Velocity = FVector::Zero();
+				UpdateState(EFighterState::FWDAIRDASHSTARTUP);
+			} else {
+				//back
+				GetCharacterMovement()->GravityScale = 0.f;
+				GetCharacterMovement()->FallingLateralFriction = 1.5f;
+				LaunchCharacter(FVector(700.f * ((IsLeftSide) ? -1 : 1), 0.f, 0.f), true, true);
+				PlayMontage(CurrAttk->Animation);
+				UpdateState(EFighterState::AIRDASHING);
 			}
 
-
-			// PlayMontage(CurrAttk->Animation);
 			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 		}
 	} else {
@@ -419,7 +422,6 @@ bool AFighter::ValidateState(EFighterState NewState) {
 			valid = true;
 			break;
 
-
 		case EFighterState::DEFENDING:
 			valid = (State != EFighterState::JUMPING);
 			break;
@@ -444,6 +446,7 @@ bool AFighter::ValidateState(EFighterState NewState) {
 			break;
 
 		case EFighterState::AIRDASHING:
+		case EFighterState::FWDAIRDASHSTARTUP:
 			valid = (State == EFighterState::JUMPING && NumAirDashes > 0);
 			break;
 
@@ -494,6 +497,7 @@ void AFighter::UpdateState(EFighterState NewState) {
 		case EFighterState::STARTUP:
 		case EFighterState::DASHING:
 		case EFighterState::AIRDASHING:
+		case EFighterState::FWDAIRDASHSTARTUP:
 		case EFighterState::BLOCKSTUN:
 		case EFighterState::CROUCHBLOCKSTUN:
 		case EFighterState::HITSTUN:
@@ -568,9 +572,9 @@ void AFighter::FrameAdvanceState() {
 			break;
 
 		case EFighterState::HITSTUN:
-			(PreviousState == EFighterState::JUMPING) ? UpdateState(EFighterState::JUMPING) : UpdateState(EFighterState::NEUTRAL);
 			OtherPlayer->ComboCounter = 0;
 			GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, OtherPlayer);
+			(PreviousState == EFighterState::JUMPING) ? UpdateState(EFighterState::JUMPING) : UpdateState(EFighterState::NEUTRAL);
 			break;
 
 		case EFighterState::BLOCKSTUN:
@@ -581,13 +585,27 @@ void AFighter::FrameAdvanceState() {
 			break;
 
 		case EFighterState::KNOCKDOWN:
-			UpdateState(EFighterState::NEUTRAL);
-			OurController->CheckForSequence();
 			OtherPlayer->ComboCounter = 0;
 			GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, OtherPlayer);
+			UpdateState(EFighterState::NEUTRAL);
+			OurController->CheckForSequence();
 			break;
 
 		case EFighterState::AIRDASHING:
+			UpdateState(EFighterState::JUMPING);
+			break;
+
+		case EFighterState::FWDAIRDASHSTARTUP:
+			UpdateState(EFighterState::FWDAIRDASHACTIVE);
+			//this is going to be jank if they go under, THIS WILL BE A BUG!
+			GetCharacterMovement()->GravityScale = 0.f;
+			GetCharacterMovement()->FallingLateralFriction = 1.5f;
+			LaunchCharacter(FVector(1100.f * ((IsLeftSide) ? 1 : -1), 0.f, 0.f), true, true);
+			PlayMontage(CurrAttk->Animation);
+			FrameTimer = CurrAttk->Active;
+			break;
+
+		case EFighterState::FWDAIRDASHACTIVE:
 			UpdateState(EFighterState::JUMPING);
 			break;
 

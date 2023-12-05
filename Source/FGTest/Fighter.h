@@ -93,7 +93,9 @@ enum class EFighterState : uint8 {
 	CROUCHBLOCKSTUN UMETA(DisplayName = "CrouchingBlockstun"),
 	KNOCKDOWN UMETA(DisplayName = "Knocked Down"),
 	CROUCHING UMETA(DisplayName = "Crouching"),
-	CROUCHBLOCKING UMETA(DisplayName = "Crouch Blocking")
+	CROUCHBLOCKING UMETA(DisplayName = "Crouch Blocking"),
+	FWDAIRDASHSTARTUP UMETA(DisplayName = "Forward Air Dash Startup"),
+	FWDAIRDASHACTIVE UMETA(DisplayName = "Forward Air Dash Active")
 };
 
 
