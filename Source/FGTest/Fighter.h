@@ -239,7 +239,7 @@ private:
 		{EInputType::UPRIGHT, 1},
 	};
 
-	const FVector JumpVector = FVector(400.f, 0.f, 1100.f);
+	const FVector JumpVector = FVector(400.f, 0.f, 900.f);
 
 	// Camera Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
