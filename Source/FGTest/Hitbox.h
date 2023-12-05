@@ -23,7 +23,7 @@ public:
 
 	FProjectileStruct* ProjectileInfo;
 
-	AActor* Owner;
+	AFighter* Owner;
 	
 	bool IsProjectile;
 
@@ -38,9 +38,9 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	void Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner);
+	void Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AFighter* HitboxOwner);
 
-	void Initialize(FProjectileStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner);
+	void Initialize(FProjectileStruct* AttkData, FVector Size, FVector SpawnLocation, AProjectileBase* Projectile);
 
 private:
 	int ActiveFramesRemaining;

@@ -28,7 +28,7 @@ void AHitbox::Tick(float DeltaTime)
     if (ActiveFramesRemaining <= 0) Destroy();*/
 }
 
-void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
+void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLocation, AFighter* HitboxOwner)
 {
     //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
     AttkInfo = AttkData;
@@ -41,13 +41,13 @@ void AHitbox::Initialize(FAttackStruct* AttkData, FVector Size, FVector SpawnLoc
 }
 
 
-void AHitbox::Initialize(FProjectileStruct* ProjectileData, FVector Size, FVector SpawnLocation, AActor* HitboxOwner)
+void AHitbox::Initialize(FProjectileStruct* ProjectileData, FVector Size, FVector SpawnLocation, AProjectileBase* Projectile)
 {
    //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
     ProjectileInfo = ProjectileData;
-    Owner = HitboxOwner;
+    Owner = Projectile->Owner;
     IsProjectile = true;
-    this->AttachToActor(HitboxOwner, FAttachmentTransformRules::KeepRelativeTransform);
+    this->AttachToActor(Projectile, FAttachmentTransformRules::KeepRelativeTransform);
     BoxComponent->SetRelativeScale3D(Size);
     BoxComponent->SetRelativeLocation(SpawnLocation);
     ActiveFramesRemaining = ProjectileInfo->Lifespan;

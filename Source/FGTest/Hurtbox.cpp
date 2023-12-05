@@ -35,44 +35,34 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
     AHitbox* IncomingHitbox = Cast<AHitbox>(OtherActor);
     if ((IncomingHitbox && HurtboxOwner && IncomingHitbox->Owner) && (IncomingHitbox->Owner != HurtboxOwner))
     {
-        AFighter* FightOwner;
-        if (IncomingHitbox->IsProjectile) {
-            AProjectileBase* ProjectileOwner = Cast<AProjectileBase>(IncomingHitbox->Owner);
-            if (ProjectileOwner->Owner == HurtboxOwner || !IncomingHitbox->ProjectileInfo) {
-                return;
-            }
-            // Hitbox owned by projectile 
-            FightOwner = ProjectileOwner->Owner;
-        }
-        else {
-            // Hitbox owned by fighter owo
-            FightOwner = Cast<AFighter>(IncomingHitbox->Owner);
-            if (!IncomingHitbox->AttkInfo) {
-                return;
-            }
-        }
-
+        AFighter* FightOwner = IncomingHitbox->Owner;
         if (FightOwner) {
             HurtboxOwner->OnOw(IncomingHitbox);
             FightOwner->OnHitOther();
         }
-
         
-        
-        if (FightOwner && IncomingHitbox->AttkInfo) {
-            ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
+        if (FightOwner) {
+            if (!IncomingHitbox->IsProjectile) {
+                ApplyKnockback(IncomingHitbox, IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
+            } else {
+                ApplyKnockback(IncomingHitbox, IncomingHitbox->ProjectileInfo->KnockbackAngle, IncomingHitbox->ProjectileInfo->KnockbackForce);
+            }
         }
-        //ApplyKnockback(IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
         SpawnHurtEffect();
     }
 }
 
-void AHurtbox::ApplyKnockback(float Angle, float Force)
+void AHurtbox::ApplyKnockback(AHitbox* OtherHitbox, float Angle, float Force)
 {
     float AngleRad = Angle * (PI / 180);
     FVector AngleVector = FVector(std::cos(AngleRad), 0, std::sin(AngleRad));
     FVector LaunchDirection = FVector((HurtboxOwner->IsLeftSide) ? -1 : 1, 1, 1);
-    HurtboxOwner->LaunchCharacter(AngleVector.GetSafeNormal() * Force * LaunchDirection, true, true);
+
+    if (HurtboxOwner->State == EFighterState::HITSTUN || HurtboxOwner->State == EFighterState::KNOCKDOWN) {
+        HurtboxOwner->LaunchCharacter(AngleVector.GetSafeNormal() * Force * LaunchDirection, true, true);
+    } else if (!OtherHitbox->IsProjectile) {
+        OtherHitbox->Owner->LaunchCharacter(FVector::OneVector * Force * (LaunchDirection * -1), true, true);
+    }
 }
 
 void AHurtbox::SpawnHurtEffect()
