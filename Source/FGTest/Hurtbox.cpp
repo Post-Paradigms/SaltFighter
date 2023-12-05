@@ -33,15 +33,14 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
 {
     //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "eee eewwee weeee");
     AHitbox* IncomingHitbox = Cast<AHitbox>(OtherActor);
-    if ((IncomingHitbox && HurtboxOwner && IncomingHitbox->Owner) && (IncomingHitbox->Owner != HurtboxOwner))
+    if ((IncomingHitbox && HurtboxOwner && IncomingHitbox->Owner) && (IncomingHitbox->Owner != HurtboxOwner) && HurtboxOwner->State != EFighterState::KNOCKDOWN)
     {
         AFighter* FightOwner = IncomingHitbox->Owner;
+        
         if (FightOwner) {
             HurtboxOwner->OnOw(IncomingHitbox);
             FightOwner->OnHitOther();
-        }
-        
-        if (FightOwner) {
+
             if (!IncomingHitbox->IsProjectile) {
                 ApplyKnockback(IncomingHitbox, IncomingHitbox->AttkInfo->KnockbackAngle, IncomingHitbox->AttkInfo->KnockbackForce);
             } else {
