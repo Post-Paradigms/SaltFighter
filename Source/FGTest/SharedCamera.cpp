@@ -23,7 +23,7 @@ ASharedCamera::ASharedCamera()
 
 
 	CameraBoom->SetRelativeLocationAndRotation(FVector(-300.0f, -40.0f, 40.0f), FRotator(0.0f, 0.0f, 0.0f));
-	CameraBoom->TargetArmLength = 500.0f;
+	CameraBoom->TargetArmLength = 250.0f;
 	CameraBoom->bDoCollisionTest = true;
 
 	Visual = CreateDefaultSubobject<USphereComponent>(TEXT("Visual"));
@@ -75,7 +75,7 @@ void ASharedCamera::Tick(float DeltaTime)
 			FinalPos.X += 40;
 			SetActorLocation(FinalPos);
 
-			CameraBoom->TargetArmLength = FMath::Clamp(Distance.Size() / 3, 100, 500);
+			/*CameraBoom->TargetArmLength = FMath::Clamp(Distance.Size() / 3, 100, 500);*/
 		}
 	}
 }
