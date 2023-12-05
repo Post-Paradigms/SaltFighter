@@ -132,15 +132,16 @@ void AFighter::Landed(const FHitResult& Hit) {
 		ActiveHitbox->Destroy();
 	}
 
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 
 	//if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 	//	StopAnimMontage(nullptr);
 	//}
 	
-	StopMontage();
-
-	UpdateState(EFighterState::NEUTRAL);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+	if (State != EFighterState::HITSTUN && State != EFighterState::KNOCKDOWN) {
+		StopMontage();
+		UpdateState(EFighterState::NEUTRAL);
+	}
 }
 
 // Rotate player towards direction of the opponent
@@ -634,7 +635,7 @@ void AFighter::OnHitOther() {
 
 	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Combo counter meow: %d"), ComboCounter));
 	//check if it was blocked for comboing and scaling!
-	StartHitStop(0.04f);
+	//StartHitStop(0.04f);
 }
 
 /*
@@ -662,7 +663,7 @@ void AFighter::OnOw(AHitbox* OwCauser) {
 		return;
 	}
 	if (FightOwner) {
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "boop");
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "boop");
 		FAttackStruct* AttkInfo = OwCauser->AttkInfo;
 		CauseOw(AttkInfo->AttackType, AttkInfo->Blockstun, AttkInfo->Hitstun, AttkInfo->Knockdown);
 	}
@@ -689,15 +690,17 @@ void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool 
 			/* Where da dmg?? :/ - will be chips */
 			GameMode->DamagePlayer(this, 1);
 		}
+
 		//i didn't pay 60 bucks to block
 		if (Knockdown) {
 			UpdateState(EFighterState::KNOCKDOWN);
 			FrameTimer = 51; //this has to be a consistent number across the entire cast
 		}
 		else {
-			PreviousState = State;
-			UpdateState(EFighterState::HITSTUN);
+			//PreviousState = State;
 			FrameTimer = Hitstun;
+			PlayMontage(HitStunMontage);
+			UpdateState(EFighterState::HITSTUN);
 		}
 	}
 }
@@ -715,7 +718,7 @@ void AFighter::StopHitStop() {
 	OtherPlayer->OurController->SetActorTickEnabled(true);
 	OurController->GetCharacter()->CustomTimeDilation = 1.0f;
 	OtherPlayer->OurController->GetCharacter()->CustomTimeDilation = 1.0f;
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "RACIST");
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "RACIST");
 }
 
 void AFighter::SpawnDashVisual()

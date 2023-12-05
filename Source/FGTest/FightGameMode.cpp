@@ -56,7 +56,7 @@ void AFightGameMode::BeginPlay()
             if (P1FighterController && P1FighterCharacter)
                 P1FighterController->Possess(P1FighterCharacter);
 
-            P1FighterController->ConsoleCommand("DisableAllScreenMessages");
+            P1FighterController->ConsoleCommand("EnableAllScreenMessages");
             
         }
         else if (i == 1) { // Setup player 2
