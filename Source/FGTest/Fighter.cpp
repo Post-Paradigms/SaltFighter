@@ -657,13 +657,15 @@ void AFighter::OnOw(AHitbox* OwCauser) {
 	if (!OwCauser) {
 		return;
 	}
+
+
 	AFighter* FightOwner = Cast<AFighter>(OwCauser->Owner);
 	AProjectileBase* Projectile = Cast<AProjectileBase>(OwCauser->Owner);
 
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
-	if (FightOwner) {
+	if (!OwCauser->IsProjectile) {
 		FAttackStruct* AttkInfo = OwCauser->AttkInfo;
 		CauseOw(AttkInfo->AttackType, AttkInfo->Blockstun, AttkInfo->Hitstun, AttkInfo->Knockdown, AttkInfo->Damage);
 	}
