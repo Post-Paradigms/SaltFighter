@@ -72,10 +72,16 @@ void ASharedCamera::Tick(float DeltaTime)
 		if (ActiveFighters[0] && ActiveFighters[1]) {
 			FVector Distance = ActiveFighters[0]->GetActorLocation() - ActiveFighters[1]->GetActorLocation();
 			FVector FinalPos = Distance / 2 + ActiveFighters[1]->GetActorLocation();
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::SanitizeFloat(FinalPos.Z));	
+			FinalPos.Z = FMath::Clamp(FinalPos.Z, 92, 200);
 			FinalPos.X += 40;
 			SetActorLocation(FinalPos);
-
-			/*CameraBoom->TargetArmLength = FMath::Clamp(Distance.Size() / 3, 100, 500);*/
+			
+			// CameraBoom->TargetArmLength = FMath::Clamp(FMath::Pow(Distance.Size(), 1.5) - 200, -50, 100);
+			float MaxLength = 531;
+			CameraBoom->TargetArmLength = (Distance.Size() / MaxLength) * 150 - 50;
+			// CameraBoom->TargetArmLength = 0;
 		}
 	}
 }
