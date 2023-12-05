@@ -40,12 +40,11 @@ void AFireball::Tick(float DeltaTime)
 
 void AFireball::PerformLight() {
 	// load data to use
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("putting")));
-	SetActorLocation(Owner->GetActorLocation());
+
 	if (Owner) {
 		Direction = Owner->IsLeftSide ? 1 : -1;
 	}
- // GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("neigh")));
+	SetActorLocation(Owner->GetActorLocation() + FVector(35.f * Direction, 0.f, 30.f));
  	//Hitbox stuff, need info to set
 
 	ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + ProjectileData->HitboxLoc, FRotator::ZeroRotator);
