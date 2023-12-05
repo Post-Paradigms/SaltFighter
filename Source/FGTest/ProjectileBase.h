@@ -14,6 +14,9 @@ struct FProjectileStruct : public FTableRowBase {
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Damage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	FVector HitboxLoc;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
@@ -36,6 +39,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	bool Knockdown;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int KnockbackAngle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int KnockbackForce;
 };
 
 UCLASS()

@@ -136,8 +136,9 @@ void AFighter::Landed(const FHitResult& Hit) {
 	//if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 	//	StopAnimMontage(nullptr);
 	//}
-	
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+	if (UCapsuleComponent* Cap = GetCapsuleComponent()) {
+		Cap->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+	}
 	if (State != EFighterState::HITSTUN && State != EFighterState::KNOCKDOWN) {
 		StopMontage();
 		UpdateState(EFighterState::NEUTRAL);
@@ -148,7 +149,11 @@ void AFighter::Landed(const FHitResult& Hit) {
 void AFighter::Face()
 {
 	if (OtherPlayer && 
-		State != EFighterState::STARTUP && State != EFighterState::ACTIVE && State != EFighterState::RECOVERY)
+		State != EFighterState::STARTUP &&
+		State != EFighterState::ACTIVE && 
+		State != EFighterState::RECOVERY && 
+		State != EFighterState::FWDAIRDASHSTARTUP &&
+		State != EFighterState::FWDAIRDASHACTIVE)
 	{
 		FVector Direction = OtherPlayer->GetActorLocation() - this->GetActorLocation();
 		Direction = FVector(Direction.X, Direction.Y, 0.f);
@@ -658,25 +663,19 @@ void AFighter::OnOw(AHitbox* OwCauser) {
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
-	if (!FightOwner && !Projectile) {
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "OWCAUSER SHOULD NOT BE NULL");
-		return;
-	}
 	if (FightOwner) {
-		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "boop");
 		FAttackStruct* AttkInfo = OwCauser->AttkInfo;
-		CauseOw(AttkInfo->AttackType, AttkInfo->Blockstun, AttkInfo->Hitstun, AttkInfo->Knockdown);
+		CauseOw(AttkInfo->AttackType, AttkInfo->Blockstun, AttkInfo->Hitstun, AttkInfo->Knockdown, AttkInfo->Damage);
 	}
-	else {
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "beep");
+	else if (Projectile) {
 		FProjectileStruct* ProjectileInfo = OwCauser->ProjectileInfo;
-		CauseOw(ProjectileInfo->AttackType, ProjectileInfo->Blockstun, ProjectileInfo->Hitstun, ProjectileInfo->Knockdown);
+		CauseOw(ProjectileInfo->AttackType, ProjectileInfo->Blockstun, ProjectileInfo->Hitstun, ProjectileInfo->Knockdown, ProjectileInfo->Damage);
 		Projectile->Destroy();
 	}
 	OwCauser->Destroy();
 }
 
-void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool Knockdown) {
+void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool Knockdown, int Damage) {
 
 	if (State == EFighterState::BLOCKSTUN ||
 		(State == EFighterState::DEFENDING && AttackType != EAttackType::LOW) ||
@@ -688,7 +687,7 @@ void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool 
 	else {
 		if (AFightGameMode* GameMode = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())) {
 			/* Where da dmg?? :/ - will be chips */
-			GameMode->DamagePlayer(this, 1);
+			GameMode->DamagePlayer(this, Damage);
 		}
 
 		//i didn't pay 60 bucks to block

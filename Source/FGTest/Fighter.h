@@ -26,6 +26,9 @@ public:
 	UAnimMontage* Animation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 Damage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int32 Startup;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
@@ -227,7 +230,7 @@ public:
 
 	void OnOw(class AHitbox* OwCauser);
 
-	void CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool Knockdown);
+	void CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool Knockdown, int Damage);
 
 private:
 	const TMap<EInputType, int> JumpDirections = {
