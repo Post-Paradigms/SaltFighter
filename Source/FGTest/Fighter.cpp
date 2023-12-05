@@ -37,11 +37,12 @@ AFighter::AFighter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
-	//// Audio Setup
-	//static ConstructorHelpers::FObjectFinder<USoundCue> JumpCueObject(TEXT("/Script/Engine.SoundCue'/Game/Sound/JumpStartCue.JumpStartCue''"));
-	//if (JumpCueObject.Succeeded()) {
-	//	JumpSoundCue = JumpCueObject.Object;		
-	//}
+	// Dash Visual
+	static ConstructorHelpers::FClassFinder<AStaticMeshActor> DashVisualClass(TEXT("/Game/Blueprints/BP_Magic_Circle"));
+	if (DashVisualClass.Class)
+    {
+        MagicCircle = Cast<AStaticMeshActor>(DashVisualClass.Class->GetDefaultObject());
+    }
 
 	//static ConstructorHelpers::FObjectFinder<USoundCue> LandCueObject(TEXT("/Script/Engine.SoundCue'/Game/Sound/JumpEndCue.JumpEndCue''"));
 	//if (LandCueObject.Succeeded()) {
@@ -378,7 +379,16 @@ void AFighter::PerformDash(bool Back) {
 			UpdateState(EFighterState::AIRDASHING);
 			//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
 
-			PlayMontage(CurrAttk->Animation);
+			if (DashName == "AirDash") 
+			{
+				SpawnDashVisual();
+				GetCharacterMovement()->GravityScale = 0.f;
+				GetCharacterMovement()->FallingLateralFriction = 1.5f;
+				LaunchCharacter(FVector(1100.f * ((IsLeftSide) ? 1 : -1), 0.f, 0.f), true, true);
+			}
+
+
+			// PlayMontage(CurrAttk->Animation);
 			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 		}
 	} else {
@@ -526,6 +536,8 @@ void AFighter::FrameAdvanceState() {
 	FrameTimer = -1; //for safety
 	//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Red, "frame advance state");
 	FActorSpawnParameters SpawnInfo;
+	GetCharacterMovement()->GravityScale = 2.5f;
+	GetCharacterMovement()->FallingLateralFriction = 0.f;
 	switch (State) {
 		case EFighterState::STARTUP:
 			UpdateState(EFighterState::ACTIVE);
@@ -688,6 +700,15 @@ void AFighter::StopHitStop() {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "RACIST");
 }
 
+void AFighter::SpawnDashVisual()
+{
+	int Direction = (IsLeftSide) ? 1.f : -1.f;
+	FVector SpawnLocation = GetActorLocation() + FVector(-40.f * Direction, 0.f, 0.f);
+	FRotator SpawnRotation = FRotator(0.f * Direction, -55.f * Direction, 60.f);
+	FActorSpawnParameters SpawnParams;
+	AStaticMeshActor* DashEffectInstance = GetWorld()->SpawnActor<AStaticMeshActor>(MagicCircle->GetClass(), SpawnLocation, SpawnRotation, SpawnParams);
+	DashEffectInstance->SetLifeSpan(1.f);
+}
 
 // === FIGHTER MOVE FUNCTIONS ===
 void AFighter::LightNormal(bool Target) {

@@ -13,6 +13,7 @@
 #include "FighterController.h"
 #include "Components/AudioComponent.h"
 #include "Sound/SoundCue.h"
+#include "Engine/StaticMeshActor.h"
 #include "Fighter.generated.h"
 
 USTRUCT(BlueprintType)
@@ -169,6 +170,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
 	USoundCue* HeavyHitCue;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dash, meta = (AllowPrivateAccess = "true"))
+	AStaticMeshActor* MagicCircle;
 
 protected:
 	// Called when the game starts or when spawned
@@ -273,7 +276,7 @@ private:
 
 	FTimerHandle HitStopTimerHandler;
 
-	
+	void SpawnDashVisual();
 
 	// Fighter Move Functions owo
 	void LightNormal(bool Target);
