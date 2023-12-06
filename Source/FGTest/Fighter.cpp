@@ -325,9 +325,6 @@ void AFighter::TakeInInput(EInputType Input) {
 void AFighter::PerformNormal(FName AttkName) {
 	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	if (!CurrAttk) { return; }
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Squeak")));
-
-	
 
 	PreviousState = State;
 	UpdateState(EFighterState::STARTUP);
@@ -554,7 +551,11 @@ void AFighter::FrameAdvanceState() {
 			//spawns the hitbox according to the current attack
 			if (AProjectileBase* CurrProjectile = GetWorld()->SpawnActor<AProjectileBase>(CurrAttk->ProjectileClass)) {
 				CurrProjectile->SetOwner(this);
-				CurrProjectile->PerformLight();
+				if (LightMove) {
+					CurrProjectile->PerformLight();
+				} else {
+					CurrProjectile->PerformHeavy();
+				}
 			} else {
 				ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk->HitboxLoc, FRotator::ZeroRotator, SpawnInfo);
 				ActiveHitbox->Initialize(CurrAttk, CurrAttk->HitboxScale, CurrAttk->HitboxLoc, this);
@@ -659,12 +660,14 @@ void AFighter::OnOw(AHitbox* OwCauser) {
 	}
 
 
-	AFighter* FightOwner = Cast<AFighter>(OwCauser->Owner);
-	AProjectileBase* Projectile = Cast<AProjectileBase>(OwCauser->Owner);
+	//AFighter* FightOwner = Cast<AFighter>(OwCauser->Owner);
+	//AProjectileBase* Projectile = Cast<AProjectileBase>(OwCauser->Owner);
 
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
+
+
 	if (!OwCauser->IsProjectile) {
 		FAttackStruct* AttkInfo = OwCauser->AttkInfo;
 		CauseOw(AttkInfo->AttackType, AttkInfo->Blockstun, AttkInfo->Hitstun, AttkInfo->Knockdown, AttkInfo->Damage);
@@ -673,11 +676,10 @@ void AFighter::OnOw(AHitbox* OwCauser) {
 		} else {
 			LightHitSound();
 		}
-	}
-	else if (Projectile) {
+	} else {
 		FProjectileStruct* ProjectileInfo = OwCauser->ProjectileInfo;
 		CauseOw(ProjectileInfo->AttackType, ProjectileInfo->Blockstun, ProjectileInfo->Hitstun, ProjectileInfo->Knockdown, ProjectileInfo->Damage);
-		Projectile->Destroy();
+		//Projectile->Destroy();
 	}
 	OwCauser->Destroy();
 }
@@ -724,7 +726,6 @@ void AFighter::StopHitStop() {
 	OtherPlayer->OurController->SetActorTickEnabled(true);
 	OurController->GetCharacter()->CustomTimeDilation = 1.0f;
 	OtherPlayer->OurController->GetCharacter()->CustomTimeDilation = 1.0f;
-	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "RACIST");
 }
 
 void AFighter::SpawnDashVisual()
@@ -773,22 +774,27 @@ void AFighter::LightQuarterCircleForward() {
 	//we're not gonna have any jumping specials for now
 	//so i don't need be like
 	FName SpecialName = "LightFQC";
+	LightMove = true;
+	MeatballSound();
 	PerformSpecial(SpecialName);
 }
 
 void AFighter::HeavyQuarterCircleForward() {
 	FName SpecialName = "HeavyFQC";
+	LightMove = false;
 	PerformSpecial(SpecialName);
 }
 
 void AFighter::LightQuarterCircleBack()
 {
+	if (State == EFighterState::JUMPING) { return; }
 	FName SpecialName = "LightBQC";
 	PerformSpecial(SpecialName);
 }
 
 void AFighter::HeavyQuarterCircleBack()
 {
+	if (State == EFighterState::JUMPING) { return; }
 	FName SpecialName = "HeavyBQC";
 	PerformSpecial(SpecialName);
 }
@@ -823,4 +829,7 @@ void AFighter::HeavyHitSound()
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HeavyHitCue, GetActorLocation());
 }
 
+void AFighter::MeatballSound() {
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), MeatballCue, GetActorLocation(), 1.0f, 1.0f, 2.0f);
+}
 

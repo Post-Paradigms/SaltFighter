@@ -175,6 +175,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
 	USoundCue* HeavyHitCue;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	USoundCue* MeatballCue;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dash, meta = (AllowPrivateAccess = "true"))
 	AStaticMeshActor* MagicCircle;
 
@@ -261,6 +264,9 @@ private:
 
 	class UAnimInstance* AnimInstance;
 
+	bool LightMove; //LETS FUCKING GOOOOO
+	//ONLY 6 MORE BOOLS TO GOOOOOO
+
 	// Facing
 	void Face();
 
@@ -305,4 +311,6 @@ private:
 
 	void LightHitSound();
 	void HeavyHitSound();
+
+	void MeatballSound();
 };

@@ -45,6 +45,7 @@ void AHitbox::Initialize(FProjectileStruct* ProjectileData, FVector Size, FVecto
 {
    //GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("awoooooooooooo")));
     ProjectileInfo = ProjectileData;
+    MyProjectile = Projectile;
     Owner = Projectile->Owner;
     IsProjectile = true;
     this->AttachToActor(Projectile, FAttachmentTransformRules::KeepRelativeTransform);

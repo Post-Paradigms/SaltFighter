@@ -11,6 +11,9 @@
 /**
  * 
  */
+
+DECLARE_DYNAMIC_DELEGATE(FTriggerDelegate);
+
 UCLASS()
 class FGTEST_API AHitbox : public AActor
 {
@@ -19,13 +22,17 @@ class FGTEST_API AHitbox : public AActor
 public:
 	AHitbox();
 
+	AFighter* Owner;
+
     FAttackStruct* AttkInfo;
 
-	FProjectileStruct* ProjectileInfo;
-
-	AFighter* Owner;
-	
 	bool IsProjectile;
+	FProjectileStruct* ProjectileInfo;
+	AProjectileBase* MyProjectile;
+
+	//UPROPERTY(BlueprintAssignable, Category = "Events")
+	FTriggerDelegate OnTriggerDelegate;
+
 
 protected:
 	virtual void BeginPlay() override;

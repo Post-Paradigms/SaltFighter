@@ -36,7 +36,7 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
     if ((IncomingHitbox && HurtboxOwner && IncomingHitbox->Owner) && (IncomingHitbox->Owner != HurtboxOwner) && HurtboxOwner->State != EFighterState::KNOCKDOWN)
     {
         AFighter* FightOwner = IncomingHitbox->Owner;
-        
+
         if (FightOwner) {
             HurtboxOwner->OnOw(IncomingHitbox);
             FightOwner->OnHitOther();
@@ -46,6 +46,9 @@ void AHurtbox::BeginOverlap(UPrimitiveComponent * OverlappedComponent, AActor * 
             } else {
                 ApplyKnockback(IncomingHitbox, IncomingHitbox->ProjectileInfo->KnockbackAngle, IncomingHitbox->ProjectileInfo->KnockbackForce);
             }
+        }
+        if (IncomingHitbox->OnTriggerDelegate.GetUObject()) {
+            IncomingHitbox->OnTriggerDelegate.Execute();
         }
         SpawnHurtEffect();
     }
@@ -58,9 +61,15 @@ void AHurtbox::ApplyKnockback(AHitbox* OtherHitbox, float Angle, float Force)
     FVector LaunchDirection = FVector((HurtboxOwner->IsLeftSide) ? -1 : 1, 1, 1);
 
     if (HurtboxOwner->State == EFighterState::HITSTUN || HurtboxOwner->State == EFighterState::KNOCKDOWN) {
+        //hit them
         HurtboxOwner->LaunchCharacter(AngleVector.GetSafeNormal() * Force * LaunchDirection, true, true);
+    } else if ((HurtboxOwner->State != EFighterState::HITSTUN && HurtboxOwner->State != EFighterState::KNOCKDOWN) && OtherHitbox->IsProjectile) {
+
+        if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "Blocking and IsProjectile");
+        HurtboxOwner->LaunchCharacter(FVector::ForwardVector * Force * LaunchDirection, true, true);
     } else if (!OtherHitbox->IsProjectile) {
-        OtherHitbox->Owner->LaunchCharacter(FVector::OneVector * Force * (LaunchDirection * -1), true, true);
+        if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "Blocking and Not Projectile");
+        OtherHitbox->Owner->LaunchCharacter(FVector::ForwardVector * Force * (LaunchDirection * -1), true, true);
     }
 }
 

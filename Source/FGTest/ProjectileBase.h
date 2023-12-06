@@ -17,6 +17,9 @@ public:
 	int32 Damage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	FVector SizeScale;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	FVector HitboxLoc;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
