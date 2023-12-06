@@ -384,7 +384,6 @@ void AFighter::PerformSpecial(FName SpecialName) {
 
 	//only have one owning projectile out
 	if (CurrAttk->ProjectileClass && IsValid(CurrentProjectile)) { //might cause jank but we'll see
-		
 		OurController->FlushBuffer();
 		return;
 	}
@@ -395,10 +394,17 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	CanTargetCombo = false;
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
+
+	if (CurrAttk->InvincibleStartupActive) {
+		MyHurtbox->SetActorHiddenInGame(true);
+	}
+
 	UpdateState(EFighterState::STARTUP);
 	//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
 
-	PlayMontage(CurrAttk->Animation);
+	if (CurrAttk && CurrAttk->Animation) {
+		PlayMontage(CurrAttk->Animation);
+	}
 
 	if (CurrAttk->ProjectileClass) {
 		MeatballSound(); //thank you kevin
@@ -541,6 +547,7 @@ void AFighter::UpdateState(EFighterState NewState) {
 		case EFighterState::CROUCHING:
 		case EFighterState::CROUCHBLOCKING:
 			Locked = false;
+			MyHurtbox->SetActorHiddenInGame(false);
 			CanJumpCancel = false;
 			CanSpecialCancel = false;
 			CanTargetCombo = false;
@@ -625,7 +632,11 @@ void AFighter::FrameAdvanceState() {
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
+
 			if (CurrAttk) {
+				if (CurrAttk->InvincibleStartupActive) {
+					MyHurtbox->SetActorHiddenInGame(false);
+				}
 				FrameTimer = CurrAttk->Recovery;
 			} else {
 				UpdateState(EFighterState::NEUTRAL);
@@ -864,12 +875,20 @@ void AFighter::HeavyQuarterCircleBack()
 	PerformSpecial(SpecialName);
 }
 
-void AFighter::LightDragonPunch()
-{
+void AFighter::LightDragonPunch() {
+	if (State == EFighterState::JUMPING) { return; }
+	int SideScalar = IsLeftSide ? 1 : -1;
+	LaunchCharacter(FVector(100.f * SideScalar, 0.f, 700.f), true, true);
+	FName SpecialName = "LightDP";
+	PerformSpecial(SpecialName);
 }
 
-void AFighter::HeavyDragonPunch()
-{
+void AFighter::HeavyDragonPunch() {
+	if (State == EFighterState::JUMPING) { return; }
+	int SideScalar = IsLeftSide ? 1 : -1;
+	LaunchCharacter(FVector(150.f * SideScalar, 0.f, 1000.f), true, true);
+	FName SpecialName = "HeavyDP";
+	PerformSpecial(SpecialName);
 }
 
 

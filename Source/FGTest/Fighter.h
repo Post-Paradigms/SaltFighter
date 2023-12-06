@@ -59,6 +59,9 @@ public:
 	bool TargetComboable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	bool InvincibleStartupActive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	EInputType NextTargetInput;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
