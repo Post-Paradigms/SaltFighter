@@ -124,6 +124,9 @@ void AFighter::MoveEvent(const FInputActionValue &Value)
 }
 
 void AFighter::Landed(const FHitResult& Hit) {
+	if (NumJumps == MaxJumps) {
+		return;
+	}
 	Super::Landed(Hit);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), LandedSoundCue, GetActorLocation());
 	NumAirDashes = MaxAirDashes;
@@ -139,10 +142,8 @@ void AFighter::Landed(const FHitResult& Hit) {
 	if (UCapsuleComponent* Cap = GetCapsuleComponent()) {
 		Cap->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 	}
-	if (State != EFighterState::HITSTUN && State != EFighterState::KNOCKDOWN) {
-		StopMontage();
-		UpdateState(EFighterState::NEUTRAL);
-	}
+	StopMontage();
+	UpdateState(EFighterState::NEUTRAL);
 }
 
 // Rotate player towards direction of the opponent
@@ -678,7 +679,7 @@ void AFighter::OnOw(AHitbox* OwCauser) {
 		ActiveHitbox->Destroy();
 	}
 
-	if (!OwCauser->IsProjectile) {
+	if (OwCauser && !OwCauser->IsProjectile) {
 		FAttackStruct* AttkInfo = OwCauser->AttkInfo;
 		CauseOw(AttkInfo->AttackType, AttkInfo->Blockstun, AttkInfo->Hitstun, AttkInfo->Knockdown, AttkInfo->Damage);
 		if(AttkInfo->Knockdown) {
@@ -686,7 +687,7 @@ void AFighter::OnOw(AHitbox* OwCauser) {
 		} else {
 			LightHitSound();
 		}
-	} else {
+	} else if (OwCauser) {
 		FProjectileStruct* ProjectileInfo = OwCauser->ProjectileInfo;
 		CauseOw(ProjectileInfo->AttackType, ProjectileInfo->Blockstun, ProjectileInfo->Hitstun, ProjectileInfo->Knockdown, ProjectileInfo->Damage);
 		//Projectile->Destroy();
