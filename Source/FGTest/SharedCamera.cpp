@@ -71,9 +71,9 @@ void ASharedCamera::Tick(float DeltaTime)
 	if (ActiveFighters.Num() == 2) {
 		if (ActiveFighters[0] && ActiveFighters[1]) {
 			FVector Distance = ActiveFighters[0]->GetActorLocation() - ActiveFighters[1]->GetActorLocation();
-			FVector FinalPos = Distance / 2 + ActiveFighters[1]->GetActorLocation();
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::SanitizeFloat(FinalPos.Z));	
+			// FVector FinalPos = Distance / 2 + ActiveFighters[1]->GetActorLocation();
+			// if (GEngine)
+			// 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::SanitizeFloat(FinalPos.Z));	
 			FinalPos.Z = FMath::Clamp(FinalPos.Z, 92, 200);
 			FinalPos.X += 40;
 			SetActorLocation(FinalPos);

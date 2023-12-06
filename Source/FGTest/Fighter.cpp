@@ -668,6 +668,11 @@ void AFighter::OnOw(AHitbox* OwCauser) {
 	if (!OwCauser->IsProjectile) {
 		FAttackStruct* AttkInfo = OwCauser->AttkInfo;
 		CauseOw(AttkInfo->AttackType, AttkInfo->Blockstun, AttkInfo->Hitstun, AttkInfo->Knockdown, AttkInfo->Damage);
+		if(AttkInfo->Knockdown) {
+			HeavyHitSound();
+		} else {
+			LightHitSound();
+		}
 	}
 	else if (Projectile) {
 		FProjectileStruct* ProjectileInfo = OwCauser->ProjectileInfo;
@@ -735,6 +740,7 @@ void AFighter::SpawnDashVisual()
 // === FIGHTER MOVE FUNCTIONS ===
 void AFighter::LightNormal(bool Target) {
 	// string var name 
+	LightAttackSound();
 	FName AttkName = "";
 	if (Target && CurrAttk) {
 		AttkName = CurrAttk->NextTargetName;
@@ -750,6 +756,7 @@ void AFighter::LightNormal(bool Target) {
 
 void AFighter::HeavyNormal(bool Target) {
 	FName AttkName = "";
+	HeavyAttackSound();
 	if (Target && CurrAttk) {
 		AttkName = CurrAttk->NextTargetName;
 	} else if (State == EFighterState::JUMPING) {
