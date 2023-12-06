@@ -355,7 +355,16 @@ void AFighter::PerformNormal(FName AttkName) {
 void AFighter::PerformSpecial(FName SpecialName) {
 	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(SpecialName, "Special");
 
+	//if (!CurrAttk || (CurrAttk->ProjectileClass && IsValid(CurrentProjectile))) { return; }
 	if (!CurrAttk) { return; }
+
+	//only have one owning projectile out
+	if (CurrAttk->ProjectileClass && IsValid(CurrentProjectile)) { //might cause jank but we'll see
+		
+		OurController->FlushBuffer();
+		return;
+	}
+
 	//flush the input buffer here
 	OurController->FlushBuffer();
 	PreviousState = State;
@@ -366,6 +375,11 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
 
 	PlayMontage(CurrAttk->Animation);
+
+	if (CurrAttk->ProjectileClass) {
+		MeatballSound(); //thank you kevin
+	}
+
 	FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 }
 
@@ -550,6 +564,7 @@ void AFighter::FrameAdvanceState() {
 			UpdateState(EFighterState::ACTIVE);
 			//spawns the hitbox according to the current attack
 			if (AProjectileBase* CurrProjectile = GetWorld()->SpawnActor<AProjectileBase>(CurrAttk->ProjectileClass)) {
+				CurrentProjectile = CurrProjectile;
 				CurrProjectile->SetOwner(this);
 				if (LightMove) {
 					CurrProjectile->PerformLight();
@@ -641,7 +656,7 @@ void AFighter::OnHitOther() {
 
 	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("Combo counter meow: %d"), ComboCounter));
 	//check if it was blocked for comboing and scaling!
-	//StartHitStop(0.04f);
+	StartHitStop(0.04f);
 }
 
 /*
@@ -659,14 +674,9 @@ void AFighter::OnOw(AHitbox* OwCauser) {
 		return;
 	}
 
-
-	//AFighter* FightOwner = Cast<AFighter>(OwCauser->Owner);
-	//AProjectileBase* Projectile = Cast<AProjectileBase>(OwCauser->Owner);
-
 	if (ActiveHitbox) {
 		ActiveHitbox->Destroy();
 	}
-
 
 	if (!OwCauser->IsProjectile) {
 		FAttackStruct* AttkInfo = OwCauser->AttkInfo;
@@ -773,13 +783,14 @@ void AFighter::HeavyNormal(bool Target) {
 void AFighter::LightQuarterCircleForward() {
 	//we're not gonna have any jumping specials for now
 	//so i don't need be like
+	if (State == EFighterState::JUMPING) { return; }
 	FName SpecialName = "LightFQC";
 	LightMove = true;
-	MeatballSound();
 	PerformSpecial(SpecialName);
 }
 
 void AFighter::HeavyQuarterCircleForward() {
+	if (State == EFighterState::JUMPING) { return; }
 	FName SpecialName = "HeavyFQC";
 	LightMove = false;
 	PerformSpecial(SpecialName);

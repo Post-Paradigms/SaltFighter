@@ -256,6 +256,8 @@ private:
 
 	FAttackStruct* CurrAttk;
 
+	AProjectileBase* CurrentProjectile;
+
 	int32 NumAirDashes;
 
 	int32 NumJumps;
