@@ -270,6 +270,18 @@ private:
 	bool LightMove; //LETS FUCKING GOOOOO
 	//ONLY 6 MORE BOOLS TO GOOOOOO
 
+	//you may wonder what this variable is
+	//bascially, we got into a hairy situation
+	//the issue has gotten too long to the point i can't just cut it
+	//and if i were to cut it i'd have to sweep up the mess later
+	//i need a perm fix
+	//something
+	//that will condition it
+	//uh shampoop
+	//- kenneth 2:32am 12/6
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Jank, meta = (AllowPrivateAccess = "true"))
+	AActor* Hair;
+
 	// Facing
 	void Face();
 

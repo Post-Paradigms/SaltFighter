@@ -163,8 +163,21 @@ void AFighter::Face()
 		// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
 		// GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green, Debug);
 
-		IsLeftSide = (Rot.Yaw < 90.f);
+		//if (IsLeftSide && (Rot.Yaw >= 90.f)) {
+		//	GetMesh()->SetRelativeScale3D(FVector(0.15f, -0.15f, 0.15f));
+		//	FTransform transform = GetMesh()->GetRelativeTransform();
+		//	if (Hair) {
+		//		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "FLIP TO RIGHT");
+		//	}
+		//} else if (!IsLeftSide && (Rot.Yaw < 90.f)) {
+		//	GetMesh()->SetRelativeScale3D(FVector(0.15f, 0.15f, 0.15f));
+		//	//hahahahahahahahaha
+		//	if (Hair) {
+		//		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "FLIP TO LEFT");
+		//	}
+		//}
 
+		IsLeftSide = (Rot.Yaw < 90.f);
 
 		/* SetControlRotation for smooth turn, SetActorRelativeRotation for instant turn */
 		 if (OurController) OurController->SetControlRotation(Rot);
@@ -341,7 +354,6 @@ void AFighter::PerformNormal(FName AttkName) {
 
 	PlayMontage(CurrAttk->Animation);
 	FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
-
 }
 
 /**
