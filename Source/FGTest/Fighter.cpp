@@ -67,6 +67,7 @@ void AFighter::BeginPlay()
 	{
 		PlayerHurtbox->HurtboxOwner = this;
 		PlayerHurtbox->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+		MyHurtbox = PlayerHurtbox;
 	} 
 
 	AnimInstance = GetMesh()->GetAnimInstance();	
@@ -79,8 +80,9 @@ void AFighter::Tick(float DeltaTime)
 	Face();
 	FString Debug = FString::Printf(TEXT("State: %d"), State);
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
-	//FString Debug2 = FString::Printf(TEXT("IsLeft: (%d)"), IsLeftSide);
-	//GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug2);
+
+	if (DashCD > 0) DashCD--;
+	if (BackdashCD > 0) BackdashCD--;
 
 	if (FrameTimer > 0) FrameTimer--;
 
@@ -163,25 +165,31 @@ void AFighter::Face()
 		// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
 		// GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Green, Debug);
 
-		//if (IsLeftSide && (Rot.Yaw >= 90.f)) {
-		//	GetMesh()->SetRelativeScale3D(FVector(0.15f, -0.15f, 0.15f));
-		//	FTransform transform = GetMesh()->GetRelativeTransform();
-		//	if (Hair) {
-		//		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "FLIP TO RIGHT");
-		//	}
-		//} else if (!IsLeftSide && (Rot.Yaw < 90.f)) {
-		//	GetMesh()->SetRelativeScale3D(FVector(0.15f, 0.15f, 0.15f));
-		//	//hahahahahahahahaha
-		//	if (Hair) {
-		//		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "FLIP TO LEFT");
-		//	}
-		//}
+		if (IsLeftSide && (Rot.Yaw >= 90.f)) {
+			//going to right
+			GetMesh()->SetRelativeScale3D(FVector(0.15f, -0.15f, 0.15f));
+			if (Hair) {
+				Hair->SetActorRelativeScale3D(FVector(-1, 1, 1));
+				Hair->SetActorRelativeLocation(FVector(30.f, 10.f, -10.f));
+			}
+
+		} else if (!IsLeftSide && (Rot.Yaw < 90.f)) {
+			//going to left
+			GetMesh()->SetRelativeScale3D(FVector(0.15f, 0.15f, 0.15f));
+			if (Hair) {
+				Hair->SetActorRelativeScale3D(FVector(-1, 1, 1));
+				Hair->SetActorRelativeScale3D(FVector(1, 1, 1));
+				Hair->SetActorRelativeLocation(FVector::Zero());
+
+			}
+			//hahahahahahahahaha
+		}
 
 		IsLeftSide = (Rot.Yaw < 90.f);
 
 		/* SetControlRotation for smooth turn, SetActorRelativeRotation for instant turn */
-		 if (OurController) OurController->SetControlRotation(Rot);
-		SetActorRelativeRotation(Rot);
+		// if (OurController) OurController->SetControlRotation(Rot);
+		//SetActorRelativeRotation(Rot);
 	}
 }
 
@@ -352,7 +360,9 @@ void AFighter::PerformNormal(FName AttkName) {
 
 	//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
 
-	PlayMontage(CurrAttk->Animation);
+	if (CurrAttk && CurrAttk->Animation) {
+		PlayMontage(CurrAttk->Animation);
+	}
 	FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 }
 
@@ -425,20 +435,33 @@ void AFighter::PerformDash(bool Back) {
 
 			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 		}
-	} else {
-		//dash state
-		DashName = Back ? "BackDash" : "Dash";
-		CurrAttk = FighterDataTable->FindRow<FAttackStruct>(DashName, "Dash");
+	} else if (!Back && DashCD == 0) {
+		//forwrd
+		DashCD = MaxDashCD;
+		CurrAttk = FighterDataTable->FindRow<FAttackStruct>("Dash", "Dash");
 		if (CurrAttk) {
 			OurController->FlushBuffer();
 			PreviousState = State;
 			UpdateState(EFighterState::DASHING);
-			//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
-
 			PlayMontage(CurrAttk->Animation);
 			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 		}
-	}// do else if for backdash in the future
+	} else if (Back && BackdashCD == 0) {
+		//backdash
+		BackdashCD = MaxBackdashCD;
+		CurrAttk = FighterDataTable->FindRow<FAttackStruct>("BackDash", "Dash");
+		if (CurrAttk) {
+			OurController->FlushBuffer();
+			PreviousState = State;
+			UpdateState(EFighterState::DASHING);
+			PlayMontage(CurrAttk->Animation);
+			FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
+			MyHurtbox->SetActorHiddenInGame(true);
+		}
+	} else if ((Back && BackdashCD > 0) || (!Back && DashCD > 0)) {
+		//on timer, flush buffer!
+		OurController->FlushBuffer();
+	}
 }
 
 // Validates and changes state
@@ -586,17 +609,27 @@ void AFighter::FrameAdvanceState() {
 					CurrProjectile->PerformHeavy();
 				}
 			} else {
-				ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk->HitboxLoc, FRotator::ZeroRotator, SpawnInfo);
-				ActiveHitbox->Initialize(CurrAttk, CurrAttk->HitboxScale, CurrAttk->HitboxLoc, this);
+				int Direction = IsLeftSide ? 1 : -1;
+				ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), GetActorLocation() + CurrAttk->HitboxLoc * Direction, FRotator::ZeroRotator, SpawnInfo);
+				ActiveHitbox->Initialize(CurrAttk, CurrAttk->HitboxScale, CurrAttk->HitboxLoc * Direction, this);
 			}
-			FrameTimer = CurrAttk->Active;
+
+			if (CurrAttk) {
+				FrameTimer = CurrAttk->Active;
+			} else {
+				UpdateState(EFighterState::NEUTRAL);
+			}
 			break;
 		case EFighterState::ACTIVE:
 			UpdateState(EFighterState::RECOVERY);
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
-			FrameTimer = CurrAttk->Recovery;
+			if (CurrAttk) {
+				FrameTimer = CurrAttk->Recovery;
+			} else {
+				UpdateState(EFighterState::NEUTRAL);
+			}
 			break;
 		case EFighterState::RECOVERY:
 			//this conditional is purely for target combos
@@ -622,6 +655,7 @@ void AFighter::FrameAdvanceState() {
 
 		case EFighterState::KNOCKDOWN:
 			OtherPlayer->ComboCounter = 0;
+			MyHurtbox->SetActorHiddenInGame(false);
 			GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, OtherPlayer);
 			UpdateState(EFighterState::NEUTRAL);
 			OurController->CheckForSequence();
@@ -637,8 +671,12 @@ void AFighter::FrameAdvanceState() {
 			GetCharacterMovement()->GravityScale = 0.f;
 			GetCharacterMovement()->FallingLateralFriction = 1.5f;
 			LaunchCharacter(FVector(1100.f * ((IsLeftSide) ? 1 : -1), 0.f, 0.f), true, true);
-			PlayMontage(CurrAttk->Animation);
-			FrameTimer = CurrAttk->Active;
+			if (CurrAttk) {
+				PlayMontage(CurrAttk->Animation);
+				FrameTimer = CurrAttk->Active;
+			} else {
+				UpdateState(EFighterState::NEUTRAL);
+			}
 			break;
 
 		case EFighterState::FWDAIRDASHACTIVE:
@@ -646,6 +684,7 @@ void AFighter::FrameAdvanceState() {
 			break;
 
 		case EFighterState::DASHING:
+			MyHurtbox->SetActorHiddenInGame(false);
 			UpdateState(EFighterState::NEUTRAL);
 			break;
 	}
@@ -726,6 +765,7 @@ void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool 
 		//i didn't pay 60 bucks to block
 		if (Knockdown) {
 			UpdateState(EFighterState::KNOCKDOWN);
+			MyHurtbox->SetActorHiddenInGame(true);
 			FrameTimer = 150; //this has to be a consistent number across the entire cast
 		}
 		else {

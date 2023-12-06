@@ -154,6 +154,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
 	int32 MaxAirDashes;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
+	int32 MaxDashCD;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player, meta = (AllowPrivateAccess = "true"))
+	int32 MaxBackdashCD;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data", meta = (AllowPrivateAccess = "true"))
 	UDataTable* FighterDataTable;
 
@@ -254,6 +260,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* HitStunMontage;
 
+	class AHurtbox* MyHurtbox;
+
 	FAttackStruct* CurrAttk;
 
 	AProjectileBase* CurrentProjectile;
@@ -262,6 +270,9 @@ private:
 
 	int32 NumJumps;
 
+	int32 DashCD;
+	int32 BackdashCD;
+
 	class AHitbox* ActiveHitbox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
@@ -269,6 +280,8 @@ private:
 
 	bool LightMove; //LETS FUCKING GOOOOO
 	//ONLY 6 MORE BOOLS TO GOOOOOO
+
+
 
 	//you may wonder what this variable is
 	//bascially, we got into a hairy situation
