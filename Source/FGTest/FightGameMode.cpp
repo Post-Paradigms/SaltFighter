@@ -4,6 +4,7 @@
 #include "FightGameMode.h"
 #include "FightGameState.h"
 #include "FightPlayerState.h"
+#include "SharedCamera.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "EnhancedInputComponent.h"
@@ -38,9 +39,12 @@ AFightGameMode::AFightGameMode()
 void AFightGameMode::BeginPlay()
 {
     Super::BeginPlay();
+    GetWorld()->GetTimerManager().SetTimer(BeginPlayTimer, this, &AFightGameMode::BeginPlayPlay, 1.f, false);
+}
 
+void AFightGameMode::BeginPlayPlay() {
     // Create a player for each PlayerStart object
-     TArray<AActor*> PlayerStarts;
+    TArray<AActor*> PlayerStarts;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStarts);
 
     for (int i = 0; i < PlayerStarts.Num(); ++i)
@@ -57,7 +61,7 @@ void AFightGameMode::BeginPlay()
                 P1FighterController->Possess(P1FighterCharacter);
 
             P1FighterController->ConsoleCommand("EnableAllScreenMessages");
-            
+
         }
         else if (i == 1) { // Setup player 2
             if (PepperBPClass)
@@ -77,10 +81,7 @@ void AFightGameMode::BeginPlay()
             if (P2FighterController && P2FighterCharacter) {
                 P2FighterController->Possess(P2FighterCharacter);
             }
-
         }
-
-
     }
 
     // Both players done setup, set other player and controller references
@@ -102,6 +103,13 @@ void AFightGameMode::BeginPlay()
 
     P1FighterController->DisableInput(P1FighterController);
     P2FighterController->DisableInput(P2FighterController);
+
+    TArray<AActor*> Camera;
+    UGameplayStatics::GetAllActorsWithTag(GetWorld(), "SharedCamera", Camera);
+
+
+    ASharedCamera* TheCamera = Cast<ASharedCamera>(Camera[0]);
+    TheCamera->ActivateCamera();
 
     StartRoundCountdownTimerCount = 0;
     GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 1.0f, true);
@@ -144,7 +152,7 @@ void AFightGameMode::ResetRound()
     FightingHUD->UpdatePlayer2Health(P2FighterCharacter->GetPlayerState<AFightPlayerState>()->PlayerHealth = 100);
 
     GetGameState<AFightGameState>()->RoundNumber++;
-    GetGameState<AFightGameState>()->RoundTimer = 100.0f;
+    GetGameState<AFightGameState>()->RoundTimer = 99.0f;
 
     GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 1.0f, true);
 }
@@ -199,9 +207,9 @@ void AFightGameMode::StartRoundCountdown()
 
             P1FighterController->EnableInput(P1FighterController);
             P2FighterController->EnableInput(P2FighterController);
-
             GetWorld()->GetTimerManager().ClearTimer(StartRoundCountdownTimer);
             StartRoundCountdownTimerCount = 0;
+            FightingHUD->StartRoundTimer();
             return;
             break;
 

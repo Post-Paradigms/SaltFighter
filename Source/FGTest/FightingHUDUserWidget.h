@@ -79,9 +79,17 @@ public:
 	UFUNCTION()
 	void AddPlayer2Win();
 
+	UFUNCTION()
+	void StartRoundTimer();
+
+	UFUNCTION()
+	void PauseRoundTimer();
+
 private:
 	TArray<EInputType> P1Buffer;
 
 	TArray<EInputType> P2Buffer;
+
+	bool AllowCountdown;
 
 };

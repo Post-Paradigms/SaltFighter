@@ -34,26 +34,13 @@ ASharedCamera::ASharedCamera()
 void ASharedCamera::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//Sets views of all controllers to this actor's camera.
-	for (FConstPlayerControllerIterator ControllerIt = GetWorld()->GetPlayerControllerIterator(); ControllerIt; ++ControllerIt) {
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("One Iteration"));
-		APlayerController* FighterCtlr = ControllerIt->Get();
-		if (FighterCtlr) {
-			FighterCtlr->SetViewTargetWithBlend(this);
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Controller view set."));
-			ActiveFighters.Add(FighterCtlr->GetPawn());
-		}
-	}
-
 }
 
 // Called every frame
 void ASharedCamera::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!Activated) { return; }
 	//Sets views of all controllers to this actor's camera.
 	if (ActiveFighters.Num() < 2) {
 		for (FConstPlayerControllerIterator ControllerIt = GetWorld()->GetPlayerControllerIterator(); ControllerIt; ++ControllerIt) {
@@ -64,8 +51,6 @@ void ASharedCamera::Tick(float DeltaTime)
 			}
 		}
 	}
-	
-
 
 	//Logic assumes two fighters.
 	if (ActiveFighters.Num() == 2) {
@@ -84,5 +69,20 @@ void ASharedCamera::Tick(float DeltaTime)
 			// CameraBoom->TargetArmLength = 0;
 		}
 	}
+}
+
+void ASharedCamera::ActivateCamera() {
+	for (FConstPlayerControllerIterator ControllerIt = GetWorld()->GetPlayerControllerIterator(); ControllerIt; ++ControllerIt) {
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("One Iteration"));
+		APlayerController* FighterCtlr = ControllerIt->Get();
+		if (FighterCtlr) {
+			FighterCtlr->SetViewTargetWithBlend(this);
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Controller view set."));
+			ActiveFighters.Add(FighterCtlr->GetPawn());
+		}
+	}
+	Activated = true;
 }
 

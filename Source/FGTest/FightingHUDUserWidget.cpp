@@ -14,7 +14,18 @@
 // Called to update the round timer display. Should be called once every second?
 void UFightingHUDUserWidget::UpdateRoundTimer(int time)
 {
-	RoundTimer->SetText(FText::AsNumber(time));
+	if (AllowCountdown) {
+		//RoundTimer->SetText(FText::AsNumber(time));
+	}
+}
+
+void UFightingHUDUserWidget::StartRoundTimer() {
+	RoundTimer->SetText(FText::AsNumber(99));
+	AllowCountdown = true;
+}
+
+void UFightingHUDUserWidget::PauseRoundTimer() {
+	AllowCountdown = false;
 }
 
 // Called to update player 1's healthbar when their health changes.
