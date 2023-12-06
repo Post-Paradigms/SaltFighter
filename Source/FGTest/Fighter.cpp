@@ -842,6 +842,6 @@ void AFighter::HeavyHitSound()
 }
 
 void AFighter::MeatballSound() {
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), MeatballCue, GetActorLocation(), 1.0f, 1.0f, 2.0f);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), MeatballCue, GetActorLocation(), 1.0f, 1.0f, 1.5f);
 }
 
