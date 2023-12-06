@@ -878,7 +878,9 @@ void AFighter::HeavyQuarterCircleBack()
 void AFighter::LightDragonPunch() {
 	if (State == EFighterState::JUMPING) { return; }
 	int SideScalar = IsLeftSide ? 1 : -1;
+	NumJumps = 0;
 	LaunchCharacter(FVector(100.f * SideScalar, 0.f, 700.f), true, true);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	FName SpecialName = "LightDP";
 	PerformSpecial(SpecialName);
 }
@@ -886,7 +888,9 @@ void AFighter::LightDragonPunch() {
 void AFighter::HeavyDragonPunch() {
 	if (State == EFighterState::JUMPING) { return; }
 	int SideScalar = IsLeftSide ? 1 : -1;
+	NumJumps = 0;
 	LaunchCharacter(FVector(150.f * SideScalar, 0.f, 1000.f), true, true);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	FName SpecialName = "HeavyDP";
 	PerformSpecial(SpecialName);
 }
