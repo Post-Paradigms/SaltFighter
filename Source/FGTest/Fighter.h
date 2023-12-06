@@ -264,6 +264,7 @@ private:
 
 	class AHitbox* ActiveHitbox;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	class UAnimInstance* AnimInstance;
 
 	bool LightMove; //LETS FUCKING GOOOOO

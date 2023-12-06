@@ -63,7 +63,6 @@ void AFireball::PerformHeavy() {
 void AFireball::SpawnFireball(FProjectileStruct* ProjData) {
 	Direction = Owner->IsLeftSide ? 1 : -1;
 	ProjectileData = ProjData;
-	//SetActorLocation(Owner->GetActorLocation() + FVector(35.f * Direction, 0.f, 30.f));
 	SetActorLocation(Owner->GetActorLocation() + FVector(ProjData->HitboxLoc.X * Direction, ProjData->HitboxLoc.Y, ProjData->HitboxLoc.Z));
 	SetActorScale3D(ProjData->SizeScale);
 	ActiveHitbox = GetWorld()->SpawnActor<AHitbox>(AHitbox::StaticClass(), Owner->GetActorLocation() + FVector(ProjData->HitboxLoc.X * Direction, ProjData->HitboxLoc.Y, ProjData->HitboxLoc.Z), FRotator::ZeroRotator);

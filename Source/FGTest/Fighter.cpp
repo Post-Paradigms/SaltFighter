@@ -338,6 +338,7 @@ void AFighter::PerformNormal(FName AttkName) {
 	}
 
 	//if (AnimInstance && CurrAttk->Animation) AnimInstance->Montage_Play(CurrAttk->Animation);
+
 	PlayMontage(CurrAttk->Animation);
 	FrameTimer = CurrAttk->Startup; //starts the frame timer in tick
 
