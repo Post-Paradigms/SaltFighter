@@ -95,7 +95,7 @@ void AFighter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AFighter::Jump(EInputType Input)
+void AFighter::FighterJump(EInputType Input)
 {
 	if (JumpDirections.Contains(Input))
 	{
@@ -227,7 +227,7 @@ void AFighter::TakeInInput(EInputType Input) {
 		case EInputType::UPRIGHT:
 			//jump
 			if (ValidateState(EFighterState::JUMPING) && NumJumps > 0) {
-				Jump(Input);
+				FighterJump(Input);
 			}
 			break;
 
@@ -566,7 +566,7 @@ void AFighter::FrameAdvanceState() {
 			//spawns the hitbox according to the current attack
 			if (AProjectileBase* CurrProjectile = GetWorld()->SpawnActor<AProjectileBase>(CurrAttk->ProjectileClass)) {
 				CurrentProjectile = CurrProjectile;
-				CurrProjectile->SetOwner(this);
+				CurrProjectile->SetProjectileOwner(this);
 				if (LightMove) {
 					CurrProjectile->PerformLight();
 				} else {

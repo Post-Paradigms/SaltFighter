@@ -83,5 +83,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void PerformLight() PURE_VIRTUAL(AProjectileBase::PerformLight, );
 	virtual void PerformHeavy() PURE_VIRTUAL(AProjectileBase::PerformHeavy, );
-	FORCEINLINE void SetOwner(AFighter* FighterRef) { Owner = FighterRef; }
+	FORCEINLINE void SetProjectileOwner(AFighter* FighterRef) { Owner = FighterRef; }
 };

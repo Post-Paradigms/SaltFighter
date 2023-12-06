@@ -192,7 +192,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	virtual void Jump(EInputType Input);
+	virtual void FighterJump(EInputType Input);
 
 	virtual void Landed(const FHitResult& Hit) override;
 
