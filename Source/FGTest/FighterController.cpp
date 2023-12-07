@@ -3,6 +3,8 @@
 
 #include "FighterController.h"
 #include "FightGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "FightGameMode.h"
 #include "Fighter.h"
 
 AFighterController::AFighterController()
@@ -48,6 +50,7 @@ void AFighterController::SetupInputComponent()
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFighterController::OnMovePressed);
         EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Triggered, this, &AFighterController::OnLightAttackPressed);
         EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Triggered, this, &AFighterController::OnHeavyAttackPressed);
+        EnhancedInputComponent->BindAction(PauseMenuAction, ETriggerEvent::Completed, this, &AFighterController::OnPauseMenuPressed);
     }
 
 }
@@ -163,7 +166,7 @@ bool AFighterController::IsSubSequence(TArray<EInputType> Sequence, int Addition
             }
         }
     }
-
+ 
     return false;
 }
 
@@ -183,4 +186,16 @@ void AFighterController::OnLightAttackPressed(const FInputActionValue &Value)
 
 void AFighterController::OnHeavyAttackPressed(const FInputActionValue& Value) {
     PolledInput = EInputType::HB;
+}
+
+void AFighterController::OnPauseMenuPressed(const FInputActionValue& Value) {
+    TogglePauseMenu();
+}
+
+void AFighterController::TogglePauseMenu() {
+    AFightGameMode* GameMod = Cast<AFightGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    if (GameMod) {
+        GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Purple, FString::Printf(TEXT("meow")));
+        GameMod->SignalToPause();
+    }
 }

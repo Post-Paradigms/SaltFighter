@@ -57,6 +57,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = "true"))
 	USoundCue* lc;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	bool IsPaused = false;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void SpawnPauseMenu();
+
+	UFUNCTION(BlueprintCallable)
+	void SignalToPause();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PauseGame();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

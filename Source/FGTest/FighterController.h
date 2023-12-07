@@ -78,9 +78,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* HeavyAttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* PauseMenuAction;
+
 	static constexpr float NeutralThreshold = 0.5;
 
 	void CheckForSequence();
+
+	UFUNCTION(BlueprintCallable)
+	void TogglePauseMenu();
 
 protected:
 	virtual void BeginPlay() override;
@@ -91,6 +97,7 @@ protected:
 	void OnMovePressed(const FInputActionValue &Value);
 	void OnLightAttackPressed(const FInputActionValue &Value);
 	void OnHeavyAttackPressed(const FInputActionValue &Value);
+	void OnPauseMenuPressed(const FInputActionValue& Value);
 
 private:
 	const TArray<EInputType> LeftSideNumPad = { EInputType::UP, EInputType::UPRIGHT, EInputType::RIGHT, 

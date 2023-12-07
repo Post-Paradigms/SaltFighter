@@ -101,6 +101,7 @@ void AFightGameMode::BeginPlayPlay() {
         FightingHUD->AddToPlayerScreen();
         GetGameState<AFightGameState>()->FightingHUD = FightingHUD;
     }
+    SpawnPauseMenu();
 
     P1FighterController->DisableInput(P1FighterController);
     P2FighterController->DisableInput(P2FighterController);
@@ -233,3 +234,8 @@ UFightingHUDUserWidget* AFightGameMode::GetFightingHUD() { return FightingHUD; }
 AFighterController* AFightGameMode::GetPlayer1Controller() { return P1FighterController; }
 
 AFighterController* AFightGameMode::GetPlayer2Controller() { return P2FighterController; }
+
+void AFightGameMode::SignalToPause()
+{
+    PauseGame();
+}
