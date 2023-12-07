@@ -17,19 +17,22 @@ void AFightGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FightingHUD = Cast<AFightGameMode>(GetWorld()->GetAuthGameMode())->GetFightingHUD();
 }
 
 void AFightGameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!FightingHUD || !FightingHUD->AllowCountdown) {
+		return;
+	}
+
 	RoundTimer -= DeltaTime;
 
 	RoundTimerDelay -= DeltaTime;
 	if (RoundTimerDelay <= 0.0f)
 	{
-		FightingHUD->UpdateRoundTimer((int) (RoundTimer + 0.5f));
+		FightingHUD->UpdateRoundTimer((int)(RoundTimer + 0.5f));
 		RoundTimerDelay = 1.0f;
 	}
 

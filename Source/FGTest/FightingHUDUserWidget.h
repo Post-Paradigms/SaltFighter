@@ -90,6 +90,7 @@ private:
 
 	TArray<EInputType> P2Buffer;
 
+public:
 	bool AllowCountdown;
 
 };

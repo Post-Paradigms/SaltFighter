@@ -99,6 +99,7 @@ void AFightGameMode::BeginPlayPlay() {
     {
         FightingHUD = CreateWidget<UFightingHUDUserWidget>(P1FighterController, FightingHUDClass);
         FightingHUD->AddToPlayerScreen();
+        GetGameState<AFightGameState>()->FightingHUD = FightingHUD;
     }
 
     P1FighterController->DisableInput(P1FighterController);

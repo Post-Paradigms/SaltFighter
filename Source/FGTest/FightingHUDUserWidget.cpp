@@ -15,7 +15,7 @@
 void UFightingHUDUserWidget::UpdateRoundTimer(int time)
 {
 	if (AllowCountdown) {
-		//RoundTimer->SetText(FText::AsNumber(time));
+		RoundTimer->SetText(FText::AsNumber(time));
 	}
 }
 

@@ -31,14 +31,14 @@ public:
 
 	int Player2Wins;
 
+	UPROPERTY()
+	class UFightingHUDUserWidget* FightingHUD;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
 private:
-	UPROPERTY()
-	class UFightingHUDUserWidget* FightingHUD;
-
 	// Round Timer Update Delay
 	float RoundTimerDelay;
 };
