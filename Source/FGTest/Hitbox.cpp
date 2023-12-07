@@ -11,7 +11,7 @@ AHitbox::AHitbox()
      
     BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Player Hurtbox"));
     BoxComponent->SetupAttachment(RootComponent);
-    BoxComponent->bHiddenInGame = false;
+    BoxComponent->bHiddenInGame = true;
 }
 
 void AHitbox::BeginPlay()

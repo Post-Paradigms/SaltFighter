@@ -11,7 +11,7 @@ AHurtbox::AHurtbox()
     BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Player Hurtbox"));
     BoxComponent->SetupAttachment(RootComponent);   
     BoxComponent->SetRelativeScale3D(FVector(1.5, 1.5, 2.5));
-    BoxComponent->bHiddenInGame = false;
+    BoxComponent->bHiddenInGame = true;
 
     // Hit Effect
     static ConstructorHelpers::FClassFinder<ANiagaraActor> HurtEffectClass(TEXT("/Game/Blueprints/BP_HitEffect"));
