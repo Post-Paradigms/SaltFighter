@@ -37,13 +37,6 @@ AFighter::AFighter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
-	// Dash Visual
-	static ConstructorHelpers::FClassFinder<AStaticMeshActor> DashVisualClass(TEXT("/Game/Blueprints/BP_Magic_Circle"));
-	if (DashVisualClass.Class)
-    {
-        MagicCircle = Cast<AStaticMeshActor>(DashVisualClass.Class->GetDefaultObject());
-    }
-
 	//static ConstructorHelpers::FObjectFinder<USoundCue> LandCueObject(TEXT("/Script/Engine.SoundCue'/Game/Sound/JumpEndCue.JumpEndCue''"));
 	//if (LandCueObject.Succeeded()) {
 	//	LandedSoundCue = LandCueObject.Object;
@@ -80,6 +73,10 @@ void AFighter::Tick(float DeltaTime)
 	Face();
 	FString Debug = FString::Printf(TEXT("State: %d"), State);
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
+
+	/*if (State == EFighterState::HITSTUN || State == EFighterState::KNOCKDOWN) {
+		GetCharacterMovement()->FallingLateralFriction = 1.5f;
+	}*/
 
 	if (DashCD > 0) DashCD--;
 	if (BackdashCD > 0) BackdashCD--;
@@ -126,7 +123,7 @@ void AFighter::MoveEvent(const FInputActionValue &Value)
 }
 
 void AFighter::Landed(const FHitResult& Hit) {
-	if (NumJumps == MaxJumps) {
+	if (NumJumps == MaxJumps || (CurrAttk && CurrAttk->InvincibleStartupActive && State == EFighterState::RECOVERY)) {
 		return;
 	}
 	Super::Landed(Hit);
@@ -555,6 +552,14 @@ void AFighter::UpdateState(EFighterState NewState) {
 		case EFighterState::CROUCHBLOCKING:
 			Locked = false;
 			MyHurtbox->SetActorHiddenInGame(false);
+			NumAirDashes = MaxAirDashes;
+			NumJumps = MaxJumps;
+			if (ActiveHitbox) {
+				ActiveHitbox->Destroy();
+			}
+			if (GetCapsuleComponent()) {
+				GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+			}
 			CanJumpCancel = false;
 			CanSpecialCancel = false;
 			CanTargetCombo = false;
@@ -728,6 +733,10 @@ void AFighter::OnHitOther() {
 	if (OtherPlayer->State == EFighterState::HITSTUN || OtherPlayer->State == EFighterState::KNOCKDOWN) {
 		ComboCounter++;
 		GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, this);
+		if (NumJumps != MaxJumps) {
+			int SideScalar = IsLeftSide ? 1 : -1;
+			LaunchCharacter(FVector(100.f * SideScalar, 0.f, 500.f), true, true);
+		}
 	}
 	// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
 
@@ -787,6 +796,9 @@ void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool 
 		}
 
 		//i didn't pay 60 bucks to block
+		//GetCharacterMovement()->GravityScale = 1.f;
+		//GetCharacterMovement()->FallingLateralFriction = 1.f;
+
 		if (Knockdown) {
 			UpdateState(EFighterState::KNOCKDOWN);
 			MyHurtbox->SetActorHiddenInGame(true);
@@ -825,8 +837,7 @@ void AFighter::SpawnDashVisual()
 	FRotator SpawnRotation = FRotator(-296.931334f, 60.f - FuckIt, 47.633677);
 
 	FActorSpawnParameters SpawnParams;
-	//AStaticMeshActor* DashEffectInstance = GetWorld()->SpawnActor<AStaticMeshActor>(MagicCircle->GetClass(), SpawnLocation, SpawnRotation, SpawnParams);
-	//DashEffectInstance->SetLifeSpan(1.f);
+
 	ANiagaraActor* DashEffect = GetWorld()->SpawnActor<ANiagaraActor>(MagicCircleClass, SpawnLocation, SpawnRotation, SpawnParams);
 	DashEffect->SetLifeSpan(5.f);
 }
@@ -866,10 +877,9 @@ void AFighter::HeavyNormal(bool Target) {
 void AFighter::LightQuarterCircleForward() {
 	//we're not gonna have any jumping specials for now
 	//so i don't need be like
+	if (State == EFighterState::JUMPING) { return; }
 	FName SpecialName = "LightFQC";
-	if (State == EFighterState::JUMPING) { 
-		SpecialName = "AirLightFQC";
-	} 
+	
 	LightMove = true;
 	PerformSpecial(SpecialName);
 }
@@ -883,8 +893,10 @@ void AFighter::HeavyQuarterCircleForward() {
 
 void AFighter::LightQuarterCircleBack()
 {
-	if (State == EFighterState::JUMPING) { return; }
 	FName SpecialName = "LightBQC";
+	if (State == EFighterState::JUMPING) {
+		SpecialName = "AirLightBQC";
+	}
 	PerformSpecial(SpecialName);
 }
 
