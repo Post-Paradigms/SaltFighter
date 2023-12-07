@@ -557,8 +557,8 @@ void AFighter::UpdateState(EFighterState NewState) {
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
-			if (UCapsuleComponent* Cap = GetCapsuleComponent()) {
-				Cap->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+			if (GetCapsuleComponent()) {
+				GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 			}
 			CanJumpCancel = false;
 			CanSpecialCancel = false;
