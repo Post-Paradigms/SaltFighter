@@ -78,8 +78,7 @@ void UMainMenuUserWidget::OnCreditClicked()
 
 void UMainMenuUserWidget::OnQuitClicked()
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("QUIT!"));
+	UKismetSystemLibrary::QuitGame(GetWorld(), GetOwningPlayer(), EQuitPreference::Quit, false);
 }
 
 // This would be easier in blueprint but too bad, blueprint cringe
