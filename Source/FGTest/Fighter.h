@@ -188,9 +188,6 @@ public:
 	USoundCue* MeatballCue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dash, meta = (AllowPrivateAccess = "true"))
-	AStaticMeshActor* MagicCircle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dash, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ANiagaraActor> MagicCircleClass;
 
 protected:

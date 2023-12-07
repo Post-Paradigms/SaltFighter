@@ -37,13 +37,6 @@ AFighter::AFighter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
-	// Dash Visual
-	static ConstructorHelpers::FClassFinder<AStaticMeshActor> DashVisualClass(TEXT("/Game/Blueprints/BP_Magic_Circle"));
-	if (DashVisualClass.Class)
-    {
-        MagicCircle = Cast<AStaticMeshActor>(DashVisualClass.Class->GetDefaultObject());
-    }
-
 	//static ConstructorHelpers::FObjectFinder<USoundCue> LandCueObject(TEXT("/Script/Engine.SoundCue'/Game/Sound/JumpEndCue.JumpEndCue''"));
 	//if (LandCueObject.Succeeded()) {
 	//	LandedSoundCue = LandCueObject.Object;
@@ -825,8 +818,7 @@ void AFighter::SpawnDashVisual()
 	FRotator SpawnRotation = FRotator(-296.931334f, 60.f - FuckIt, 47.633677);
 
 	FActorSpawnParameters SpawnParams;
-	//AStaticMeshActor* DashEffectInstance = GetWorld()->SpawnActor<AStaticMeshActor>(MagicCircle->GetClass(), SpawnLocation, SpawnRotation, SpawnParams);
-	//DashEffectInstance->SetLifeSpan(1.f);
+
 	ANiagaraActor* DashEffect = GetWorld()->SpawnActor<ANiagaraActor>(MagicCircleClass, SpawnLocation, SpawnRotation, SpawnParams);
 	DashEffect->SetLifeSpan(5.f);
 }
@@ -867,9 +859,7 @@ void AFighter::LightQuarterCircleForward() {
 	//we're not gonna have any jumping specials for now
 	//so i don't need be like
 	FName SpecialName = "LightFQC";
-	if (State == EFighterState::JUMPING) { 
-		SpecialName = "AirLightFQC";
-	} 
+	
 	LightMove = true;
 	PerformSpecial(SpecialName);
 }
@@ -883,8 +873,10 @@ void AFighter::HeavyQuarterCircleForward() {
 
 void AFighter::LightQuarterCircleBack()
 {
-	if (State == EFighterState::JUMPING) { return; }
 	FName SpecialName = "LightBQC";
+	if (State == EFighterState::JUMPING) {
+		SpecialName = "AirLightBQC";
+	}
 	PerformSpecial(SpecialName);
 }
 
