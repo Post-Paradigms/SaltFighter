@@ -380,10 +380,10 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	if (!CurrAttk) { return; }
 
 	//only have one owning projectile out
-	if (CurrAttk->ProjectileClass && IsValid(CurrentProjectile)) { //might cause jank but we'll see
-		OurController->FlushBuffer();
-		return;
-	}
+	//if (CurrAttk->ProjectileClass && IsValid(CurrentProjectile)) { //might cause jank but we'll see
+	//	OurController->FlushBuffer();
+	//	return;
+	//}
 
 	//flush the input buffer here
 	OurController->FlushBuffer();
@@ -492,8 +492,12 @@ bool AFighter::ValidateState(EFighterState NewState) {
 
 		// might be jank ;m;
 		case EFighterState::JUMPING:
-			valid = (State == EFighterState::NEUTRAL || State == EFighterState::FORWARDING || State == EFighterState::DEFENDING || GetCharacterMovement()->IsFalling() ||
+			valid = (State == EFighterState::NEUTRAL || State == EFighterState::FORWARDING || State == EFighterState::DEFENDING || 
+				(GetCharacterMovement()->IsFalling() && State != EFighterState::STARTUP &&
+					State != EFighterState::ACTIVE &&
+					State != EFighterState::RECOVERY)||
 				(CanJumpCancel && State == EFighterState::ACTIVE) || (CanJumpCancel && State == EFighterState::RECOVERY));
+
 			break;
 
 		case EFighterState::CROUCHING:
@@ -725,18 +729,21 @@ void AFighter::FrameAdvanceState() {
 * will set up the damage scaling and combo counting depending if the current attack connected or was blocked.
 */
 void AFighter::OnHitOther() {
-	CanJumpCancel = CurrAttk->JumpCancellable;
-	CanSpecialCancel = CurrAttk->SpecialCancellable;
 	CanTargetCombo = CurrAttk->TargetComboable;
 	NextTargetInput = CurrAttk->NextTargetInput;
 	
 	if (OtherPlayer->State == EFighterState::HITSTUN || OtherPlayer->State == EFighterState::KNOCKDOWN) {
+		CanJumpCancel = CurrAttk->JumpCancellable;
+		CanSpecialCancel = CurrAttk->SpecialCancellable;
 		ComboCounter++;
 		GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, this);
 		if (NumJumps != MaxJumps) {
 			int SideScalar = IsLeftSide ? 1 : -1;
 			LaunchCharacter(FVector(100.f * SideScalar, 0.f, 500.f), true, true);
 		}
+	} else {
+		CanJumpCancel = false;
+		CanSpecialCancel = false;
 	}
 	// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
 

@@ -67,7 +67,7 @@ void AHurtbox::ApplyKnockback(AHitbox* OtherHitbox, float Angle, float Force)
         HurtboxOwner->LaunchCharacter(FVector::ForwardVector * Force * LaunchDirection, true, true);
     } else if (!OtherHitbox->IsProjectile) {
         if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "Blocking and Not Projectile");
-        OtherHitbox->Owner->LaunchCharacter(FVector(1, 0, 1) * Force * (LaunchDirection * -1), true, true);
+        OtherHitbox->Owner->LaunchCharacter(FVector(1, 0, 0) * Force * (LaunchDirection * -1), true, true);
     }
 }
 

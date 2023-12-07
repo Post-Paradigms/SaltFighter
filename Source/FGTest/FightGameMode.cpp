@@ -179,7 +179,8 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
         {
             ResetRound();
             FightingHUD->AddPlayer2Win();
-            if (GetGameState<AFightGameState>()->Player2Wins++ == 2) {
+            GetGameState<AFightGameState>()->Player2Wins++;
+            if (GetGameState<AFightGameState>()->Player2Wins == 2) {
                 UGameplayStatics::OpenLevel(this, "MainMenuTestMap");
             }
         }
@@ -190,7 +191,8 @@ void AFightGameMode::DamagePlayer(AFighter* Fighter, int Damage)
         {
             ResetRound();
             FightingHUD->AddPlayer1Win();
-            if (GetGameState<AFightGameState>()->Player1Wins++ == 2) {
+            GetGameState<AFightGameState>()->Player1Wins++;
+            if (GetGameState<AFightGameState>()->Player1Wins == 2) {
                 UGameplayStatics::OpenLevel(this, "MainMenuTestMap");
             }
         }
