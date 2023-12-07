@@ -119,7 +119,7 @@ void AFighter::MoveEvent(const FInputActionValue &Value)
 }
 
 void AFighter::Landed(const FHitResult& Hit) {
-	if (NumJumps == MaxJumps) {
+	if (NumJumps == MaxJumps || (CurrAttk && CurrAttk->InvincibleStartupActive && State == EFighterState::RECOVERY)) {
 		return;
 	}
 	Super::Landed(Hit);
@@ -548,6 +548,14 @@ void AFighter::UpdateState(EFighterState NewState) {
 		case EFighterState::CROUCHBLOCKING:
 			Locked = false;
 			MyHurtbox->SetActorHiddenInGame(false);
+			NumAirDashes = MaxAirDashes;
+			NumJumps = MaxJumps;
+			if (ActiveHitbox) {
+				ActiveHitbox->Destroy();
+			}
+			if (UCapsuleComponent* Cap = GetCapsuleComponent()) {
+				Cap->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+			}
 			CanJumpCancel = false;
 			CanSpecialCancel = false;
 			CanTargetCombo = false;
