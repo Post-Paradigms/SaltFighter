@@ -28,6 +28,14 @@ void UMainMenuUserWidget::NativeConstruct()
 
 void UMainMenuUserWidget::Select()
 {
+	if (InCredits) {
+		CreditUW->SetVisibility(ESlateVisibility::Hidden);
+		SetVisibility(ESlateVisibility::Visible);
+		NavigationIndex = 0;
+		UpdateButtonState();
+		InCredits = false;
+		return;
+	}
 	switch (NavigationIndex) {
 	case 0:
 		OnPlayClicked();
@@ -63,8 +71,9 @@ void UMainMenuUserWidget::OnPlayClicked()
 
 void UMainMenuUserWidget::OnCreditClicked()
 {
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Credits!"));
+	SetVisibility(ESlateVisibility::Hidden);
+	CreditUW->SetVisibility(ESlateVisibility::Visible);
+	InCredits = true;
 }
 
 void UMainMenuUserWidget::OnQuitClicked()

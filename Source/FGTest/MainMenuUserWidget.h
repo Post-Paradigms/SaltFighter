@@ -33,6 +33,9 @@ public:
 
 	int NavigationIndex;
 
+	UPROPERTY()
+	class UUserWidget* CreditUW;
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -55,4 +58,6 @@ private:
 	void SetCreditIndex();
 	UFUNCTION()
 	void SetQuitIndex();
+
+	bool InCredits;
 };

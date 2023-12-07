@@ -33,4 +33,11 @@ private:
 
 	UPROPERTY()
 	class UMainMenuUserWidget* MainMenuUW;
+
+	// User Widget
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> CreditUWClass;
+
+	UPROPERTY()
+	class UUserWidget* CreditUW;
 };

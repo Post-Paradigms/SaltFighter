@@ -26,6 +26,13 @@ void AMainMenuGameMode::BeginPlay()
         MainMenuUW = CreateWidget<UMainMenuUserWidget>(GetWorld()->GetFirstPlayerController(), MainMenuUWClass);
         MainMenuUW->AddToPlayerScreen();
     }
+
+    if (CreditUWClass) {
+        CreditUW = CreateWidget<UUserWidget>(GetWorld()->GetFirstPlayerController(), CreditUWClass);
+        MainMenuUW->CreditUW = CreditUW;
+        CreditUW->AddToPlayerScreen();
+        CreditUW->SetVisibility(ESlateVisibility::Hidden);
+    }
 }
 
 void AMainMenuGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
