@@ -735,7 +735,7 @@ void AFighter::OnHitOther() {
 		GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, this);
 		if (NumJumps != MaxJumps) {
 			int SideScalar = IsLeftSide ? 1 : -1;
-			LaunchCharacter(FVector(100.f * SideScalar, 0.f, 550.f), true, true);
+			LaunchCharacter(FVector(100.f * SideScalar, 0.f, 500.f), true, true);
 		}
 	}
 	// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
