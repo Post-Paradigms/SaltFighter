@@ -157,7 +157,7 @@ void AFightGameMode::ResetRound()
     GetGameState<AFightGameState>()->RoundNumber++;
     GetGameState<AFightGameState>()->RoundTimer = 99.0f;
 
-    StartRoundCountdownTimerCount = 1;
+    StartRoundCountdownTimerCount = 0;
     GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 2.0f, true);
 }
 
@@ -218,7 +218,7 @@ void AFightGameMode::StartRoundCountdown()
             P1FighterController->EnableInput(P1FighterController);
             P2FighterController->EnableInput(P2FighterController);
             GetWorld()->GetTimerManager().ClearTimer(StartRoundCountdownTimer);
-            StartRoundCountdownTimerCount = 1;
+            StartRoundCountdownTimerCount = 0;
             FightingHUD->StartRoundTimer();
             return;
             break;
