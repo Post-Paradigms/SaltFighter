@@ -113,7 +113,9 @@ void AFightGameMode::BeginPlayPlay() {
     TheCamera->ActivateCamera();
 
     StartRoundCountdownTimerCount = 0;
-    GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 1.0f, true);
+    FightingHUD->UpdateCountdown(FText::FromString("TURN UP THE HEAT"));
+    UGameplayStatics::PlaySound2D(GetWorld(), tuth, 1.5f, 1.0f, 0.5f);
+    GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 2.0f, true);
 }
 
 
@@ -155,7 +157,8 @@ void AFightGameMode::ResetRound()
     GetGameState<AFightGameState>()->RoundNumber++;
     GetGameState<AFightGameState>()->RoundTimer = 99.0f;
 
-    GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 1.0f, true);
+    StartRoundCountdownTimerCount = 1;
+    GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 2.0f, true);
 }
 
 // Damage a player and update the hud
@@ -192,24 +195,30 @@ void AFightGameMode::StartRoundCountdown()
 {
     switch (StartRoundCountdownTimerCount) {
         case 0:
-            FightingHUD->UpdateCountdown(FText::FromString("3"));
+            if (GetGameState<AFightGameState>()->RoundNumber == 0) {
+                FightingHUD->UpdateCountdown(FText::FromString("ROUND ONE"));
+                UGameplayStatics::PlaySound2D(GetWorld(), r1, 1.5f, 1.0f, 0.5f);
+            }
+            else if (GetGameState<AFightGameState>()->RoundNumber == 1) {
+                FightingHUD->UpdateCountdown(FText::FromString("ROUND TWO"));
+                UGameplayStatics::PlaySound2D(GetWorld(), r2, 1.5f, 1.0f, 0.5f);
+            }
+            else if (GetGameState<AFightGameState>()->RoundNumber == 2) {
+                FightingHUD->UpdateCountdown(FText::FromString("ROUND THREE"));
+                UGameplayStatics::PlaySound2D(GetWorld(), r3, 1.5f, 1.0f, 0.5f);
+            }
             break;
         case 1:
-            FightingHUD->UpdateCountdown(FText::FromString("2"));
+            FightingHUD->UpdateCountdown(FText::FromString("LET'S COOK"));
+            UGameplayStatics::PlaySound2D(GetWorld(), lc, 1.5f, 1.0f, 0.75f);
             break;
         case 2:
-            FightingHUD->UpdateCountdown(FText::FromString("1"));
-            break;
-        case 3:
-            FightingHUD->UpdateCountdown(FText::FromString("COOK"));
-            break;
-        case 4:
             FightingHUD->UpdateCountdown(FText::FromString(""));
 
             P1FighterController->EnableInput(P1FighterController);
             P2FighterController->EnableInput(P2FighterController);
             GetWorld()->GetTimerManager().ClearTimer(StartRoundCountdownTimer);
-            StartRoundCountdownTimerCount = 0;
+            StartRoundCountdownTimerCount = 1;
             FightingHUD->StartRoundTimer();
             return;
             break;
