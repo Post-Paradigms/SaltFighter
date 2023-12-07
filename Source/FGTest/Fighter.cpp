@@ -74,6 +74,10 @@ void AFighter::Tick(float DeltaTime)
 	FString Debug = FString::Printf(TEXT("State: %d"), State);
 	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 0.015f, FColor::Green, Debug);
 
+	/*if (State == EFighterState::HITSTUN || State == EFighterState::KNOCKDOWN) {
+		GetCharacterMovement()->FallingLateralFriction = 1.5f;
+	}*/
+
 	if (DashCD > 0) DashCD--;
 	if (BackdashCD > 0) BackdashCD--;
 
@@ -729,6 +733,10 @@ void AFighter::OnHitOther() {
 	if (OtherPlayer->State == EFighterState::HITSTUN || OtherPlayer->State == EFighterState::KNOCKDOWN) {
 		ComboCounter++;
 		GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, this);
+		if (NumJumps != MaxJumps) {
+			int SideScalar = IsLeftSide ? 1 : -1;
+			LaunchCharacter(FVector(100.f * SideScalar, 0.f, 550.f), true, true);
+		}
 	}
 	// FString Debug = FString::Printf(TEXT("Actor Rotation: (%f, %f, %f)"), Rot.Pitch, Rot.Yaw, Rot.Roll);
 
@@ -788,6 +796,9 @@ void AFighter::CauseOw(EAttackType AttackType, int Blockstun, int Hitstun, bool 
 		}
 
 		//i didn't pay 60 bucks to block
+		//GetCharacterMovement()->GravityScale = 1.f;
+		//GetCharacterMovement()->FallingLateralFriction = 1.f;
+
 		if (Knockdown) {
 			UpdateState(EFighterState::KNOCKDOWN);
 			MyHurtbox->SetActorHiddenInGame(true);
@@ -866,6 +877,7 @@ void AFighter::HeavyNormal(bool Target) {
 void AFighter::LightQuarterCircleForward() {
 	//we're not gonna have any jumping specials for now
 	//so i don't need be like
+	if (State == EFighterState::JUMPING) { return; }
 	FName SpecialName = "LightFQC";
 	
 	LightMove = true;
