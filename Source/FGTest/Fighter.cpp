@@ -391,6 +391,13 @@ void AFighter::PerformSpecial(FName SpecialName) {
 	//flush the input buffer here
 	OurController->FlushBuffer();
 	PreviousState = State;
+
+	if (PreviousState == EFighterState::JUMPING) {
+		GetCharacterMovement()->GravityScale = 0.f;
+		GetCharacterMovement()->FallingLateralFriction = 1.5f;
+		GetCharacterMovement()->Velocity = FVector::Zero();
+	}
+
 	CanTargetCombo = false;
 	CanJumpCancel = false;
 	CanSpecialCancel = false;
@@ -623,6 +630,12 @@ void AFighter::FrameAdvanceState() {
 
 			if (CurrAttk) {
 				FrameTimer = CurrAttk->Active;
+				if (PreviousState == EFighterState::JUMPING) {
+					//let aerial attacks freeze in the air a bit!
+					GetCharacterMovement()->GravityScale = 0.f;
+					GetCharacterMovement()->FallingLateralFriction = 1.5f;
+					GetCharacterMovement()->Velocity = FVector::Zero();
+				}
 			} else {
 				UpdateState(EFighterState::NEUTRAL);
 			}
@@ -691,7 +704,7 @@ void AFighter::FrameAdvanceState() {
 			break;
 
 		case EFighterState::FWDAIRDASHACTIVE:
-			UpdateState(EFighterState::JUMPING);
+			UpdateState(PreviousState);
 			break;
 
 		case EFighterState::DASHING:
@@ -807,10 +820,15 @@ void AFighter::SpawnDashVisual()
 {
 	int Direction = (IsLeftSide) ? 1.f : -1.f;
 	FVector SpawnLocation = GetActorLocation() + FVector(-40.f * Direction, 0.f, 0.f);
-	FRotator SpawnRotation = FRotator(0.f * Direction, -55.f * Direction, 60.f);
+	//FRotator SpawnRotation = FRotator(60.f * Direction, -55.f * Direction, 60.f);
+	int FuckIt = (IsLeftSide) ? 0 : -140.f;
+	FRotator SpawnRotation = FRotator(-296.931334f, 60.f - FuckIt, 47.633677);
+
 	FActorSpawnParameters SpawnParams;
-	AStaticMeshActor* DashEffectInstance = GetWorld()->SpawnActor<AStaticMeshActor>(MagicCircle->GetClass(), SpawnLocation, SpawnRotation, SpawnParams);
-	DashEffectInstance->SetLifeSpan(1.f);
+	//AStaticMeshActor* DashEffectInstance = GetWorld()->SpawnActor<AStaticMeshActor>(MagicCircle->GetClass(), SpawnLocation, SpawnRotation, SpawnParams);
+	//DashEffectInstance->SetLifeSpan(1.f);
+	ANiagaraActor* DashEffect = GetWorld()->SpawnActor<ANiagaraActor>(MagicCircleClass, SpawnLocation, SpawnRotation, SpawnParams);
+	DashEffect->SetLifeSpan(5.f);
 }
 
 // === FIGHTER MOVE FUNCTIONS ===
@@ -848,8 +866,10 @@ void AFighter::HeavyNormal(bool Target) {
 void AFighter::LightQuarterCircleForward() {
 	//we're not gonna have any jumping specials for now
 	//so i don't need be like
-	if (State == EFighterState::JUMPING) { return; }
 	FName SpecialName = "LightFQC";
+	if (State == EFighterState::JUMPING) { 
+		SpecialName = "AirLightFQC";
+	} 
 	LightMove = true;
 	PerformSpecial(SpecialName);
 }

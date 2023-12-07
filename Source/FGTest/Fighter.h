@@ -190,6 +190,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dash, meta = (AllowPrivateAccess = "true"))
 	AStaticMeshActor* MagicCircle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dash, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class ANiagaraActor> MagicCircleClass;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
