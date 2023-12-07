@@ -77,8 +77,8 @@ void AHurtbox::SpawnHurtEffect()
 {
     if (HurtEffectComponent)
     {
-        FVector SpawnLocation = HurtboxOwner->GetActorLocation() + FVector(-50.f, 0.f, 0.f) * ((HurtboxOwner->IsLeftSide) ? -1.f : 1.f);
-        FRotator SpawnRotation = FRotator(90.f, 0.f, 0.f) * ((HurtboxOwner->IsLeftSide) ? -1.f : 1.f);
+        FVector SpawnLocation = HurtboxOwner->GetActorLocation() + FVector(-50.f, 0.f, 0.f) * ((HurtboxOwner->IsLeftSide) ? 1.f : -1.f);
+        FRotator SpawnRotation = FRotator(90.f, 0.f, 0.f) * ((HurtboxOwner->IsLeftSide) ? 1.f : -1.f);
         FActorSpawnParameters SpawnInfo;
         ANiagaraActor* EffectInstance = GetWorld()->SpawnActor<ANiagaraActor>(HurtEffectComponent->GetClass(), SpawnLocation, SpawnRotation, SpawnInfo);
         EffectInstance->SetLifeSpan(0.5f);
