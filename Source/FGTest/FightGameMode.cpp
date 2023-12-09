@@ -113,15 +113,16 @@ void AFightGameMode::BeginPlayPlay() {
     ASharedCamera* TheCamera = Cast<ASharedCamera>(Camera[0]);
     TheCamera->ActivateCamera();
 
-    StartRoundCountdownTimerCount = 0;
+ /*   StartRoundCountdownTimerCount = 0;
     FightingHUD->UpdateCountdown(FText::FromString("TURN UP THE HEAT"));
     UGameplayStatics::PlaySound2D(GetWorld(), tuth, 3.0f, 1.0f, 0.5f);
     GetWorld()->GetTimerManager().SetTimer(StartRoundCountdownTimer, this, &AFightGameMode::StartRoundCountdown, 2.0f, true);
- /*   P1FighterController->EnableInput(P1FighterController);
+    FightingHUD->StartRoundTimer();*/
+
+    P1FighterController->EnableInput(P1FighterController);
     P2FighterController->EnableInput(P2FighterController);
     GetWorld()->GetTimerManager().ClearTimer(StartRoundCountdownTimer);
-    StartRoundCountdownTimerCount = 0;*/
-    FightingHUD->StartRoundTimer();
+    StartRoundCountdownTimerCount = 0;
 }
 
 

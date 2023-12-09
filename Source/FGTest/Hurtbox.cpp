@@ -5,6 +5,8 @@
 #include "Hitbox.h"
 #include "FightGameMode.h"
 #include "Components/StaticMeshComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 
 AHurtbox::AHurtbox()
 {
@@ -61,13 +63,13 @@ void AHurtbox::ApplyKnockback(AHitbox* OtherHitbox, float Angle, float Force)
     FVector LaunchDirection = FVector((HurtboxOwner->IsLeftSide) ? -1 : 1, 1, 1);
 
     if (HurtboxOwner->State == EFighterState::HITSTUN || HurtboxOwner->State == EFighterState::KNOCKDOWN) {
-        HurtboxOwner->LaunchCharacter(AngleVector.GetSafeNormal() * Force * LaunchDirection, true, true);
+        HurtboxOwner->GetCharacterMovement()->AddImpulse(AngleVector.GetSafeNormal() * Force * LaunchDirection);
     } else if ((HurtboxOwner->State != EFighterState::HITSTUN && HurtboxOwner->State != EFighterState::KNOCKDOWN) && OtherHitbox->IsProjectile) {
         if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, "Blocking and IsProjectile");
-        HurtboxOwner->LaunchCharacter(FVector::ForwardVector * Force * LaunchDirection, true, true);
+        HurtboxOwner->GetCharacterMovement()->AddImpulse(FVector::ForwardVector * Force * LaunchDirection);
     } else if (!OtherHitbox->IsProjectile) {
         if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, "Blocking and Not Projectile");
-        OtherHitbox->Owner->LaunchCharacter(FVector(1, 0, 0) * Force * (LaunchDirection * -1), true, true);
+        OtherHitbox->Owner->GetCharacterMovement()->AddImpulse(FVector(1, 0, 0) * Force * (LaunchDirection * -1));
     }
 }
 

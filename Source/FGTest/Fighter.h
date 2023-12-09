@@ -50,6 +50,9 @@ public:
 	bool Knockdown;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	bool Launcher;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	bool JumpCancellable;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
@@ -263,9 +266,13 @@ private:
 	UPROPERTY(EditAnywhere)
 	UAnimMontage* HitStunMontage;
 
+	UPROPERTY()
 	class AHurtbox* MyHurtbox;
 
 	FAttackStruct* CurrAttk;
+
+	UPROPERTY()
+	class UCapsuleComponent* MyCapsule;
 
 	AProjectileBase* CurrentProjectile;
 
@@ -276,6 +283,7 @@ private:
 	int32 DashCD;
 	int32 BackdashCD;
 
+	UPROPERTY()
 	class AHitbox* ActiveHitbox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))

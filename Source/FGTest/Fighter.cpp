@@ -64,6 +64,7 @@ void AFighter::BeginPlay()
 	} 
 
 	AnimInstance = GetMesh()->GetAnimInstance();	
+	MyCapsule = GetCapsuleComponent();
 }
 
 // Called every frame
@@ -101,7 +102,14 @@ void AFighter::FighterJump(EInputType Input)
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), JumpSoundCue, GetActorLocation());
 		PreviousState = State;
 		NumJumps--;
-		GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+
+		if (OtherPlayer->NumJumps != MaxJumps) {
+			//they're jumping, leave the collision on!
+			OtherPlayer->MyCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+		} else {
+			MyCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+		}
+
 		UpdateState(EFighterState::JUMPING);
 		FVector FacingSide = FVector((IsLeftSide) ? 1 : -1, 1, 1);
 		FVector Direction = FVector(JumpDirections[Input], 1, 1);
@@ -134,14 +142,16 @@ void AFighter::Landed(const FHitResult& Hit) {
 		ActiveHitbox->Destroy();
 	}
 
+	OtherPlayer->ComboCounter = 0;
+	GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, OtherPlayer);
 
 	//if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 	//	StopAnimMontage(nullptr);
 	//}
-	if (UCapsuleComponent* Cap = GetCapsuleComponent()) {
-		Cap->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+	if (MyCapsule) {
+		MyCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 	}
-	StopMontage();
+	//StopMontage();
 	UpdateState(EFighterState::NEUTRAL);
 }
 
@@ -345,7 +355,9 @@ void AFighter::PerformNormal(FName AttkName) {
 	CurrAttk = FighterDataTable->FindRow<FAttackStruct>(AttkName, "Normal");
 	if (!CurrAttk) { return; }
 
-	PreviousState = State;
+	if (State != EFighterState::ACTIVE && State != EFighterState::RECOVERY) {
+		PreviousState = State;
+	}
 	UpdateState(EFighterState::STARTUP);
 	CanTargetCombo = false;
 	CanJumpCancel = false;
@@ -561,8 +573,8 @@ void AFighter::UpdateState(EFighterState NewState) {
 			if (ActiveHitbox) {
 				ActiveHitbox->Destroy();
 			}
-			if (GetCapsuleComponent()) {
-				GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+			if (MyCapsule) {
+				MyCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 			}
 			CanJumpCancel = false;
 			CanSpecialCancel = false;
@@ -590,7 +602,7 @@ void AFighter::UpdateState(EFighterState NewState) {
 			/*if (AnimInstance && AnimInstance->Montage_IsPlaying(NULL)) {
 				StopAnimMontage(nullptr);
 			}*/
-			StopMontage();
+			//StopMontage();
 			/*if (AnimInstance) AnimInstance->Montage_Stop(NULL);*/
 			break;
 	}
@@ -735,9 +747,15 @@ void AFighter::OnHitOther() {
 	if (OtherPlayer->State == EFighterState::HITSTUN || OtherPlayer->State == EFighterState::KNOCKDOWN) {
 		CanJumpCancel = CurrAttk->JumpCancellable;
 		CanSpecialCancel = CurrAttk->SpecialCancellable;
+
+		if (CurrAttk->Launcher) {
+			OtherPlayer->NumJumps = 0;
+		}
+
 		ComboCounter++;
 		GetWorld()->GetAuthGameMode<AFightGameMode>()->GetFightingHUD()->UpdateCombo(ComboCounter, this);
-		if (NumJumps != MaxJumps) {
+		//checking not invincible reversal is MAD CHEESE LOL
+		if (NumJumps != MaxJumps && ComboCounter < 10 && !CurrAttk->InvincibleStartupActive) {
 			int SideScalar = IsLeftSide ? 1 : -1;
 			LaunchCharacter(FVector(100.f * SideScalar, 0.f, 500.f), true, true);
 		}
@@ -884,7 +902,7 @@ void AFighter::HeavyNormal(bool Target) {
 void AFighter::LightQuarterCircleForward() {
 	//we're not gonna have any jumping specials for now
 	//so i don't need be like
-	if (State == EFighterState::JUMPING) { return; }
+	if (State == EFighterState::JUMPING || NumJumps != MaxJumps) { return; }
 	FName SpecialName = "LightFQC";
 	
 	LightMove = true;
@@ -892,7 +910,7 @@ void AFighter::LightQuarterCircleForward() {
 }
 
 void AFighter::HeavyQuarterCircleForward() {
-	if (State == EFighterState::JUMPING) { return; }
+	if (State == EFighterState::JUMPING || NumJumps != MaxJumps) { return; }
 	FName SpecialName = "HeavyFQC";
 	LightMove = false;
 	PerformSpecial(SpecialName);
@@ -901,35 +919,36 @@ void AFighter::HeavyQuarterCircleForward() {
 void AFighter::LightQuarterCircleBack()
 {
 	FName SpecialName = "LightBQC";
-	if (State == EFighterState::JUMPING) {
+	if (State == EFighterState::JUMPING || NumJumps != MaxJumps) {
 		SpecialName = "AirLightBQC";
+		LaunchCharacter(FVector(1100.f * ((IsLeftSide) ? 1 : -1), 0.f, 0.f), true, true);
 	}
 	PerformSpecial(SpecialName);
 }
 
 void AFighter::HeavyQuarterCircleBack()
 {
-	if (State == EFighterState::JUMPING) { return; }
+	if (State == EFighterState::JUMPING || NumJumps != MaxJumps) { return; }
 	FName SpecialName = "HeavyBQC";
 	PerformSpecial(SpecialName);
 }
 
 void AFighter::LightDragonPunch() {
-	if (State == EFighterState::JUMPING) { return; }
+	if (State == EFighterState::JUMPING || NumJumps != MaxJumps) { return; }
 	int SideScalar = IsLeftSide ? 1 : -1;
 	NumJumps = 0;
+	MyCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	LaunchCharacter(FVector(100.f * SideScalar, 0.f, 700.f), true, true);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	FName SpecialName = "LightDP";
 	PerformSpecial(SpecialName);
 }
 
 void AFighter::HeavyDragonPunch() {
-	if (State == EFighterState::JUMPING) { return; }
+	if (State == EFighterState::JUMPING || NumJumps != MaxJumps) { return; }
 	int SideScalar = IsLeftSide ? 1 : -1;
 	NumJumps = 0;
+	MyCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	LaunchCharacter(FVector(150.f * SideScalar, 0.f, 1000.f), true, true);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	FName SpecialName = "HeavyDP";
 	PerformSpecial(SpecialName);
 }
