@@ -1,3 +1,4 @@
 # Salt-Fighter
-Report can be found in the documentation folder. 
+Game Link: https://spoonfedbread.itch.io/salt-fighter
+
 Alpha demo video: https://youtu.be/oOHaYqw-0fg
