@@ -509,6 +509,9 @@ bool AFighter::ValidateState(EFighterState NewState) {
 					State != EFighterState::ACTIVE &&
 					State != EFighterState::RECOVERY)||
 				(CanJumpCancel && State == EFighterState::ACTIVE) || (CanJumpCancel && State == EFighterState::RECOVERY));
+			if (State == EFighterState::HITSTUN || State == EFighterState::KNOCKDOWN) {
+				valid = false;
+			}
 
 			break;
 
